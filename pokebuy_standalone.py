@@ -120,12 +120,17 @@ class EbayClient:
             params["itemFilter(0).value"] = str(max_price)
 
         try:
-            response = requests.get(self.finding_api_url, params=params, timeout=30)
+            print(f"Searching eBay for: {query}")
+            response = requests.get(self.finding_api_url, params=params, timeout=45)
             response.raise_for_status()
             data = response.json()
-            return self._parse_response(data)
+            listings = self._parse_response(data)
+            print(f"eBay API returned {len(listings)} listings")
+            return listings
         except Exception as e:
             print(f"Error searching eBay: {e}")
+            import traceback
+            traceback.print_exc()
             return []
 
     def _parse_response(self, data: Dict) -> List[Listing]:
@@ -181,14 +186,17 @@ class EbayClient:
         url = f"https://www.ebay.com/sch/i.html?_nkw={encoded_query}&_sacat={POKEMON_CATEGORY_ID}&LH_Sold=1&LH_Complete=1&_ipg=200"
 
         try:
+            print(f"Fetching sold listings for market value...")
             headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-            response = requests.get(url, headers=headers, timeout=30)
+            response = requests.get(url, headers=headers, timeout=45)
             response.raise_for_status()
 
             soup = BeautifulSoup(response.text, 'html.parser')
             sold_items = []
 
             items = soup.find_all('div', class_='s-item__info')
+            print(f"Found {len(items)} sold listing elements")
+
             for item in items[:max_results]:
                 try:
                     price_elem = item.find('span', class_='s-item__price')
@@ -203,9 +211,12 @@ class EbayClient:
                 except:
                     continue
 
+            print(f"Extracted {len(sold_items)} valid sold prices")
             return sold_items
         except Exception as e:
             print(f"Error fetching sold listings: {e}")
+            import traceback
+            traceback.print_exc()
             return []
 
 # ============================================================================
@@ -216,44 +227,60 @@ class DealFinder:
     def __init__(self, ebay_client: EbayClient):
         self.ebay = ebay_client
 
-    def find_deals(self, query: str, discount_threshold: float = 50,
+    def find_deals(self, query: str, discount_threshold: float = 0,
                    max_results: int = 20) -> List[Deal]:
-        # Get market value
+        # Get market value (but don't require it)
         market_value = self._get_market_value(query)
-        if not market_value:
-            return []
+        if market_value:
+            print(f"Market value found: ${market_value:.2f}")
+        else:
+            print(f"Could not determine market value (insufficient sold listings)")
+            market_value = None  # Will show all listings without market comparison
 
-        print(f"Market value: ${market_value:.2f}")
+        # Search active listings (no price filter if no market value)
+        max_price_filter = None
+        if market_value and discount_threshold > 0:
+            max_price_filter = market_value * (100 - discount_threshold) / 100
 
-        # Search active listings
-        max_price_filter = market_value * (100 - discount_threshold) / 100
         listings = self.ebay.search_active_listings(
             query=query,
-            max_results=max_results * 3,
+            max_results=max_results * 2,
             max_price=max_price_filter
         )
 
         if not listings:
+            print("No active listings found")
             return []
 
-        # Find deals
+        print(f"Found {len(listings)} active listings")
+
+        # Create deals from all listings
         deals = []
         for listing in listings:
             listing_price = listing.get_total_cost()
-            discount_amount = market_value - listing_price
-            discount_percent = (discount_amount / market_value) * 100
 
-            if discount_percent >= discount_threshold:
-                deal = Deal(
-                    listing=listing,
-                    market_value=market_value,
-                    discount_amount=discount_amount,
-                    discount_percent=discount_percent
-                )
-                deals.append(deal)
+            if market_value:
+                discount_amount = market_value - listing_price
+                discount_percent = (discount_amount / market_value) * 100
+            else:
+                # No market data - show listing anyway with N/A for discount
+                discount_amount = 0
+                discount_percent = 0
 
-        # Sort by deal score
-        deals.sort(key=lambda d: d.deal_score, reverse=True)
+            deal = Deal(
+                listing=listing,
+                market_value=market_value if market_value else listing_price,  # Use listing price as fallback
+                discount_amount=discount_amount,
+                discount_percent=discount_percent
+            )
+            deals.append(deal)
+
+        # Sort by price (lowest first) if no market data, otherwise by deal score
+        if market_value:
+            deals.sort(key=lambda d: d.deal_score, reverse=True)
+        else:
+            deals.sort(key=lambda d: d.listing.get_total_cost())
+
         return deals[:max_results]
 
     def _get_market_value(self, query: str) -> Optional[float]:
@@ -552,29 +579,40 @@ HTML_TEMPLATE = """
 
                 const img = deal.image_url ? `<img src="${deal.image_url}" class="deal-image">` : '';
 
+                const hasMarket = deal.has_market_data && deal.market_value;
+                const marketDisplay = hasMarket
+                    ? `$${deal.market_value.toFixed(2)}`
+                    : '<span style="color: #999;">N/A</span>';
+                const discountDisplay = hasMarket && deal.discount_percent !== null
+                    ? `${deal.discount_percent.toFixed(1)}%`
+                    : '<span style="color: #999;">N/A</span>';
+                const saveDisplay = hasMarket && deal.discount_amount !== null
+                    ? `$${deal.discount_amount.toFixed(2)}`
+                    : '<span style="color: #999;">N/A</span>';
+
                 card.innerHTML = `
                     ${img}
                     <div class="deal-content">
-                        <div class="deal-emoji">${deal.emoji}</div>
+                        ${hasMarket ? `<div class="deal-emoji">${deal.emoji}</div>` : ''}
                         <h3 class="deal-title">${truncate(deal.card_name, 80)}</h3>
                         <div class="deal-prices">
                             <div>
-                                <div style="font-size: 0.8rem; color: #666;">Market</div>
-                                <div class="market-value">$${deal.market_value.toFixed(2)}</div>
+                                <div style="font-size: 0.8rem; color: #666;">Market Value</div>
+                                <div class="market-value">${marketDisplay}</div>
                             </div>
                             <div>
-                                <div style="font-size: 0.8rem; color: #666;">Price</div>
+                                <div style="font-size: 0.8rem; color: #666;">Current Price</div>
                                 <div class="listing-price">$${deal.listing_price.toFixed(2)}</div>
                             </div>
                         </div>
                         <div class="deal-stats">
                             <div class="stat">
-                                <div class="stat-label">Save</div>
-                                <div class="stat-value" style="color: #dc3545;">$${deal.discount_amount.toFixed(2)}</div>
+                                <div class="stat-label">You Save</div>
+                                <div class="stat-value" style="color: #dc3545;">${saveDisplay}</div>
                             </div>
                             <div class="stat">
                                 <div class="stat-label">Discount</div>
-                                <div class="stat-value" style="color: #dc3545;">${deal.discount_percent.toFixed(1)}%</div>
+                                <div class="stat-value" style="color: #dc3545;">${discountDisplay}</div>
                             </div>
                         </div>
                         <a href="${deal.url}" target="_blank" class="deal-link">View on eBay →</a>
@@ -626,18 +664,22 @@ def search():
 
         deals_json = []
         for deal in deals:
+            # Check if market value is real or just a fallback
+            has_market_data = deal.market_value != deal.listing.get_total_cost()
+
             deals_json.append({
                 'card_name': deal.listing.title,
-                'market_value': deal.market_value,
+                'market_value': deal.market_value if has_market_data else None,
                 'listing_price': deal.listing.get_total_cost(),
-                'discount_amount': deal.discount_amount,
-                'discount_percent': deal.discount_percent,
-                'deal_score': deal.deal_score,
-                'emoji': deal.get_emoji(),
-                'is_hot_deal': deal.is_hot_deal,
-                'is_star_deal': deal.is_star_deal,
+                'discount_amount': deal.discount_amount if has_market_data else None,
+                'discount_percent': deal.discount_percent if has_market_data else None,
+                'deal_score': deal.deal_score if has_market_data else 0,
+                'emoji': deal.get_emoji() if has_market_data else '📦',
+                'is_hot_deal': deal.is_hot_deal if has_market_data else False,
+                'is_star_deal': deal.is_star_deal if has_market_data else False,
                 'url': deal.listing.url,
                 'image_url': deal.listing.image_url,
+                'has_market_data': has_market_data,
             })
 
         return jsonify({
