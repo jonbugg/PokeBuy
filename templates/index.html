@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎴 PokeBuy - Pokemon Card Deal Finder</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎴 PokeBuy</h1>
+            <p class="subtitle">Find Pokemon Cards at 50%+ Off Market Value</p>
+        </header>
+
+        <main>
+            <!-- Search Form -->
+            <div class="search-section">
+                <div class="search-box">
+                    <input
+                        type="text"
+                        id="searchQuery"
+                        placeholder="Search for cards (e.g., Charizard PSA 10)"
+                        autocomplete="off"
+                    >
+                    <button id="searchBtn" onclick="searchDeals()">
+                        🔍 Search
+                    </button>
+                </div>
+
+                <!-- Advanced Filters (Collapsible) -->
+                <div class="filters">
+                    <button class="filter-toggle" onclick="toggleFilters()">
+                        ⚙️ Advanced Filters
+                    </button>
+                    <div id="advancedFilters" class="filter-content" style="display: none;">
+                        <div class="filter-grid">
+                            <div class="filter-item">
+                                <label for="discount">Min Discount %</label>
+                                <input type="number" id="discount" value="50" min="0" max="100">
+                            </div>
+                            <div class="filter-item">
+                                <label for="maxResults">Max Results</label>
+                                <input type="number" id="maxResults" value="20" min="1" max="50">
+                            </div>
+                            <div class="filter-item">
+                                <label for="minPrice">Min Price ($)</label>
+                                <input type="number" id="minPrice" placeholder="Optional">
+                            </div>
+                            <div class="filter-item">
+                                <label for="maxPrice">Max Price ($)</label>
+                                <input type="number" id="maxPrice" placeholder="Optional">
+                            </div>
+                            <div class="filter-item">
+                                <label for="listingType">Listing Type</label>
+                                <select id="listingType">
+                                    <option value="">All</option>
+                                    <option value="FixedPrice">Buy It Now</option>
+                                    <option value="Auction">Auction</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Search Buttons -->
+                <div class="quick-searches">
+                    <button class="quick-btn" onclick="quickSearch('Charizard PSA 10')">🔥 Charizard PSA 10</button>
+                    <button class="quick-btn" onclick="quickSearch('Pikachu')">⚡ Pikachu</button>
+                    <button class="quick-btn" onclick="quickSearch('Umbreon Alt Art')">🌙 Umbreon Alt Art</button>
+                    <button class="quick-btn" onclick="quickSearch('Base Set Holo')">✨ Base Set Holo</button>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Searching for deals...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error" class="error" style="display: none;"></div>
+
+            <!-- Results Summary -->
+            <div id="resultsSummary" class="results-summary" style="display: none;"></div>
+
+            <!-- Deals Grid -->
+            <div id="dealsContainer" class="deals-grid"></div>
+        </main>
+
+        <footer>
+            <p>Made with ❤️ for Pokemon card collectors</p>
+            <p class="disclaimer">Always verify listings before purchasing. PokeBuy is not affiliated with eBay or Pokemon.</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

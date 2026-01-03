@@ -4,6 +4,8 @@ Find Pokemon cards listed at less than 50% their market value on eBay!
 
 PokeBuy helps you discover amazing deals on Pokemon cards by comparing active eBay listings against historical sold prices. Whether you're hunting for vintage Charizards or modern chase cards, PokeBuy finds the best deals and highlights them for you.
 
+**NEW!** 📱 **Mobile-friendly web interface** - Access PokeBuy from any device! See [MOBILE_DEPLOYMENT.md](MOBILE_DEPLOYMENT.md) for deployment instructions.
+
 ## ✨ Features
 
 - 🔍 **Smart Search**: Search by Pokemon name or specific card
@@ -14,6 +16,7 @@ PokeBuy helps you discover amazing deals on Pokemon cards by comparing active eB
 - 📈 **Price Trends**: Analyze if card prices are rising or falling
 - 📁 **Export**: Save deals to CSV for further analysis
 - 🎨 **Beautiful CLI**: Rich terminal interface with colors and tables
+- 📱 **Mobile Web App**: Access from any device via web browser!
 
 ## 🚀 Quick Start
 
@@ -47,7 +50,19 @@ EBAY_APP_ID=your_app_id_here
 
 Get your free eBay API credentials at: https://developer.ebay.com/
 
-### Usage
+### Mobile Web Interface
+
+For mobile access, run the web app:
+
+```bash
+python web_app.py
+```
+
+Then open `http://localhost:5000` in your browser!
+
+For deployment to cloud platforms (Replit, Railway, Heroku), see [MOBILE_DEPLOYMENT.md](MOBILE_DEPLOYMENT.md).
+
+### Command Line Usage
 
 #### Basic Search
 
