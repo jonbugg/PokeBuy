@@ -17,5 +17,8 @@ python-dateutil>=2.8.2
 # Web interface
 flask>=3.0.0
 
+# AI Integration
+anthropic>=0.40.0
+
 # Testing (optional)
 pytest>=7.4.3

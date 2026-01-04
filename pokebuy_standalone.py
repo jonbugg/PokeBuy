@@ -19,12 +19,14 @@ from urllib.parse import quote_plus
 import requests
 from bs4 import BeautifulSoup
 from flask import Flask, render_template_string, jsonify, request
+from anthropic import Anthropic
 
 # ============================================================================
 # CONFIGURATION
 # ============================================================================
 
 EBAY_APP_ID = os.environ.get("EBAY_APP_ID", "")
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 POKEMON_CATEGORY_ID = "183454"
 CACHE_EXPIRY_HOURS = 48
 DEFAULT_DISCOUNT_THRESHOLD = 50
@@ -220,17 +222,171 @@ class EbayClient:
             return []
 
 # ============================================================================
+# CLAUDE AI SERVICE
+# ============================================================================
+
+class ClaudeService:
+    """Service for integrating Claude AI to improve search and analysis"""
+
+    def __init__(self, api_key: str):
+        self.client = Anthropic(api_key=api_key) if api_key else None
+
+    def enhance_search_query(self, user_query: str) -> str:
+        """
+        Use Claude to enhance a natural language query into better eBay search terms
+
+        Example: "I want a vintage Charizard graded PSA 9"
+              -> "Charizard Base Set PSA 9"
+        """
+        if not self.client:
+            return user_query
+
+        try:
+            message = self.client.messages.create(
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=200,
+                messages=[{
+                    "role": "user",
+                    "content": f"""You are a Pokemon card expert helping optimize eBay searches.
+
+User wants to search for: "{user_query}"
+
+Convert this into optimal eBay search terms. Focus on:
+- Card name
+- Set name (if vintage: Base Set, Jungle, Fossil, etc.)
+- Grading info (PSA, BGS, CGC if mentioned)
+- Condition keywords
+
+Return ONLY the optimized search query, nothing else. Be concise - max 6 words.
+
+Examples:
+"I want a Charizard that's graded well" -> "Charizard PSA"
+"vintage Pikachu in good condition" -> "Pikachu Base Set"
+"modern umbreon alternate art" -> "Umbreon Alt Art"
+
+Optimized search:"""
+                }]
+            )
+            enhanced = message.content[0].text.strip()
+            print(f"Claude enhanced query: '{user_query}' -> '{enhanced}'")
+            return enhanced
+        except Exception as e:
+            print(f"Claude query enhancement failed: {e}")
+            return user_query
+
+    def analyze_listings(self, listings: List[Dict], query: str) -> List[Dict]:
+        """
+        Use Claude to analyze and filter listings for relevance
+
+        Filters out:
+        - Bulk lots when user wants single cards
+        - Wrong cards (e.g., "Charizard EX" when searching for "Charizard Base Set")
+        - Damaged/poor condition cards
+        - Irrelevant listings
+        """
+        if not self.client or not listings:
+            return listings
+
+        try:
+            # Prepare listing summaries
+            listing_summaries = []
+            for i, listing in enumerate(listings[:20]):  # Analyze first 20
+                listing_summaries.append(f"{i}: {listing['title']} - ${listing['price']}")
+
+            summaries_text = "\n".join(listing_summaries)
+
+            message = self.client.messages.create(
+                model="claude-3-5-haiku-20241022",  # Use Haiku for speed
+                max_tokens=500,
+                messages=[{
+                    "role": "user",
+                    "content": f"""You are filtering Pokemon card listings for relevance.
+
+User searched for: "{query}"
+
+Here are the listings (ID: Title - Price):
+{summaries_text}
+
+Identify which listings are RELEVANT to what the user wants. Filter OUT:
+- Bulk lots (unless user explicitly wants them)
+- Wrong cards or sets
+- Damaged/poor condition (unless user wants them)
+- Completely unrelated items
+- Obvious fakes or reproductions
+
+Return ONLY the IDs of RELEVANT listings as a comma-separated list.
+Example: 0,2,5,7,9
+
+Relevant listing IDs:"""
+                }]
+            )
+
+            # Parse response
+            relevant_ids_text = message.content[0].text.strip()
+            relevant_ids = {int(x.strip()) for x in relevant_ids_text.split(',') if x.strip().isdigit()}
+
+            # Filter listings
+            filtered = [listing for i, listing in enumerate(listings) if i in relevant_ids or i >= 20]
+            print(f"Claude filtered {len(listings)} -> {len(filtered)} relevant listings")
+            return filtered
+
+        except Exception as e:
+            print(f"Claude filtering failed: {e}")
+            return listings
+
+    def generate_deal_insights(self, deal: Dict, market_value: Optional[float]) -> str:
+        """
+        Generate AI insights about why a deal is good or concerns to watch for
+        """
+        if not self.client or not market_value:
+            return ""
+
+        try:
+            message = self.client.messages.create(
+                model="claude-3-5-haiku-20241022",
+                max_tokens=150,
+                messages=[{
+                    "role": "user",
+                    "content": f"""Analyze this Pokemon card deal:
+
+Card: {deal['card_name']}
+Listing Price: ${deal['listing_price']:.2f}
+Market Value: ${market_value:.2f}
+Discount: {deal.get('discount_percent', 0):.1f}%
+Seller Feedback: {deal.get('seller_feedback_percent', 0):.1f}%
+Condition: {deal.get('condition', 'Unknown')}
+
+In 1-2 sentences, explain:
+1. Why this is a good deal, OR
+2. What to watch out for
+
+Be concise and practical. Focus on value.
+
+Insight:"""
+                }]
+            )
+            return message.content[0].text.strip()
+        except:
+            return ""
+
+# ============================================================================
 # DEAL FINDER
 # ============================================================================
 
 class DealFinder:
-    def __init__(self, ebay_client: EbayClient):
+    def __init__(self, ebay_client: EbayClient, claude_service: Optional['ClaudeService'] = None):
         self.ebay = ebay_client
+        self.claude = claude_service
 
     def find_deals(self, query: str, discount_threshold: float = 0,
                    max_results: int = 20) -> List[Deal]:
+        # Use Claude to enhance the search query
+        enhanced_query = query
+        if self.claude:
+            enhanced_query = self.claude.enhance_search_query(query)
+
         # Get market value (but don't require it)
-        market_value = self._get_market_value(query)
+        market_value = self._get_market_value(enhanced_query)
         if market_value:
             print(f"Market value found: ${market_value:.2f}")
         else:
@@ -243,8 +399,8 @@ class DealFinder:
             max_price_filter = market_value * (100 - discount_threshold) / 100
 
         listings = self.ebay.search_active_listings(
-            query=query,
-            max_results=max_results * 2,
+            query=enhanced_query,
+            max_results=max_results * 3,  # Get extra for Claude filtering
             max_price=max_price_filter
         )
 
@@ -253,6 +409,17 @@ class DealFinder:
             return []
 
         print(f"Found {len(listings)} active listings")
+
+        # Use Claude to filter relevant listings
+        if self.claude:
+            listing_dicts = [
+                {"title": l.title, "price": l.price}
+                for l in listings
+            ]
+            filtered_dicts = self.claude.analyze_listings(listing_dicts, query)
+            filtered_titles = {d["title"] for d in filtered_dicts}
+            listings = [l for l in listings if l.title in filtered_titles]
+            print(f"After Claude filtering: {len(listings)} relevant listings")
 
         # Create deals from all listings
         deals = []
@@ -667,7 +834,8 @@ def search():
             return jsonify({'error': 'eBay API key not configured', 'success': False}), 500
 
         ebay = EbayClient(EBAY_APP_ID)
-        finder = DealFinder(ebay)
+        claude = ClaudeService(ANTHROPIC_API_KEY) if ANTHROPIC_API_KEY else None
+        finder = DealFinder(ebay, claude)
         deals = finder.find_deals(query, discount, max_results)
 
         deals_json = []
