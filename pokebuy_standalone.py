@@ -306,6 +306,14 @@ class DealFinder:
 
 app = Flask(__name__)
 
+# Add CORS headers to fix 403 errors
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
+
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
