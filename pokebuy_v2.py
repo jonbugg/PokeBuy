@@ -426,23 +426,564 @@ class DealFinderV2:
 
 app = Flask(__name__)
 
+@app.after_request
+def after_request(response):
+    """Add CORS headers to fix browser 403 errors"""
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
+
 @app.route('/')
 def index():
     return """
-    <html>
-    <body style="font-family: sans-serif; max-width: 800px; margin: 50px auto;">
-        <h1>🎴 PokeBuy V2 - AI-Powered Deal Finder</h1>
-        <p>Test the API:</p>
-        <pre>
-POST /api/search
-{
-  "query": "vintage Charizard",
-  "min_discount": 50,
-  "max_results": 10
-}
-        </pre>
-    </body>
-    </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎴 PokeBuy V2 - AI-Powered Pokemon Card Deal Finder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .search-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .quick-searches {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .quick-search-btn {
+            padding: 10px 16px;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quick-search-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .deal-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .deal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+
+        .deal-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+            z-index: 1;
+        }
+
+        .badge-hot { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .badge-star { background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%); }
+        .badge-good { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; }
+
+        .card-image-container {
+            position: relative;
+            aspect-ratio: 5/7;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .deal-info {
+            padding: 20px;
+        }
+
+        .card-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-set {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .price-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .price-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .price-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #999;
+            font-weight: 600;
+        }
+
+        .price-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .market-price { color: #666; }
+        .listing-price { color: #667eea; }
+
+        .savings {
+            background: #f0f9ff;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .savings-amount {
+            font-size: 20px;
+            font-weight: 700;
+            color: #10b981;
+        }
+
+        .discount-percent {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .deal-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 15px;
+        }
+
+        .confidence-score {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .confidence-bar {
+            width: 50px;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            transition: width 0.3s;
+        }
+
+        .view-listing-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .view-listing-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .no-results h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .search-input-group {
+                flex-direction: column;
+            }
+
+            .results {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎴 PokeBuy V2</h1>
+            <p>AI-Powered Pokemon Card Deal Finder</p>
+        </div>
+
+        <div class="search-card">
+            <div class="search-input-group">
+                <input
+                    type="text"
+                    id="searchInput"
+                    class="search-input"
+                    placeholder="Search for Pokemon cards... (e.g., 'Charizard PSA 10', 'vintage Pikachu')"
+                    onkeypress="if(event.key === 'Enter') search()"
+                >
+                <button class="btn btn-primary" onclick="search()">
+                    🔍 Search
+                </button>
+            </div>
+
+            <div class="quick-searches">
+                <button class="quick-search-btn" onclick="quickSearch('Charizard PSA 10')">🔥 Charizard PSA 10</button>
+                <button class="quick-search-btn" onclick="quickSearch('Pikachu')">⚡ Pikachu</button>
+                <button class="quick-search-btn" onclick="quickSearch('Umbreon alt art')">🌙 Umbreon Alt Art</button>
+                <button class="quick-search-btn" onclick="quickSearch('Base Set holo')">✨ Base Set Holo</button>
+                <button class="quick-search-btn" onclick="quickSearch('Eeveelution')">💎 Eeveelution</button>
+            </div>
+
+            <details>
+                <summary style="cursor: pointer; font-weight: 600; margin-bottom: 10px;">⚙️ Advanced Filters</summary>
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="minDiscount">Min Discount %</label>
+                        <input type="number" id="minDiscount" value="50" min="0" max="100">
+                    </div>
+                    <div class="filter-group">
+                        <label for="maxResults">Max Results</label>
+                        <input type="number" id="maxResults" value="20" min="1" max="50">
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <h2>Finding deals...</h2>
+            <p>Claude AI is analyzing Pokemon cards and eBay listings</p>
+        </div>
+
+        <div id="results" class="results"></div>
+
+        <div id="noResults" class="no-results" style="display: none;">
+            <h2>😔 No deals found</h2>
+            <p>Try lowering the discount threshold or searching for different cards</p>
+        </div>
+    </div>
+
+    <script>
+        function quickSearch(query) {
+            document.getElementById('searchInput').value = query;
+            search();
+        }
+
+        async function search() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                alert('Please enter a search term');
+                return;
+            }
+
+            const minDiscount = parseFloat(document.getElementById('minDiscount').value) || 50;
+            const maxResults = parseInt(document.getElementById('maxResults').value) || 20;
+
+            // Show loading
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('noResults').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        min_discount: minDiscount,
+                        max_results: maxResults
+                    })
+                });
+
+                const data = await response.json();
+
+                // Hide loading
+                document.getElementById('loading').classList.remove('active');
+
+                if (data.success && data.deals.length > 0) {
+                    displayResults(data.deals);
+                } else {
+                    document.getElementById('noResults').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                document.getElementById('loading').classList.remove('active');
+                alert('Error searching for deals. Please check the console for details.');
+            }
+        }
+
+        function displayResults(deals) {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = deals.map(deal => {
+                const dealQuality = getDealQuality(deal.discount_percent);
+                const confidencePercent = deal.confidence || 0;
+
+                return `
+                    <div class="deal-card">
+                        <div class="card-image-container">
+                            <div class="deal-badge badge-${dealQuality.class}">${dealQuality.emoji} ${dealQuality.label}</div>
+                            ${deal.card.image ?
+                                `<img src="${deal.card.image}" alt="${deal.card.name}" class="card-image">` :
+                                `<div style="color: white; font-size: 48px;">🎴</div>`
+                            }
+                        </div>
+                        <div class="deal-info">
+                            <div class="card-name">${deal.listing.title}</div>
+                            <div class="card-set">${deal.card.name} • ${deal.card.set} #${deal.card.number}</div>
+
+                            <div class="price-grid">
+                                <div class="price-item">
+                                    <span class="price-label">Market Value</span>
+                                    <span class="price-value market-price">$${deal.market_price.toFixed(2)}</span>
+                                </div>
+                                <div class="price-item">
+                                    <span class="price-label">Current Price</span>
+                                    <span class="price-value listing-price">$${deal.listing.price.toFixed(2)}</span>
+                                </div>
+                            </div>
+
+                            <div class="savings">
+                                <div class="savings-amount">💰 Save $${deal.savings.toFixed(2)}</div>
+                                <div class="discount-percent">${deal.discount_percent.toFixed(0)}% off market price</div>
+                            </div>
+
+                            <div class="deal-meta">
+                                <div class="confidence-score">
+                                    <span>🎯 ${confidencePercent}% match</span>
+                                    <div class="confidence-bar">
+                                        <div class="confidence-fill" style="width: ${confidencePercent}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="view-listing-btn" onclick="window.open('${deal.listing.url}', '_blank')">
+                                View on eBay →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getDealQuality(discountPercent) {
+            if (discountPercent >= 70) {
+                return { emoji: '🔥', label: 'HOT DEAL', class: 'hot' };
+            } else if (discountPercent >= 60) {
+                return { emoji: '⭐', label: 'STAR DEAL', class: 'star' };
+            } else {
+                return { emoji: '💎', label: 'GOOD DEAL', class: 'good' };
+            }
+        }
+    </script>
+</body>
+</html>
     """
 
 @app.route('/api/search', methods=['POST'])
