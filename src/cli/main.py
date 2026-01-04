@@ -139,14 +139,14 @@ def search(search_query, discount, max_results, min_price, max_price, listing_ty
 
     # Display results
     if not deals:
-        console.print("[yellow]No deals found matching your criteria.[/yellow]")
+        console.print("[yellow]No listings found matching your criteria.[/yellow]")
         console.print("\nTry:")
-        console.print("  - Lowering the discount threshold (--discount 40)")
         console.print("  - Broadening your search query")
         console.print("  - Checking if there are enough sold listings for this card")
         return
 
-    console.print(f"\n[bold green]Found {len(deals)} deals![/bold green]\n")
+    deals_meeting_threshold = len([d for d in deals if d.discount_percent >= discount])
+    console.print(f"\n[bold green]Found {len(deals)} listings ({deals_meeting_threshold} meet {discount}% threshold)![/bold green]\n")
 
     # Create results table
     table = Table(show_header=True, header_style="bold magenta", show_lines=True)
@@ -160,13 +160,20 @@ def search(search_query, discount, max_results, min_price, max_price, listing_ty
     table.add_column("Type", justify="center")
 
     for deal in deals:
-        # Determine row style based on deal quality
-        if deal.is_hot_deal:
+        # Determine row style based on whether it meets the threshold
+        meets_threshold = deal.discount_percent >= discount
+        if meets_threshold and deal.discount_percent >= 60:
             style = "bold red"
-        elif deal.is_star_deal:
+            row_style = "on dark_red"
+        elif meets_threshold and deal.discount_percent >= 50:
             style = "bold yellow"
+            row_style = "on dark_goldenrod"
+        elif meets_threshold:
+            style = "bold green"
+            row_style = "on dark_green"
         else:
-            style = "bold white"
+            style = "dim white"
+            row_style = None
 
         # Format card name (truncate if too long)
         card_name = deal.listing.title
@@ -176,23 +183,28 @@ def search(search_query, discount, max_results, min_price, max_price, listing_ty
         # Listing type emoji
         type_emoji = "🔨" if deal.listing.is_auction() else "💰"
 
+        # Show emoji only for deals meeting threshold
+        emoji = deal.get_emoji() if meets_threshold else ""
+        
         table.add_row(
-            deal.get_emoji(),
+            emoji,
             f"[link={deal.listing.url}]{card_name}[/link]",
             f"[green]${deal.market_value:.2f}[/green]",
             f"[cyan]${deal.listing_price:.2f}[/cyan]",
-            f"[bold green]${deal.discount_amount:.2f}[/bold green]",
+            f"[bold green]${deal.discount_amount:.2f}[/bold green]" if deal.discount_amount > 0 else f"[red]-${abs(deal.discount_amount):.2f}[/red]",
             f"[{style}]{deal.discount_percent:.1f}%[/{style}]",
             f"[yellow]{deal.deal_score:.0f}[/yellow]",
-            type_emoji
+            type_emoji,
+            style=row_style
         )
 
     console.print(table)
 
     # Show legend
     console.print("\n[bold]Legend:[/bold]")
-    console.print("  🔥 Hot Deal (>60% off)  |  ⭐ Star Deal (50-60% off)  |  💎 Good Deal (40-50% off)")
+    console.print(f"  [on dark_red] 🔥 Hot Deal (>60% off) [/on dark_red]  [on dark_goldenrod] ⭐ Star Deal (50-60% off) [/on dark_goldenrod]  [on dark_green] 💎 Meets Threshold [/on dark_green]")
     console.print("  🔨 Auction  |  💰 Buy It Now")
+    console.print(f"  Highlighted rows meet the {discount}% discount threshold")
 
     # Export to CSV if requested
     if export:

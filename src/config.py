@@ -19,6 +19,10 @@ DATA_DIR.mkdir(exist_ok=True)
 EBAY_APP_ID = os.getenv("EBAY_APP_ID", "")
 EBAY_CERT_ID = os.getenv("EBAY_CERT_ID", "")
 EBAY_DEV_ID = os.getenv("EBAY_DEV_ID", "")
+EBAY_USER_TOKEN = os.getenv("EBAY_USER_TOKEN", "")
+
+# Pokemon TCG API Configuration (for TCGPlayer market prices)
+POKEMON_TCG_API_KEY = os.getenv("POKEMON_TCG_API_KEY", "")
 
 # PriceCharting API Configuration
 PRICECHARTING_API_KEY = os.getenv("PRICECHARTING_API_KEY", "")

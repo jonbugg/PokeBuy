@@ -54,24 +54,12 @@ class DealFinder:
         Returns:
             List of Deal objects sorted by deal score
         """
-        # Step 1: Get market value
-        market_value = self.price_analyzer.get_market_value(search_query)
-
-        if market_value is None:
-            print(f"Warning: Could not determine market value for '{search_query}'")
-            print("This may be because there are insufficient sold listings.")
-            return []
-
-        print(f"Market value for '{search_query}': ${market_value:.2f}")
-
-        # Step 2: Search active listings
-        max_price_filter = max_price or (market_value * (100 - discount_threshold) / 100)
-
+        # Step 1: Search active listings first
         listings = self.ebay.search_active_listings(
             query=search_query,
             max_results=max_results * 2,  # Get extra to filter
             min_price=min_price,
-            max_price=max_price_filter,
+            max_price=max_price,
             listing_type=listing_type
         )
 
@@ -81,38 +69,101 @@ class DealFinder:
 
         print(f"Found {len(listings)} active listings")
 
-        # Step 3: Analyze each listing for deals
+        # Step 2: For each listing, look up its individual market value
         deals = []
+        price_cache = {}  # Cache prices for similar titles to avoid duplicate lookups
+        
+        # Limit lookups to avoid long wait times (each lookup takes 1-3 seconds)
+        max_lookups = min(len(listings), 15)
+        print(f"Looking up market prices (checking up to {max_lookups} unique cards)...")
 
-        for listing in listings:
-            # Parse card info from listing
+        for i, listing in enumerate(listings):
+            # Parse card info from listing title
             card = self.card_parser.parse_listing_title(listing.title, search_query)
+            
+            # Create a simplified search key from the listing title
+            # Extract key terms for price lookup
+            price_lookup_key = self._create_price_lookup_key(listing.title)
+            
+            # Check if we've already looked up this price
+            if price_lookup_key in price_cache:
+                market_value = price_cache[price_lookup_key]
+            elif len(price_cache) < max_lookups:
+                # Look up market value for this specific card
+                print(f"  [{len(price_cache)+1}/{max_lookups}] Looking up: {listing.title[:50]}...")
+                tcg_result = self.ebay.get_tcg_market_price(listing.title)
+                if tcg_result:
+                    market_value = tcg_result['market_value']
+                    card.market_value_source = f"pricecharting ({tcg_result.get('card_name', '')[:30]})"
+                    print(f"         -> ${market_value:.2f}")
+                else:
+                    market_value = None
+                    card.market_value_source = "unknown"
+                    print(f"         -> No price found")
+                
+                # Cache the result
+                price_cache[price_lookup_key] = market_value
+            else:
+                # Hit max lookups, skip price lookup
+                market_value = None
+                card.market_value_source = "not looked up"
+
             card.market_value = market_value
-            card.market_value_source = "ebay_sold"
 
             # Calculate deal metrics
             listing_price = listing.get_total_cost()
-            discount_amount = market_value - listing_price
-            discount_percent = (discount_amount / market_value) * 100
+            
+            if market_value and market_value > 0:
+                discount_amount = market_value - listing_price
+                discount_percent = (discount_amount / market_value) * 100
+            else:
+                discount_amount = 0.0
+                discount_percent = 0.0
+                market_value = 0.0
 
-            # Only include if meets threshold
-            if discount_percent >= discount_threshold:
-                deal = Deal(
-                    card=card,
-                    listing=listing,
-                    market_value=market_value,
-                    listing_price=listing_price,
-                    discount_amount=discount_amount,
-                    discount_percent=discount_percent
-                )
-                deals.append(deal)
+            deal = Deal(
+                card=card,
+                listing=listing,
+                market_value=market_value,
+                listing_price=listing_price,
+                discount_amount=discount_amount,
+                discount_percent=discount_percent
+            )
+            deals.append(deal)
 
-        # Step 4: Sort by deal score (highest first)
-        deals.sort(key=lambda d: d.deal_score, reverse=True)
-
-        print(f"Found {len(deals)} deals meeting {discount_threshold}% discount threshold")
+        # Step 3: Sort by discount percentage (best deals first)
+        deals.sort(key=lambda d: d.discount_percent, reverse=True)
+        
+        # Count deals meeting threshold
+        deals_meeting_threshold = len([d for d in deals if d.discount_percent >= discount_threshold])
+        deals_with_price = len([d for d in deals if d.market_value > 0])
+        
+        print(f"Found prices for {deals_with_price}/{len(deals)} listings")
+        print(f"{deals_meeting_threshold} listings meet {discount_threshold}% discount threshold")
 
         return deals[:max_results]
+
+    def _create_price_lookup_key(self, title: str) -> str:
+        """
+        Create a simplified key for caching price lookups.
+        Extracts the most important terms from a listing title.
+        """
+        import re
+        
+        # Lowercase and clean
+        key = title.lower()
+        
+        # Remove common filler words
+        filler_words = ['pokemon', 'tcg', 'card', 'cards', 'the', 'a', 'an', 'and', 'or', 'for',
+                       'lot', 'bundle', 'set', 'collection', 'pick', 'choose', 'your',
+                       'nm', 'mint', 'near', 'excellent', 'good', 'played', 'lp', 'mp', 'hp',
+                       'free', 'shipping', 'fast', 'same', 'day', 'new', 'sealed']
+        
+        words = key.split()
+        key_words = [w for w in words if w not in filler_words and len(w) > 2]
+        
+        # Take first 5 significant words
+        return ' '.join(key_words[:5])
 
     def analyze_deal(self, listing: Listing, market_value: float) -> Optional[Deal]:
         """

@@ -60,22 +60,33 @@ class PriceAnalyzer:
             max_results=100
         )
 
-        if not sold_listings or len(sold_listings) < 3:
-            # Insufficient data
-            return None
+        market_value = None
+        source = "ebay_sold"
+        sample_size = 0
 
-        # Calculate market value
-        market_value = self._calculate_market_value(sold_listings)
+        if sold_listings and len(sold_listings) >= 3:
+            # Calculate market value from eBay sold listings
+            market_value = self._calculate_market_value(sold_listings)
+            sample_size = len(sold_listings)
+        
+        # Fallback to Pokemon TCG API if eBay data is insufficient
+        if market_value is None:
+            # Extract card name from search query for TCG API lookup
+            tcg_result = self.ebay.get_tcg_market_price(search_query)
+            if tcg_result:
+                market_value = tcg_result['market_value']
+                source = f"tcgplayer ({tcg_result.get('set_name', 'unknown set')})"
+                sample_size = 1
 
         # Cache the result
         if market_value is not None:
             self.cache.set(
                 search_key=cache_key,
                 market_value=market_value,
-                source="ebay_sold",
+                source=source,
                 data={
                     "query": search_query,
-                    "sample_size": len(sold_listings),
+                    "sample_size": sample_size,
                     "calculated_at": datetime.now().isoformat()
                 }
             )
@@ -83,7 +94,7 @@ class PriceAnalyzer:
             # Update card object if provided
             if card:
                 card.market_value = market_value
-                card.market_value_source = "ebay_sold"
+                card.market_value_source = source
                 card.market_value_updated = datetime.now()
 
         return market_value
