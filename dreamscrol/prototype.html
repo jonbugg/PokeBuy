@@ -30,7 +30,8 @@ html,body{height:100%}
 body{background:var(--ink);color:var(--text);font-family:var(--body);display:grid;place-items:center;overflow:hidden;
   padding-block:12px;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
-button:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:2px solid var(--porch);outline-offset:2px;border-radius:8px}
+button:disabled{opacity:.5;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focus-visible{outline:2px solid var(--porch);outline-offset:2px;border-radius:8px}
 
 .phone{position:relative;width:min(100%,420px);height:100%;max-height:880px;border-radius:28px;overflow:hidden;overflow:clip;background:var(--black);
   box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px var(--line)}
@@ -56,7 +57,17 @@ button:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:2px
 @keyframes kb{from{transform:scale(1.04)}to{transform:scale(1.15) translateY(-1.5%)}}
 @keyframes sway{0%{transform:scale(1.1) translateX(-2%)}50%{transform:scale(1.12) translate(1%,-.5%)}100%{transform:scale(1.1) translateX(2%)}}
 @keyframes fadein{from{opacity:.25}to{opacity:1}}
-.shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,.5),transparent 20%,transparent 40%,rgba(0,0,0,.88) 88%)}
+.shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,.5),transparent 20%,transparent 38%,rgba(0,0,0,.9) 86%)}
+
+.card.promo{display:grid;align-content:center;padding:28px 24px 40px;background:radial-gradient(120% 70% at 85% 8%,#3b2b57 0%,transparent 60%),radial-gradient(100% 60% at 0% 100%,#4d3118 0%,transparent 60%),var(--night)}
+.promo .eyebrow{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--porch);margin-bottom:10px}
+.promo h2{font-family:var(--display);font-weight:400;font-size:36px;line-height:1.1;margin:0 0 12px;text-wrap:balance}
+.promo p{color:var(--muted);font-size:15px;line-height:1.45;margin:0 0 18px;max-width:32ch}
+.promo ul{list-style:none;padding:0;margin:0 0 24px;display:grid;gap:10px;font-size:14.5px}
+.promo li{display:flex;gap:10px;align-items:baseline}
+.promo li::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--porch);transform:translateY(-1px)}
+.promo .btn{justify-self:start;padding:14px 20px}
+.promo .done{font-family:var(--display);font-size:22px;color:var(--match)}
 
 .segs{position:absolute;top:56px;left:14px;right:14px;display:flex;gap:4px;z-index:2}
 .segs i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.28);overflow:hidden}
@@ -68,7 +79,7 @@ button:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:2px
 .liveflag{position:absolute;top:64px;left:14px;z-index:2;display:flex;gap:6px;align-items:center}
 .liveflag b{font-size:11px;font-weight:800;letter-spacing:.08em;padding:4px 8px;border-radius:6px;background:var(--live)}
 .liveflag span{font-size:12px;font-weight:700;padding:4px 8px;border-radius:6px;background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.quote{position:absolute;left:22px;right:84px;top:30%;z-index:2;font-family:var(--display);font-size:22px;line-height:1.25;text-wrap:balance;text-shadow:0 2px 14px rgba(0,0,0,.7);animation:fadein .6s ease-out}
+.quote{position:absolute;left:22px;right:84px;top:28%;z-index:2;font-family:var(--display);font-size:22px;line-height:1.25;text-wrap:balance;text-shadow:0 2px 14px rgba(0,0,0,.7);animation:fadein .6s ease-out}
 .quote span{display:block;margin-top:8px;font-family:var(--body);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--porch)}
 
 /* right rail */
@@ -78,7 +89,6 @@ button:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:2px
 .act:active svg{transform:scale(.88)}
 .act.on.like svg{fill:var(--heart)}
 .act.on.save svg{fill:var(--porch)}
-.act.agentav .av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;background:var(--raise);border:2px solid var(--text);text-shadow:none}
 .fh{position:absolute;right:22px;bottom:240px;width:26px;height:26px;z-index:3;pointer-events:none;animation:floatup 1.8s ease-out forwards}
 .fh svg{width:100%;height:100%;fill:var(--heart)}
 @keyframes floatup{0%{opacity:0;transform:translate(0,0) scale(.6)}15%{opacity:1}100%{opacity:0;transform:translate(var(--dx,-20px),-220px) scale(1.1)}}
@@ -87,9 +97,12 @@ button:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:2px
 .info{position:absolute;left:14px;right:74px;bottom:16px;z-index:3;display:flex;flex-direction:column;gap:6px;text-shadow:0 1px 8px rgba(0,0,0,.55)}
 .chips{display:flex;flex-wrap:wrap;gap:5px}
 .chip{font-size:11.5px;font-weight:700;padding:4px 8px;border-radius:99px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);text-shadow:none}
-.chip.new,.chip.unless,.chip.open{color:var(--porch)}
+.chip.new,.chip.unless,.chip.open,.chip.north{color:var(--porch)}
 .chip.drop{color:var(--heart)}
-.chip.fsbo,.chip.ver{color:var(--match)}
+.chip.fsbo,.chip.ver,.chip.reno{color:var(--match)}
+.chip.fit{background:var(--match);color:var(--match-ink);border-color:transparent}
+.chip.stretch{background:var(--porch);color:var(--porch-ink);border-color:transparent}
+.chip.over{color:var(--muted)}
 .chip.live i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--heart);margin-right:5px;vertical-align:1px;animation:pulse 1.4s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.3}}
 .tapinfo{display:flex;flex-direction:column;gap:5px;cursor:pointer;border-radius:10px}
@@ -112,7 +125,7 @@ button:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:2px
 .follow{margin-left:auto;font-size:12px;font-weight:800;padding:5px 11px;border-radius:99px;border:1.5px solid var(--text);text-shadow:none;flex:none}
 .follow.on{background:var(--text);color:var(--ink)}
 .ctas{display:flex;gap:6px;margin-top:2px}
-.cta{flex:1;font-size:13px;font-weight:800;padding:10px 8px;border-radius:12px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);text-shadow:none}
+.cta{flex:1;font-size:13px;font-weight:800;padding:10px 6px;border-radius:12px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);text-shadow:none;white-space:nowrap}
 .cta.primary{background:var(--porch);color:var(--porch-ink);border-color:transparent}
 
 .chat{display:flex;flex-direction:column;gap:5px;margin-bottom:4px;max-height:150px;overflow:hidden;justify-content:flex-end;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 30%);mask-image:linear-gradient(to bottom,transparent,#000 30%)}
@@ -149,6 +162,10 @@ button:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:2px
 .stat span{font-size:12px;color:var(--muted);font-weight:600}
 .panel{background:var(--raise);border-radius:14px;padding:14px;display:grid;gap:10px}
 .panel h2{margin:0;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.panel .big{font-family:var(--display);font-size:30px;font-variant-numeric:tabular-nums}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;padding-top:8px;border-top:1px solid var(--line)}
+.kv span{color:var(--muted)}
+.kv b{font-weight:700;text-align:right}
 .sp{width:100%;height:auto;display:block}
 .sp-area{fill:var(--porch);opacity:.16}
 .sp-line{fill:none;stroke:var(--porch);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
@@ -178,7 +195,6 @@ button:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:2px
 .me-head p{margin:2px 0 0;color:var(--muted);font-size:13px}
 .taste{display:flex;flex-wrap:wrap;gap:6px}
 .taste span{font-size:13px;font-weight:700;padding:6px 10px;border-radius:99px;background:var(--raise2)}
-.taste span b{color:var(--porch);font-weight:800;margin-left:4px;font-variant-numeric:tabular-nums}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .tile{position:relative;aspect-ratio:3/4;max-width:100%;border-radius:10px;overflow:hidden;text-align:left}
 .tile svg{width:100%;height:100%;display:block}
@@ -207,9 +223,9 @@ button:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:2px
 .note:hover{background:var(--raise)}
 .note .ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--raise2)}
 .note .ic svg{width:20px;height:20px;fill:none;stroke:var(--text);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.note .ic.sold{background:var(--porch)} .note .ic.sold svg{stroke:var(--porch-ink)}
+.note .ic.sold,.note .ic.offer{background:var(--porch)} .note .ic.sold svg,.note .ic.offer svg{stroke:var(--porch-ink)}
 .note .ic.drop{background:rgba(255,92,124,.18)} .note .ic.drop svg{stroke:var(--heart)}
-.note .ic.heart{background:rgba(127,227,196,.16)} .note .ic.heart svg{stroke:var(--match)}
+.note .ic.heart,.note .ic.bank{background:rgba(127,227,196,.16)} .note .ic.heart svg,.note .ic.bank svg{stroke:var(--match)}
 .note .ic.live{background:var(--live)}
 .note b{display:block;font-size:14px;font-weight:700;line-height:1.3}
 .note span{display:block;font-size:12.5px;color:var(--muted);line-height:1.35;margin-top:2px}
@@ -228,7 +244,7 @@ button:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:2px
 
 /* sheets, modal, toast */
 .sheet-wrap{position:absolute;inset:0;z-index:20;display:flex;align-items:flex-end;background:rgba(0,0,0,.45)}
-.sheet{width:100%;max-height:82%;overflow-y:auto;background:var(--night);border-radius:22px 22px 0 0;padding:10px 18px 22px;display:grid;gap:12px;animation:up .25s ease-out}
+.sheet{width:100%;max-height:86%;overflow-y:auto;background:var(--night);border-radius:22px 22px 0 0;padding:10px 18px 22px;display:grid;gap:12px;animation:up .25s ease-out}
 @keyframes up{from{transform:translateY(40px);opacity:.4}}
 .handle{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 2px}
 .sheet h3{margin:0;font-family:var(--display);font-weight:400;font-size:22px;text-wrap:balance}
@@ -245,19 +261,27 @@ button:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:2px
 .compose button{font-weight:800;color:var(--porch);padding:0 6px}
 .warn{font-size:12.5px;line-height:1.4;padding:10px 12px;border-radius:12px;background:rgba(255,92,124,.12);border:1px solid rgba(255,92,124,.35)}
 .warn b{color:var(--heart)}
+.ok{font-size:13px;line-height:1.4;padding:10px 12px;border-radius:12px;background:rgba(127,227,196,.1);border:1px solid rgba(127,227,196,.35)}
+.ok b{color:var(--match)}
 .rows{display:grid;gap:6px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;border-radius:12px;background:var(--raise);font-size:14px;font-weight:600;text-align:left}
 .row span{color:var(--muted);font-weight:500;font-size:12.5px}
+.arow{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--raise);text-align:left;font-size:14px}
+.arow .av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;background:var(--raise2)}
+.arow small{display:block;color:var(--muted);font-size:12px;font-weight:500}
+.arow em{font-style:normal;font-size:12px;font-weight:800;color:var(--porch)}
 .pay{display:grid;font-size:14px}
-.pay div{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.pay div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
 .pay div:first-child{border-top:0}
 .pay div.total{font-weight:800;font-size:16px;color:var(--porch)}
 .fgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .fgrid div{background:var(--raise);border-radius:10px;padding:8px;min-width:0}
-.fgrid b{display:block;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.fgrid b{display:block;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .fgrid span{font-size:11px;color:var(--muted);font-weight:600}
 .jump{display:flex;flex-wrap:wrap;gap:6px}
-.jump button{font-size:13px;font-weight:700;padding:7px 11px;border-radius:99px;background:var(--raise)}
+.jump button,.pills button{font-size:13px;font-weight:700;padding:7px 11px;border-radius:99px;background:var(--raise)}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pills button[aria-pressed="true"]{background:var(--porch);color:var(--porch-ink)}
 .bigprice{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .bigprice b{font-family:var(--display);font-weight:400;font-size:30px;font-variant-numeric:tabular-nums}
 .bigprice span{color:var(--porch);font-weight:700}
@@ -286,8 +310,14 @@ button:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:2px
 .step small{display:block;color:var(--muted);font-size:12px}
 .step button{font-size:12px;font-weight:800;padding:6px 10px;border-radius:99px;background:var(--porch);color:var(--porch-ink)}
 .step .done{font-size:12px;font-weight:800;color:var(--match)}
-.field{display:grid;gap:6px;font-size:13px;font-weight:700;color:var(--muted)}
-.field input{font:inherit;font-size:20px;font-family:var(--display);color:var(--text);background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.form{display:grid;gap:10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fld{display:grid;gap:5px;font-size:12.5px;font-weight:700;color:var(--muted);min-width:0}
+.fld input,.fld select{font:inherit;font-size:16px;font-weight:600;color:var(--text);background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0;width:100%}
+.result{display:grid;gap:4px;padding:16px;border-radius:16px;background:var(--raise)}
+.result small{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.result b{font-family:var(--display);font-weight:400;font-size:38px;color:var(--porch);font-variant-numeric:tabular-nums}
+.result span{font-size:13.5px;color:var(--muted)}
 .price-tags{display:flex;gap:8px;flex-wrap:wrap}
 .price-tags span{font-size:13px;font-weight:700;padding:8px 12px;border-radius:12px;background:var(--raise)}
 .price-tags b{color:var(--porch)}
@@ -299,6 +329,17 @@ button:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:2px
 .prof h3{font-size:20px}
 .prof p{margin:2px 0 0;color:var(--muted);font-size:13px}
 .rank{font-size:13px;font-weight:800;color:var(--porch-ink);background:var(--porch);border-radius:99px;padding:5px 10px;justify-self:start}
+.lender{display:grid;grid-template-columns:40px 1fr auto;gap:4px 10px;align-items:center;padding:12px;border-radius:14px;background:var(--raise);text-align:left;border:1.5px solid transparent}
+.lender[aria-pressed="true"]{border-color:var(--porch)}
+.lender .lg{grid-row:1/3;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--raise2)}
+.lender b{font-size:14.5px}
+.lender .mo2{font-family:var(--display);font-size:19px;text-align:right;font-variant-numeric:tabular-nums}
+.lender .q{grid-column:2/4;display:flex;gap:4px 12px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.lender .q strong{color:var(--text);font-variant-numeric:tabular-nums}
+.spons{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.letter{background:var(--text);color:var(--ink);border-radius:12px;padding:16px;display:grid;gap:6px;font-size:13px;line-height:1.45}
+.letter b{font-family:var(--display);font-weight:400;font-size:24px}
+.letter small{font-size:11px;color:#5b5563}
 
 .match{position:absolute;inset:0;z-index:30;display:grid;place-items:center;padding:24px;background:rgba(8,20,16,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);text-align:center}
 .match-in{display:grid;gap:14px;justify-items:center;animation:up .3s ease-out}
@@ -309,6 +350,7 @@ button:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:2px
 .match p{margin:0;font-size:15px;line-height:1.45;max-width:30ch}
 .match .btns{display:grid;gap:8px;width:100%;max-width:260px}
 
+.sheet-wrap~.toast,.match~.toast{top:14px}
 .toast{position:absolute;left:50%;top:100px;transform:translateX(-50%);z-index:40;max-width:calc(100% - 32px);width:max-content;font-size:13px;font-weight:700;padding:10px 14px;border-radius:12px;background:var(--text);color:var(--ink);box-shadow:0 10px 30px rgba(0,0,0,.4);animation:up .2s ease-out;text-align:center}
 
 @media (prefers-reduced-motion:reduce){
@@ -352,86 +394,115 @@ const money=n=>'$'+Math.round(n).toLocaleString('en-US');
 const short=n=>n>=1e6?'$'+(n/1e6).toFixed(2).replace(/0$/,'').replace(/\.0$/,'')+'M':'$'+Math.round(n/1e3)+'K';
 const fmtK=n=>n>=1e6?(n/1e6).toFixed(1).replace(/\.0$/,'')+'M':n>=1e4?(n/1e3).toFixed(1).replace(/\.0$/,'')+'K':n.toLocaleString('en-US');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const RATE=.065, DOWN=.2, TAX=.019, INS=180;
-function pay(p){const P=p*(1-DOWN),r=RATE/12,n=360;const pi=P*r/(1-Math.pow(1+r,-n));const tax=p*TAX/12;return{pi,tax,ins:INS,total:Math.round((pi+tax+INS)/10)*10}}
 const PARTNER='Sam';
+const BASE_RATE=6.5, BASE_APR=6.62, DOWN=.2, INS=150; // example rate shown until the buyer picks a lender
 
-/* ---------- sample data: every address, person and price here is made up ---------- */
+/* ---------- sample data: every address, person, lender and price here is made up ---------- */
 const AG={
- mariasellsatx:{n:'Maria Ortiz',b:'Lone Oak Realty',i:'MO',followers:12400,views:161000,rank:'#3 creator in East Austin',sold:[812000,1105000,689000]},
- hillcountrykay:{n:'Kay Brennan',b:'Pecan Street Homes',i:'KB',followers:31800,views:212000,rank:'#1 creator in Hill Country',sold:[540000,615000]},
- 'andre.tours':{n:'Andre Fields',b:'Lone Oak Realty',i:'AF',followers:9700,views:140000,rank:'Most live tours in Austin',sold:[730000]},
- 'jules.homes':{n:'Jules Romero',b:'Lone Oak Realty',i:'JR',followers:21300,views:188000,rank:'#1 creator in Hyde Park',sold:[961000,1240000]},
- 'dana.and.lee':{n:'Dana & Lee',b:'Homeowners · for sale by owner',i:'DL',followers:310,owner:true},
- 'rr.realty.rob':{n:'Rob Baines',b:'Bluebonnet Partners',i:'RB',followers:5200,views:97000,rank:'Top 10 in Round Rock',sold:[455000,502000]},
- 'the.parks.atx':{n:'Ji-woo Park',b:'Homeowners · not listed',i:'JP',followers:1840,owner:true}
+ 'kiana.sells.detroit':{n:'Kiana Brooks',b:'Woodward Realty Group',i:'KB',followers:14200,views:171000,rank:'#3 creator in Detroit',sold:[412000,286000,530000]},
+ 'upnorth.ellie':{n:'Ellie Novak',b:'Northern Pines Realty',i:'EN',followers:22900,views:198000,rank:'#1 creator for Up North cabins',sold:[245000,318000]},
+ 'marcus.tours':{n:'Marcus Hill',b:'Woodward Realty Group',i:'MH',followers:8800,views:132000,rank:'Most live tours in Metro Detroit',sold:[301000]},
+ 'corktown.cass':{n:'Cassandra Reyes',b:'Riverfront Homes',i:'CR',followers:18600,views:184000,rank:'#2 creator in Detroit',sold:[436000,598000]},
+ 'the.osei.family':{n:'Ama & Kofi Osei',b:'Homeowners · for sale by owner',i:'AO',followers:410,owner:true},
+ 'royaloak.ryan':{n:'Ryan Kowalski',b:'Lakeside Partners',i:'RK',followers:6100,views:104000,rank:'Top 10 in Royal Oak',sold:[489000,512000]},
+ 'fixit.dee':{n:'Dee Carter',b:'Riverfront Homes',i:'DC',followers:41200,views:256000,rank:'#1 creator in Detroit',sold:[29000,61000,44000]},
+ 'gp.lakehouse':{n:'The Harmons',b:'Homeowners · not listed',i:'TH',followers:2300,owner:true}
 };
 const L=[
- {key:'haskell',style:'modern',price:749000,beds:3,baths:2.5,sqft:2140,year:2019,lot:'0.12 ac',hoa:0,open:'Sun 12–2',addr:'1407 Haskell St',hood:'East Austin',
-  agent:'mariasellsatx',chips:[{t:'New · 2h ago',k:'new'}],watching:312,likes:18400,cc:842,saves:1206,shares:2914,
-  cap:'Floor-to-ceiling glass and a kitchen built for hosting.',rooms:['Exterior','Kitchen','Living','Primary suite'],partner:true,
-  sky:['#1b2050','#f0956a'],orb:[300,250,26],orbC:'#ffe2b8',hill:'#2e2a3a',ground:'#23222a',wall:['#efe6da','#d7c9b6'],floor:'#9a7656',trim:'#2a2a2e',sofa:'#4b5d73'},
- {key:'cedar',style:'aframe',price:485000,beds:2,baths:1,sqft:1060,year:1978,lot:'1.4 ac',hoa:0,open:'Sat 1–3',addr:'88 Cedar Hollow Rd',hood:'Dripping Springs',
-  agent:'hillcountrykay',chips:[{t:'Open house Sat 1–3',k:'open'}],watching:96,likes:7310,cc:311,saves:640,shares:1188,
-  cap:'Weekend-cabin energy, 35 minutes from downtown. Starlink conveys.',rooms:['Exterior','Living','Primary suite','Backyard'],
+ {key:'chicago',style:'tudor',price:649000,beds:6,baths:4.5,sqft:5200,year:1915,lot:'0.42 ac',hoa:0,tax:.028,open:'Sun 1–4',addr:'1840 Chicago Blvd',hood:'Boston-Edison',city:'Detroit',
+  agent:'kiana.sells.detroit',chips:[{t:'New · 3h ago',k:'new'}],watching:486,likes:31200,cc:1904,saves:2810,shares:6120,
+  cap:'1915 Tudor. Six bedrooms, a third-floor ballroom and all the original woodwork.',rooms:['Exterior','Living','Kitchen','Primary suite'],
+  sky:['#1b2050','#e98a5f'],orb:[312,232,24],orbC:'#ffe2b8',hill:'#2e2a3a',ground:'#24261f',wall:['#e9dcc6','#cbb796'],floor:'#7a5a3e',trim:'#3a2a20',sofa:'#6b2f2f'},
+ {key:'cabin',style:'aframe',price:279000,beds:2,baths:1,sqft:980,year:1974,lot:'2.1 ac',hoa:0,tax:.016,open:'Sat 12–2',addr:'412 Au Sable Trail',hood:'Grayling, Up North',city:'Grayling',
+  agent:'upnorth.ellie',chips:[{t:'Up North',k:'north'},{t:'Open house Sat',k:'open'}],watching:122,likes:9310,cc:402,saves:880,shares:1460,
+  cap:'Weekend place on the river, three hours up I-75.',rooms:['Exterior','Living','Primary suite','Backyard'],
   sky:['#0c1626','#4f6690'],orb:[90,170,18],orbC:'#f4f1e6',hill:'#16232a',ground:'#1a2420',wall:['#d9b48c','#a87b55'],floor:'#6b4a33',trim:'#3b2a20',sofa:'#8a4b3a'},
- {key:'cherrywood',live:true,style:'farmhouse',price:689000,beds:3,baths:2,sqft:1650,year:2016,lot:'0.18 ac',hoa:0,open:'Live now',addr:'3301 Cherrywood Rd',hood:'Cherrywood',
-  agent:'andre.tours',chips:[{t:'Open house',k:'open'}],watching:1240,likes:9800,cc:0,saves:520,shares:830,
+ {key:'ferndale',live:true,style:'farmhouse',price:329000,beds:3,baths:2,sqft:1450,year:1948,lot:'0.13 ac',hoa:0,tax:.021,open:'Live now',addr:'1215 W Drayton St',hood:'Ferndale',city:'Ferndale',
+  agent:'marcus.tours',chips:[{t:'Open house',k:'open'}],watching:1240,likes:9800,cc:0,saves:520,shares:830,
   cap:'Live open house. Ask anything.',rooms:['Exterior','Kitchen','Living','Backyard'],
   sky:['#2a3b63','#f2b07a'],orb:[310,230,30],orbC:'#fff1d6',hill:'#33405a',ground:'#2c3a2c',wall:['#f5f2ec','#e3ddd2'],floor:'#b88d63',trim:'#1f1e22',sofa:'#7d8f74'},
- {key:'avef',style:'bungalow',price:925000,beds:3,baths:2,sqft:1780,year:1926,lot:'0.16 ac',hoa:0,open:null,addr:'4510 Avenue F',hood:'Hyde Park',collab:'thenguyens',
-  agent:'jules.homes',chips:[{t:'Listed yesterday',k:'new'}],watching:204,likes:12900,cc:563,saves:980,shares:2201,
-  cap:'1926 craftsman. Original fir floors, new everything else.',rooms:['Exterior','Living','Backyard','From the sellers'],partner:true,
-  quote:'We raised both our kids here. Ask the neighbors about Friday porch dinners.',
-  sky:['#3b5d85','#f6c38b'],orb:[320,300,40],orbC:'#fff0c9',hill:'#4b6a52',ground:'#3f5a3a',wall:['#f3efe6','#e1d9cb'],floor:'#a3784f',trim:'#6d7d6a',sofa:'#c9784f'},
- {key:'berkman',style:'townhouse',price:539000,beds:2,baths:2.5,sqft:1390,year:2014,lot:'—',hoa:145,open:'Evenings, by message',addr:'1922 Berkman Dr #3',hood:'Mueller',fsbo:true,
-  agent:'dana.and.lee',chips:[{t:'For sale by owner',k:'fsbo'},{t:'Verified owner',k:'ver'}],watching:58,likes:3120,cc:147,saves:402,shares:610,
-  cap:'Corner unit facing the park. We’re moving for work, not because we want to.',rooms:['Exterior','Kitchen','Living','From the sellers'],
-  quote:'The park out back is the best part. Our dog will miss it more than we will.',
-  sky:['#24324f','#c88aa0'],orb:[70,220,22],orbC:'#ffe6d2',hill:'#2c3044',ground:'#2a2b33',wall:['#e9eef0','#cfd7da'],floor:'#b08b66',trim:'#404a58',sofa:'#d4a24a'},
- {key:'sundance',style:'ranch',price:615000,was:630000,beds:4,baths:2,sqft:2260,year:2004,lot:'0.31 ac',hoa:38,open:'Sat 11–1',addr:'702 Sundance Pkwy',hood:'Round Rock',
-  agent:'rr.realty.rob',chips:[{t:'Price drop −$15K',k:'drop'}],watching:141,likes:6040,cc:288,saves:733,shares:954,
-  cap:'Single story, big lot, and a pool that pays for itself in July.',rooms:['Exterior','Backyard','Kitchen','Living'],partner:true,
-  sky:['#6aa7d6','#f2d7a8'],orb:[80,160,34],orbC:'#fff7dd',hill:'#7a8f5a',ground:'#6d8a4a',wall:['#f1e7d6','#dccab0'],floor:'#c09a6b',trim:'#7a6a55',sofa:'#5b7a6a'},
- {key:'kinney',style:'unless',price:1400000,beds:4,baths:3,sqft:2890,year:1998,lot:'0.22 ac',hoa:0,open:null,addr:'2104 Kinney Ave',hood:'Zilker',offmarket:true,
-  agent:'the.parks.atx',chips:[{t:'Not for sale… unless?',k:'unless'}],watching:427,likes:24800,cc:1310,saves:2240,shares:4102,
-  cap:'We’d move for $1.4M. Tell us we’re crazy.',rooms:['Exterior','Living','Backyard','From the sellers'],
+ {key:'corktown',style:'bungalow',price:465000,beds:3,baths:2.5,sqft:1820,year:1890,lot:'0.08 ac',hoa:0,tax:.028,open:null,addr:'1734 Leverette St',hood:'Corktown',city:'Detroit',collab:'the.lindqvists',
+  agent:'corktown.cass',chips:[{t:'Listed yesterday',k:'new'}],watching:264,likes:15900,cc:688,saves:1240,shares:2650,
+  cap:'1890 brick Victorian, two blocks from the train station.',rooms:['Exterior','Living','Backyard','From the sellers'],
+  quote:'We watched the train station come back to life from this porch.',
+  sky:['#3b5d85','#f6c38b'],orb:[320,300,40],orbC:'#fff0c9',hill:'#4b5a6a',ground:'#3f4a3a',wall:['#f3efe6','#e1d9cb'],floor:'#a3784f',trim:'#6d4a3a',sofa:'#2f4f5f'},
+ {key:'lafayette',style:'modern',price:285000,beds:2,baths:1.5,sqft:1250,year:1959,lot:'Co-op',hoa:520,tax:.024,open:'Evenings, by message',addr:'1311 Joliet Pl #4',hood:'Lafayette Park',city:'Detroit',fsbo:true,
+  agent:'the.osei.family',chips:[{t:'For sale by owner',k:'fsbo'},{t:'Verified owner',k:'ver'}],watching:77,likes:4120,cc:203,saves:530,shares:790,
+  cap:'Mies van der Rohe townhouse. Glass walls, park out front. Co-op fee covers heat.',rooms:['Exterior','Living','Kitchen','From the sellers'],
+  quote:'Eight years of watching the seasons change through these windows.',
+  sky:['#24324f','#c88aa0'],orb:[70,220,22],orbC:'#ffe6d2',hill:'#2c3044',ground:'#2a2b33',wall:['#eef0ef','#d3d8d6'],floor:'#9d8a73',trim:'#2a2a2e',sofa:'#c79a3a'},
+ {key:'royaloak',style:'townhouse',price:529000,was:544000,beds:3,baths:3.5,sqft:2050,year:2023,lot:'—',hoa:210,tax:.017,open:'Sat 11–1',addr:'412 S Main St #3',hood:'Royal Oak',city:'Royal Oak',
+  agent:'royaloak.ryan',chips:[{t:'Price drop −$15K',k:'drop'}],watching:141,likes:6040,cc:288,saves:733,shares:954,
+  cap:'New-build townhome, rooftop deck, walk to everything on Main.',rooms:['Exterior','Kitchen','Living','Primary suite'],
+  sky:['#5e8fc4','#f2d7a8'],orb:[80,160,34],orbC:'#fff7dd',hill:'#5d6f7a',ground:'#4a5543',wall:['#f1ece4','#ddd4c6'],floor:'#c09a6b',trim:'#3d4650',sofa:'#5b7a6a'},
+ {key:'ilene',style:'fixer',rough:true,price:38000,beds:3,baths:1,sqft:1100,year:1926,lot:'0.11 ac',hoa:0,tax:.028,open:'Sat 10–12',addr:'17336 Ilene St',hood:'Bagley',city:'Detroit',
+  agent:'fixit.dee',chips:[{t:'Fixer',k:'drop'},{t:'Renovation loan eligible',k:'reno'}],watching:912,likes:58300,cc:3410,saves:5120,shares:11800,
+  cap:'Needs everything. Solid brick bones. $38K cash, or roll the repairs into a renovation loan.',rooms:['Exterior','Living','Kitchen','Backyard'],
+  sky:['#46566e','#c9b294'],orb:[300,200,26],orbC:'#f3e9d6',hill:'#47504a',ground:'#3d4a2e',wall:['#cfc3ad','#a8977b'],floor:'#6f5a43',trim:'#4a3f33',sofa:'#6b6252'},
+ {key:'lakepointe',style:'unless',price:1250000,beds:5,baths:3.5,sqft:3600,year:1928,lot:'0.5 ac',hoa:0,tax:.022,open:null,addr:'880 Lakepointe St',hood:'Grosse Pointe Park',city:'Grosse Pointe Park',offmarket:true,
+  agent:'gp.lakehouse',chips:[{t:'Not for sale… unless?',k:'unless'}],watching:427,likes:24800,cc:1310,saves:2240,shares:4102,
+  cap:'Lake St. Clair at the end of the street. We’d move for $1.25M.',rooms:['Exterior','Living','Backyard','From the sellers'],
   quote:'Not listed. If someone loves it more than we do, we’ll talk.',
   sky:['#141a33','#d9744f'],orb:[330,210,30],orbC:'#ffd9a8',hill:'#2b2a36',ground:'#2a2a27',wall:['#f4ede3','#e4d5c2'],floor:'#8b6748',trim:'#3a3330',sofa:'#2f4f4f'}
 ];
 L.forEach((l,i)=>{l.id=i;l.ag=AG[l.agent]});
 const IX=Object.fromEntries(L.map(l=>[l.key,l.id]));
-const SAM_LIKES=['haskell','cedar','avef','sundance'];
+const SAM_LIKES=['chicago','cabin','corktown','royaloak'];
 L.forEach(l=>l.partner=SAM_LIKES.includes(l.key));
+const PROMO_AFTER=3; // the "what can you afford" card sits after this many listings
+
+const LENDERS=[
+ {id:'woodward',n:'Woodward Home Loans',i:'WH',rate:6.250,apr:6.338,pts:0,fees:1950,stars:4.6,reviews:2310,close:18,sponsored:true},
+ {id:'lakeshore',n:'Lakeshore Mortgage',i:'LM',rate:6.125,apr:6.284,pts:.5,fees:2890,stars:4.8,reviews:1240,close:21},
+ {id:'greatlakes',n:'Great Lakes Credit Union',i:'GL',rate:6.000,apr:6.191,pts:1,fees:3420,stars:4.7,reviews:860,close:28},
+ {id:'motorcity',n:'Motor City Lending',i:'MC',rate:6.375,apr:6.452,pts:0,fees:1600,stars:4.5,reviews:540,close:25}
+];
+const CREDIT={'740+':0,'700–739':.25,'660–699':.625,'Under 660':1.125};
 
 const C={
- haskell:[['jordan.builds','that island could host thanksgiving for 40'],['kels_atx','the monthly payment hurts but I’d make it work'],['mariasellsatx','Open house Sunday 12–2. Come for the sunset light.','agent'],['nora.p','is the garage EV-ready?']],
- cedar:[['slowweekends','I would never leave that loft'],['tx.trailmix','how’s the cell signal out there?'],['hillcountrykay','Starlink is installed and it conveys.','agent']],
- cherrywood:[],
- avef:[['porchperson','the porch. THE PORCH.'],['thenguyens','We’re the sellers. Ask us anything about the street.','seller'],['mattycodes','guessed 780k, so wrong']],
- berkman:[['firsthomefund','love seeing owners post their own place'],['dana.and.lee','Showings any evening this week. Message us here.','seller']],
- sundance:[['poolszn','the pool math works out in july'],['r.gutierrez','price drop came at the right time']],
- kinney:[['zilker.dad','$1.4M to leave this view? fair'],['the.parks.atx','We’re serious. Message us and we’ll set up a walkthrough.','seller']]
+ chicago:[['jordan.builds','a BALLROOM. on the third floor.'],['kels.det','the woodwork alone is worth it'],['kiana.sells.detroit','Open house Sunday 1–4. The ballroom gets the best light around 3.','agent'],['nora.p','what does it cost to heat in January?']],
+ cabin:[['slowweekends','I would never come back down I-75'],['mi.trailmix','how’s the cell signal up there?'],['upnorth.ellie','Starlink is installed and it stays with the house.','agent']],
+ ferndale:[],
+ corktown:[['porchperson','two blocks from the station is wild'],['the.lindqvists','We’re the sellers. Ask us anything about the street.','seller'],['mattycodes','guessed 380k, so wrong']],
+ lafayette:[['midcentury.mo','a real Mies for under 300?'],['the.osei.family','Showings any evening this week. Message us here.','seller']],
+ royaloak:[['woodward.walks','rooftop deck for the Dream Cruise'],['r.gutierrez','price drop came at the right time']],
+ ilene:[['flipwithme','brick bones are everything'],['kels.det','what would a 203k cover on this?'],['fixit.dee','Roof and furnace are the big ones. A renovation loan can cover both.','agent']],
+ lakepointe:[['gp.dad','$1.25M to leave the lake? fair'],['gp.lakehouse','We’re serious. Message us and we’ll set up a walkthrough.','seller']]
 };
 
 /* fair housing filter: blocks comments that state preferences about protected groups */
 const FH=[/\b(no|without)\s+(kids|children|families)\b/i,/\b(adults|families|christians?|singles)\s+only\b/i,/\bdemographic/i,/\bethnic/i,/\bwhat kind of (people|neighbou?rs)\b/i,
- /\b(white|black|hispanic|latino|asian|jewish|muslim|christian|mexican|indian|immigrant|gay)\s+(neighbou?rhood|area|people|families|community|neighbou?rs)\b/i];
+ /\b(white|black|hispanic|latino|asian|jewish|muslim|christian|arab|mexican|indian|immigrant|gay)\s+(neighbou?rhood|area|people|families|community|neighbou?rs)\b/i];
 const fhFlag=t=>FH.some(r=>r.test(t));
 const FH_MSG='<b>Can’t post this.</b> Fair housing rules don’t allow comments about who should or shouldn’t live somewhere. Ask about the home or nearby places instead, like parks, commute or schools data.';
 
-const S={guess:false,couples:false,monthly:false,signedIn:false,score:0,guesses:{},liked:new Set(),saved:new Set(),follow:new Set(),homeFollow:new Set(['avef']),
- matches:[],watched:new Set(),active:-1,room:{},view:'feed',me:'buyer',pending:null,revealed:false};
+const S={guess:false,couples:false,monthly:false,signedIn:false,score:0,guesses:{},liked:new Set(),saved:new Set(),follow:new Set(),homeFollow:new Set(),
+ matches:[],watched:new Set(),active:-1,room:{},view:'feed',me:'buyer',pending:null,revealed:false,idOk:false,
+ bp:null,lender:null,preapproved:false,agent:null,offers:[],lenderSort:'apr'};
 
 const INBOX=[
- {id:'sold',unread:true,ic:'sold',t:'4510 Avenue F just sold',s:'You followed this home. Guess what it went for.',act:'sold'},
- {id:'drop',unread:true,ic:'drop',t:'Price drop on 702 Sundance Pkwy',s:'Now $615,000, down $15K. Sam liked this one.',act:'goto',k:'sundance'},
- {id:'sam',unread:true,ic:'heart',t:'Sam liked 88 Cedar Hollow Rd',s:'Like it too and it’s a match.',act:'goto',k:'cedar'},
- {id:'live',ic:'live',t:'@andre.tours is live now',s:'Open house tour of 3301 Cherrywood Rd · 1,240 watching',act:'goto',k:'cherrywood'},
- {id:'reply',ic:'chat',t:'@mariasellsatx replied to you',s:'“Open house Sunday 12–2. Come for the sunset light.”',act:'goto',k:'haskell'},
- {id:'new',ic:'spark',t:'3 new homes in East Austin match your taste',s:'Modern · under $800K · big kitchens',act:'goto',k:'haskell'},
+ {id:'sold',unread:true,ic:'sold',t:'2245 Wabash St just sold',s:'You followed this Corktown home. Guess what it went for.',act:'sold'},
+ {id:'drop',unread:true,ic:'drop',t:'Price drop on 412 S Main St #3',s:'Now $529,000, down $15K. Sam liked this one.',act:'goto',k:'royaloak'},
+ {id:'sam',unread:true,ic:'heart',t:'Sam liked 412 Au Sable Trail',s:'Like it too and it’s a match.',act:'goto',k:'cabin'},
+ {id:'live',ic:'live',t:'@marcus.tours is live now',s:'Open house tour of 1215 W Drayton St · 1,240 watching',act:'goto',k:'ferndale'},
+ {id:'reply',ic:'chat',t:'@kiana.sells.detroit replied to you',s:'“The ballroom gets the best light around 3.”',act:'goto',k:'chicago'},
+ {id:'new',ic:'spark',t:'3 new homes in Corktown match your taste',s:'Brick · under $500K · walkable',act:'goto',k:'corktown'},
  {id:'streak',ic:'flame',t:'4-day guess streak',s:'Guess one price today to keep it going.',act:'guess'}
 ];
+
+/* ---------- money math ---------- */
+const rateNow=()=>S.lender?S.lender.rate:S.bp?BASE_RATE+CREDIT[S.bp.credit]:BASE_RATE;
+function pay(p,taxRate,opts={}){
+ const rate=(opts.rate??rateNow())/100,down=Math.min(p,opts.down??(S.bp?S.bp.down:p*DOWN));
+ const P=Math.max(0,p-down),r=rate/12,n=360,pi=P>0?P*r/(1-Math.pow(1+r,-n)):0,tax=p*taxRate/12;
+ return{pi,tax,ins:INS,down,rate:rate*100,loan:P,total:Math.round((pi+tax+INS)/10)*10};
+}
+function buyingPower(b){
+ const mi=b.income/12,cap=Math.max(0,Math.min(mi*.28,mi*.43-b.debts)),rate=BASE_RATE+CREDIT[b.credit];
+ let lo=0,hi=3e6;for(let k=0;k<40;k++){const mid=(lo+hi)/2;if(pay(mid,.022,{rate,down:b.down}).total<=cap)lo=mid;else hi=mid}
+ return{max:Math.floor(lo/5000)*5000,cap:Math.round(cap/10)*10,rate};
+}
+function fit(l){if(!S.bp||l.offmarket)return null;const m=S.bp.max;return l.price<=m*.9?['fit','In your budget']:l.price<=m*1.05?['stretch','A stretch']:['over','Over budget']}
 
 /* ---------- illustrated "video" scenes ---------- */
 const GLOW='#ffd58a';
@@ -440,19 +511,39 @@ const W=(x,y,w,h,o=.92)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fil
 const pine=(x,base,h,c)=>`<polygon points="${x},${base-h} ${x+h*.28},${base} ${x-h*.28},${base}" fill="${c}"/>`;
 const wrap=(defs,inner)=>`<svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>${defs}</defs>${inner}</svg>`;
 const skyDefs=(l,id)=>`<linearGradient id="s${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${l.sky[0]}"/><stop offset=".75" stop-color="${l.sky[1]}"/></linearGradient><radialGradient id="h${id}"><stop offset="0" stop-color="${GLOW}" stop-opacity=".55"/><stop offset="1" stop-color="${GLOW}" stop-opacity="0"/></radialGradient>`;
+const timber=(x0,x1,yb,apex)=>{const xm=(x0+x1)/2;let s=`<polygon points="${x0},${yb} ${xm},${apex} ${x1},${yb}" fill="#efe6d4"/>`;for(let x=x0+14;x<x1-6;x+=16){const t=Math.abs(x-xm)/((x1-x0)/2);const yt=apex+(yb-apex)*t;s+=`<line x1="${x}" y1="${yt}" x2="${x}" y2="${yb}" stroke="#3a2a20" stroke-width="4"/>`}return s+`<line x1="${x0+8}" y1="${yb-6}" x2="${x1-8}" y2="${yb-6}" stroke="#3a2a20" stroke-width="5"/>`};
 
 const HOUSES={
- modern:()=>`<rect x="40" y="430" width="270" height="130" fill="#25222b"/><rect x="120" y="335" width="240" height="100" fill="#34303b"/><rect x="112" y="327" width="256" height="10" fill="#1b1920"/>${W(132,350,216,66,.86)}<rect x="200" y="350" width="4" height="66" fill="#34303b"/><rect x="276" y="350" width="4" height="66" fill="#34303b"/>${W(58,450,130,96)}<rect x="120" y="450" width="4" height="96" fill="#25222b"/><rect x="210" y="452" width="86" height="108" fill="#1a181e"/><rect x="20" y="558" width="360" height="8" fill="#141217"/><rect x="356" y="520" width="6" height="40" fill="#1a1512"/><circle cx="352" cy="500" r="34" fill="#1f2a22"/><circle cx="374" cy="470" r="26" fill="#243026"/>`,
+ tudor:()=>`<circle cx="22" cy="440" r="56" fill="#22301f"/><circle cx="384" cy="450" r="50" fill="#22301f"/><rect x="300" y="250" width="24" height="90" fill="#6a3125"/>
+  <rect x="34" y="404" width="332" height="158" fill="#7a3b2e"/>${Array.from({length:15},(_,k)=>`<rect x="34" y="${412+k*10}" width="332" height="1.5" fill="#5e2b21" opacity=".55"/>`).join('')}
+  <polygon points="28,408 96,300 164,408" fill="#2b2420"/>${timber(46,146,404,324)}
+  <polygon points="132,408 200,262 268,408" fill="#2b2420"/>${timber(150,250,404,292)}
+  <polygon points="236,408 304,300 372,408" fill="#2b2420"/>${timber(254,354,404,324)}
+  ${W(78,360,36,30,.8)}${W(184,330,32,40,.82)}${W(286,360,36,30,.8)}
+  ${[52,108,252,308].map(x=>`<rect x="${x}" y="430" width="40" height="52" fill="#2a1f1a"/>${W(x+3,433,34,46,.9)}<line x1="${x+20}" y1="433" x2="${x+20}" y2="479" stroke="#2a1f1a" stroke-width="2"/>`).join('')}
+  <path d="M176 562 V500 a24 24 0 0 1 48 0 V562Z" fill="#3a2418"/><path d="M182 562 V502 a18 18 0 0 1 36 0 V562Z" fill="${GLOW}" opacity=".5"/>
+  ${[52,108,252,308].map(x=>`<rect x="${x}" y="500" width="40" height="44" fill="#2a1f1a"/>${W(x+3,503,34,38,.75)}`).join('')}
+  <rect x="150" y="560" width="100" height="8" fill="#b9ab96"/>`,
+ fixer:()=>`<polygon points="76,446 200,368 324,446" fill="#3b3b3d"/><polygon points="120,420 150,402 168,418 140,432" fill="#2a2a2b"/><polygon points="230,410 262,428 246,438" fill="#262627"/>
+  <rect x="90" y="440" width="220" height="122" fill="#8c8f88"/>${Array.from({length:11},(_,k)=>`<rect x="90" y="${446+k*11}" width="220" height="1.5" fill="#6f726b"/>`).join('')}
+  <rect x="112" y="462" width="54" height="46" fill="#b08a5a"/><line x1="112" y1="462" x2="166" y2="508" stroke="#8a6a42" stroke-width="2"/><line x1="166" y1="462" x2="112" y2="508" stroke="#8a6a42" stroke-width="2"/>
+  <rect x="234" y="462" width="54" height="46" fill="#b08a5a"/><line x1="234" y1="462" x2="288" y2="508" stroke="#8a6a42" stroke-width="2"/>
+  <rect x="180" y="500" width="40" height="62" fill="#a4835a"/>
+  <polygon points="80,500 320,494 320,504 80,512" fill="#4a4540"/><rect x="92" y="504" width="6" height="58" fill="#4a4540"/><rect x="304" y="500" width="6" height="62" fill="#4a4540" transform="rotate(3 307 530)"/>
+  ${Array.from({length:30},(_,k)=>`<polygon points="${k*14-4},566 ${k*14+3},${536+((k*37)%22)} ${k*14+10},566" fill="#4b5e36"/>`).join('')}
+  <circle cx="60" cy="540" r="34" fill="#3e5230"/><circle cx="350" cy="536" r="38" fill="#3e5230"/>
+  <rect x="330" y="560" width="5" height="60" fill="#d9d4cb"/><rect x="300" y="560" width="64" height="40" fill="#f3efe7"/><rect x="300" y="560" width="64" height="12" fill="#d24b3a"/>`,
  aframe:()=>`${pine(40,570,190,'#13221c')}${pine(88,575,140,'#182a22')}${pine(360,570,210,'#13221c')}${pine(318,578,130,'#182a22')}<polygon points="200,240 335,560 65,560" fill="#4a3226"/><polygon points="200,300 296,560 104,560" fill="${GLOW}" opacity=".9"/><rect x="197" y="300" width="6" height="260" fill="#4a3226"/><rect x="140" y="458" width="120" height="6" fill="#4a3226"/><rect x="50" y="556" width="300" height="12" fill="#2c1f18"/>`,
  farmhouse:()=>`<circle cx="30" cy="470" r="46" fill="#2a3826"/><circle cx="376" cy="476" r="38" fill="#2a3826"/><polygon points="50,444 200,330 350,444" fill="#1f1e22"/><rect x="70" y="442" width="260" height="120" fill="#ece8e1"/>${Array.from({length:16},(_,k)=>`<rect x="${78+k*16}" y="442" width="2" height="120" fill="#d4cec4"/>`).join('')}<rect x="100" y="454" width="52" height="42" fill="#1a1a1a"/>${W(104,458,44,34,.88)}<rect x="248" y="454" width="52" height="42" fill="#1a1a1a"/>${W(252,458,44,34,.88)}<rect x="178" y="392" width="44" height="36" fill="#1a1a1a"/>${W(182,396,36,28,.82)}<rect x="60" y="502" width="280" height="10" fill="#1f1e22"/><rect x="74" y="512" width="8" height="50" fill="#1f1e22"/><rect x="318" y="512" width="8" height="50" fill="#1f1e22"/><rect x="182" y="514" width="36" height="48" fill="#1a1a1a"/>${W(104,520,44,30,.78)}${W(252,520,44,30,.78)}<rect x="170" y="560" width="60" height="8" fill="#cfc8bc"/>`,
- bungalow:()=>`<circle cx="30" cy="470" r="50" fill="#2c3d2a"/><circle cx="378" cy="480" r="40" fill="#2c3d2a"/><rect x="60" y="440" width="280" height="122" fill="#5f6f5c"/><polygon points="36,446 200,352 364,446" fill="#2b2622"/>${W(96,456,56,38,.85)}${W(248,456,56,38,.85)}<rect x="60" y="500" width="280" height="8" fill="#e8dfd0"/><rect x="72" y="508" width="12" height="54" fill="#e8dfd0"/><rect x="316" y="508" width="12" height="54" fill="#e8dfd0"/>${W(102,516,50,32,.8)}${W(250,516,50,32,.8)}<rect x="180" y="512" width="40" height="50" fill="#3a2b22"/><rect x="166" y="560" width="68" height="8" fill="#cfc4b2"/>`,
+ bungalow:()=>`<circle cx="30" cy="470" r="50" fill="#2c3d2a"/><circle cx="378" cy="480" r="40" fill="#2c3d2a"/><rect x="80" y="380" width="240" height="182" fill="#8a4434"/><polygon points="64,386 200,300 336,386" fill="#2b2622"/>${W(110,400,44,56,.85)}${W(178,400,44,56,.85)}${W(246,400,44,56,.85)}<rect x="70" y="490" width="260" height="8" fill="#e8dfd0"/><rect x="82" y="498" width="10" height="64" fill="#e8dfd0"/><rect x="308" y="498" width="10" height="64" fill="#e8dfd0"/>${W(110,510,44,36,.8)}${W(246,510,44,36,.8)}<rect x="180" y="506" width="40" height="56" fill="#3a2b22"/><rect x="166" y="560" width="68" height="8" fill="#cfc4b2"/>`,
  townhouse:()=>[[40,'#8a5a44'],[145,'#d9d2c5'],[250,'#46505e']].map(([x,c],u)=>`<rect x="${x-4}" y="292" width="113" height="10" fill="#1d1b20"/><rect x="${x}" y="300" width="105" height="262" fill="${c}"/>`+[325,395,465].map((y,r)=>[18,60].map((dx,k)=>((u+r+k)%3===0?`<rect x="${x+dx}" y="${y}" width="28" height="40" fill="#1d1b22"/>`:W(x+dx,y,28,40,.88))).join('')).join('')+`<rect x="${x+38}" y="510" width="28" height="52" fill="#1c1a1f"/>`).join(''),
- ranch:()=>`<circle cx="360" cy="440" r="46" fill="#4f6b3a"/><polygon points="20,470 80,415 320,415 380,470" fill="#3a3330"/><rect x="34" y="470" width="332" height="92" fill="#c9b79b"/>${W(60,490,60,40,.55)}${W(150,490,60,40,.55)}<rect x="250" y="488" width="100" height="74" fill="#8e7d66"/><rect x="250" y="505" width="100" height="2" fill="#7a6a55"/><rect x="250" y="525" width="100" height="2" fill="#7a6a55"/><rect x="250" y="545" width="100" height="2" fill="#7a6a55"/><rect x="0" y="618" width="400" height="22" fill="#d8cdb8"/><polygon points="70,640 330,640 372,740 28,740" fill="#2fa6c9"/><polygon points="96,652 304,652 322,694 78,694" fill="#7fdcef" opacity=".45"/>`,
+ modern:()=>`<circle cx="40" cy="430" r="60" fill="#22301f"/><circle cx="370" cy="440" r="54" fill="#22301f"/><rect x="40" y="380" width="320" height="10" fill="#1b1a1e"/><rect x="48" y="390" width="304" height="172" fill="#1f1e22"/>${[0,1,2,3].map(k=>W(56+k*74,398,68,72,.8)+W(56+k*74,480,68,74,.88)).join('')}${[0,1,2,3,4].map(k=>`<rect x="${52+k*74}" y="390" width="4" height="172" fill="#1b1a1e"/>`).join('')}<rect x="48" y="474" width="304" height="6" fill="#1b1a1e"/><rect x="20" y="560" width="360" height="8" fill="#141217"/>`,
  unless:()=>`<rect x="20" y="420" width="8" height="140" fill="#1d1712"/><circle cx="40" cy="400" r="70" fill="#27321f"/><circle cx="10" cy="330" r="50" fill="#2d3a24"/><rect x="70" y="360" width="260" height="202" fill="#e6e0d6"/><rect x="62" y="352" width="276" height="10" fill="#b9b1a4"/>${W(92,385,90,60)}${W(220,385,86,60)}${W(92,470,60,70)}<rect x="200" y="470" width="44" height="92" fill="#6b4b35"/>${W(262,470,44,70,.7)}<circle cx="380" cy="430" r="58" fill="#27321f"/>`
 };
+const grime=l=>l.rough?`<rect width="400" height="800" fill="#3a2b1c" opacity=".32"/><polyline points="60,120 90,190 80,260 120,330" fill="none" stroke="#2a2016" stroke-width="3" opacity=".6"/><polyline points="330,560 300,610 318,680" fill="none" stroke="#2a2016" stroke-width="3" opacity=".6"/>`:'';
 function exterior(l,id,dim){
  let s=`<rect width="400" height="800" fill="url(#s${id})"/><circle cx="${l.orb[0]}" cy="${l.orb[1]}" r="${l.orb[2]}" fill="${l.orbC}" opacity=".92"/>`;
- s+=`<path d="M0 520 Q100 470 200 505 T400 490 V800 H0Z" fill="${l.hill}"/><rect x="0" y="560" width="400" height="240" fill="${l.ground}"/><ellipse cx="200" cy="480" rx="230" ry="150" fill="url(#h${id})"/>`;
+ s+=`<path d="M0 520 Q100 470 200 505 T400 490 V800 H0Z" fill="${l.hill}"/><rect x="0" y="560" width="400" height="240" fill="${l.ground}"/>${l.rough?'':`<ellipse cx="200" cy="480" rx="230" ry="150" fill="url(#h${id})"/>`}`;
  s+=HOUSES[l.style]();
  if(dim)s+=`<rect width="400" height="800" fill="#0b0a10" opacity=".38"/>`;
  return wrap(skyDefs(l,id),s);
@@ -460,18 +551,21 @@ function exterior(l,id,dim){
 function backyard(l,id){
  let s=`<rect width="400" height="800" fill="url(#s${id})"/><circle cx="${l.orb[0]}" cy="${l.orb[1]}" r="${l.orb[2]}" fill="${l.orbC}" opacity=".9"/>`;
  s+=pine(60,520,200,'#1b261d')+pine(340,520,240,'#1b261d')+`<rect x="0" y="500" width="400" height="300" fill="${l.ground}"/>`;
- for(let x=-6;x<400;x+=22)s+=`<rect x="${x}" y="440" width="16" height="96" fill="#6e5a46"/><polygon points="${x},440 ${x+8},430 ${x+16},440" fill="#6e5a46"/>`;
- s+=`<rect x="0" y="466" width="400" height="6" fill="#5a4938"/><path d="M0 300 Q200 400 400 300" stroke="#1b1a1e" stroke-width="2" fill="none"/>`;
- for(let k=1;k<12;k++){const t=k/12,x=400*t,y=(1-t)*(1-t)*300+2*(1-t)*t*400+t*t*300;s+=`<circle cx="${x}" cy="${y+6}" r="22" fill="url(#h${id})"/><circle cx="${x}" cy="${y+6}" r="5" fill="${GLOW}"/>`}
- s+=`<rect x="120" y="610" width="160" height="12" fill="#3a2e24"/><rect x="130" y="622" width="8" height="60" fill="#3a2e24"/><rect x="262" y="622" width="8" height="60" fill="#3a2e24"/><rect x="70" y="600" width="40" height="80" rx="6" fill="#2b2420"/><rect x="290" y="600" width="40" height="80" rx="6" fill="#2b2420"/>`;
- return wrap(skyDefs(l,id),s);
+ for(let x=-6;x<400;x+=22)s+=`<rect x="${x}" y="440" width="16" height="96" fill="#6e5a46"${l.rough&&x%3===0?` transform="rotate(${x%7-3} ${x+8} 536)"`:''}/><polygon points="${x},440 ${x+8},430 ${x+16},440" fill="#6e5a46"/>`;
+ s+=`<rect x="0" y="466" width="400" height="6" fill="#5a4938"/>`;
+ if(!l.rough){s+=`<path d="M0 300 Q200 400 400 300" stroke="#1b1a1e" stroke-width="2" fill="none"/>`;
+  for(let k=1;k<12;k++){const t=k/12,x=400*t,y=(1-t)*(1-t)*300+2*(1-t)*t*400+t*t*300;s+=`<circle cx="${x}" cy="${y+6}" r="22" fill="url(#h${id})"/><circle cx="${x}" cy="${y+6}" r="5" fill="${GLOW}"/>`}
+  s+=`<rect x="120" y="610" width="160" height="12" fill="#3a2e24"/><rect x="130" y="622" width="8" height="60" fill="#3a2e24"/><rect x="262" y="622" width="8" height="60" fill="#3a2e24"/><rect x="70" y="600" width="40" height="80" rx="6" fill="#2b2420"/><rect x="290" y="600" width="40" height="80" rx="6" fill="#2b2420"/>`}
+ else s+=Array.from({length:30},(_,k)=>`<polygon points="${k*14-4},800 ${k*14+3},${560+((k*53)%90)} ${k*14+10},800" fill="#4b5e36"/>`).join('');
+ return wrap(skyDefs(l,id),s+grime(l));
 }
 function interior(l,room,id){
  const defs=skyDefs(l,id)+`<linearGradient id="w${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${l.wall[0]}"/><stop offset="1" stop-color="${l.wall[1]}"/></linearGradient>`;
- let s=`<rect width="400" height="800" fill="url(#w${id})"/><rect x="220" y="230" width="150" height="230" fill="url(#s${id})"/><rect x="292" y="230" width="6" height="230" fill="${l.trim}"/><rect x="214" y="224" width="162" height="242" fill="none" stroke="${l.trim}" stroke-width="10"/>`;
+ let s=`<rect width="400" height="800" fill="url(#w${id})"/><rect x="220" y="230" width="150" height="230" fill="${l.rough?'#a58254':`url(#s${id})`}"/><rect x="292" y="230" width="6" height="230" fill="${l.trim}"/><rect x="214" y="224" width="162" height="242" fill="none" stroke="${l.trim}" stroke-width="10"/>`;
  s+=`<rect x="0" y="600" width="400" height="200" fill="${l.floor}"/>`;
  for(let x=-240;x<=640;x+=60)s+=`<line x1="${200+(x-200)*.35}" y1="600" x2="${x}" y2="800" stroke="#000" stroke-opacity=".13" stroke-width="2"/>`;
  s+=`<rect x="0" y="596" width="400" height="6" fill="#000" opacity=".18"/>`;
+ if(l.rough){s+=`<rect x="40" y="520" width="90" height="80" fill="#5a4a3a"/><rect x="250" y="560" width="70" height="40" fill="#4a3d30"/>`;return wrap(defs,s+grime(l))}
  if(room==='Kitchen'){
   s+=`<rect x="20" y="250" width="180" height="110" fill="${l.trim}" opacity=".9"/><rect x="20" y="420" width="180" height="180" fill="${l.trim}" opacity=".75"/><rect x="20" y="412" width="180" height="10" fill="#efe9df"/>`;
   [120,200,280].forEach(cx=>{s+=`<line x1="${cx}" y1="0" x2="${cx}" y2="360" stroke="#222" stroke-width="2"/><circle cx="${cx}" cy="395" r="70" fill="url(#h${id})"/><polygon points="${cx-16},360 ${cx+16},360 ${cx+22},386 ${cx-22},386" fill="#2a2622"/><ellipse cx="${cx}" cy="388" rx="18" ry="5" fill="${GLOW}"/>`});
@@ -508,7 +602,9 @@ const NI={
  live:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M7 7a7 7 0 0 0 0 10M17 7a7 7 0 0 1 0 10"/></svg>',
  chat:'<svg viewBox="0 0 24 24"><path d="M4 5h16v11H10l-5 4V5z"/></svg>',
  spark:'<svg viewBox="0 0 24 24"><path d="M12 3v5M12 16v5M3 12h5M16 12h5M6 6l3 3M15 15l3 3M18 6l-3 3M9 15l-3 3"/></svg>',
- flame:'<svg viewBox="0 0 24 24"><path d="M12 21c4 0 7-2.8 7-6.8 0-3.2-2-5.7-4-7.7-.3 2-1.3 3.2-2.6 3.8.3-3-1.2-5.8-3.9-7.3.2 3.2-1.5 5-3 6.8C4.5 11.2 5 12.6 5 14.2 5 18.2 8 21 12 21z"/></svg>'
+ flame:'<svg viewBox="0 0 24 24"><path d="M12 21c4 0 7-2.8 7-6.8 0-3.2-2-5.7-4-7.7-.3 2-1.3 3.2-2.6 3.8.3-3-1.2-5.8-3.9-7.3.2 3.2-1.5 5-3 6.8C4.5 11.2 5 12.6 5 14.2 5 18.2 8 21 12 21z"/></svg>',
+ offer:'<svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5"/></svg>',
+ bank:'<svg viewBox="0 0 24 24"><path d="M3 10l9-6 9 6M5 10v8M10 10v8M14 10v8M19 10v8M3 20h18"/></svg>'
 };
 
 /* ---------- feed ---------- */
@@ -518,8 +614,7 @@ function agentRow(l){
  return `<div class="agent"><button class="who" data-act="profile"><span class="av">${a.i}</span><span><b>@${l.agent}</b>${l.collab?` <em>with @${l.collab}</em>`:''}<small>${esc(a.b)}</small></span></button><button class="follow" data-act="follow">Follow</button></div>`;
 }
 function cardHTML(l){
- const chips=l.chips.map(c=>`<span class="chip ${c.k||''}">${c.t}</span>`).join('')+(l.live?'':`<span class="chip live"><i></i>${l.watching} watching</span>`);
- const ctaA=l.offmarket?'Send interest':l.fsbo?'Message owner':'Request tour';
+ const chips=`<span class="chip budget" hidden></span>`+l.chips.map(c=>`<span class="chip ${c.k||''}">${c.t}</span>`).join('')+(l.live?'':`<span class="chip live"><i></i>${l.watching} watching</span>`);
  const tap=`<div class="tapinfo" data-act="details" role="button" tabindex="0" aria-label="Details for ${esc(l.addr)}">
     ${l.offmarket?'<div class="kicker">Make me move</div>':''}
     <div class="price-row"><span class="price"></span><span class="was"${l.was?'':' hidden'}>${l.was?money(l.was):''}</span><span class="mo"></span></div>
@@ -527,8 +622,8 @@ function cardHTML(l){
     <div class="facts">${l.beds} bd · ${l.baths} ba · ${l.sqft.toLocaleString('en-US')} sqft</div>
     <div class="addr">${esc(l.addr)} · ${esc(l.hood)}<u>Details</u></div></div>`;
  const guess=`<div class="guess" hidden>
-    <div class="g-top"><label for="gr${l.id}">Guess the price</label><output id="go${l.id}">$600,000</output></div>
-    <input type="range" id="gr${l.id}" min="200000" max="2000000" step="5000" value="600000">
+    <div class="g-top"><label for="gr${l.id}">Guess the price</label><output id="go${l.id}">$300,000</output></div>
+    <input type="range" id="gr${l.id}" min="20000" max="1500000" step="5000" value="300000">
     <button class="cta primary" data-act="lock">Lock it in</button></div>`;
  const rail=`<div class="rail">
    <button class="act like" data-act="like" aria-label="Like">${I.heart}<span>${fmtK(l.likes)}</span></button>
@@ -537,22 +632,33 @@ function cardHTML(l){
    <button class="act" data-act="share" aria-label="Share">${I.share}<span>${fmtK(l.shares)}</span></button></div>`;
  const top=l.live?`<div class="segs" id="sg${l.id}" hidden></div><div class="liveflag"><b>LIVE</b><span id="lv${l.id}">${fmtK(l.watching)} watching</span><span class="room" style="position:static" id="rp${l.id}">${l.rooms[0]}</span></div>`
   :`<div class="segs" id="sg${l.id}">${l.rooms.map((_,k)=>`<i class="${k===0?'on':''}"><b></b></i>`).join('')}</div><div class="room" id="rp${l.id}">${l.rooms[0]}</div>`;
+ const ctas=l.offmarket?`<button class="cta primary" data-act="tour">Send interest</button><button class="cta" data-act="afford">Afford it?</button>`
+  :`<button class="cta" data-act="tour">${l.fsbo?'Message':'Tour'}</button><button class="cta" data-act="afford">Afford it?</button><button class="cta primary" data-act="offer">Make offer</button>`;
  const body=l.live
   ?`<div class="chat" id="chat${l.id}" aria-live="polite"></div><div class="chips">${chips}</div>${tap}${agentRow(l)}
     <form class="askrow" data-live="${l.id}"><input id="ask${l.id}" autocomplete="off" placeholder="Ask @${l.agent}…" aria-label="Ask the agent a question"><button type="submit">Ask</button></form>`
-  :`<div class="chips">${chips}</div>${guess}${tap}<p class="cap">${esc(l.cap)}</p>${agentRow(l)}
-    <div class="ctas"><button class="cta primary" data-act="tour">${ctaA}</button><button class="cta" data-act="afford">Can I afford it?</button></div>`;
+  :`<div class="chips">${chips}</div>${guess}${tap}<p class="cap">${esc(l.cap)}</p>${agentRow(l)}<div class="ctas">${ctas}</div>`;
  return `<article class="card${l.live?' live':''}" data-i="${l.id}" aria-label="${esc(l.addr)}, ${esc(l.hood)}">
   <div class="media" id="m${l.id}">${scene(l,0)}</div><div class="shade"></div>${top}
   ${l.quote?`<div class="quote" id="q${l.id}" hidden>“${esc(l.quote)}”<span>From the sellers</span></div>`:''}
   ${rail}<div class="info">${body}</div>
   <div class="burst" aria-hidden="true">${I.heart}</div></article>`;
 }
-feed.innerHTML=L.map(cardHTML).join('');
-const card=i=>feed.children[i];
+function promoHTML(){
+ return `<article class="card promo" data-promo="1" aria-label="Find your buying power" id="promo">${promoInner()}</article>`;
+}
+function promoInner(){
+ if(S.bp)return `<div class="eyebrow">Your buying power</div><h2>Up to ${money(S.bp.max)}</h2><p>The feed now marks which homes fit. ${S.preapproved?`You’re pre-approved with ${esc(S.lender.n)}.`:'Next step: compare local lenders and get pre-approved so your offers count.'}</p>
+  <button class="btn" data-open="${S.preapproved?'letter':'lenders'}">${S.preapproved?'See my pre-approval':'Compare lenders'}</button>`;
+ return `<div class="eyebrow">Quick check</div><h2>What can you actually afford?</h2><p>Four questions. No credit check. Your feed starts showing what fits.</p>
+  <ul><li>Your real monthly payment on every home</li><li>Local lenders side by side, ranked by APR</li><li>Pre-approved before you fall for one</li></ul>
+  <button class="btn" data-open="bp">Find my buying power</button>`;
+}
+feed.innerHTML=L.map((l,k)=>cardHTML(l)+(k===PROMO_AFTER-1?promoHTML():'')).join('');
+const card=i=>feed.querySelector(`.card[data-i="${i}"]`);
 
 function renderPrice(i){
- const l=L[i],c=card(i),hidden=!l.live&&S.guess&&!(i in S.guesses),g=S.guesses[i],m=pay(l.price).total;
+ const l=L[i],c=card(i),hidden=!l.live&&S.guess&&!(i in S.guesses),g=S.guesses[i],m=pay(l.price,l.tax).total;
  const pe=$('.price',c),me=$('.mo',c);
  if(hidden){pe.textContent='$???,???'}
  else if(S.monthly){pe.textContent=money(m)+'/mo';me.textContent=money(l.price)}
@@ -561,8 +667,10 @@ function renderPrice(i){
  const gp=$('.guess',c); if(gp)gp.hidden=!hidden;
  const r=$('.g-result',c);
  if(S.guess&&g){r.hidden=false;r.innerHTML=`You guessed ${money(g.g)} · <b>${Math.round(g.acc*100)}% close</b> · +${g.pts} pts`}else r.hidden=true;
+ const b=$('.chip.budget',c),f=fit(l);
+ if(f&&!hidden){b.hidden=false;b.className='chip budget '+f[0];b.textContent=f[1]}else b.hidden=true;
 }
-const renderAllPrices=()=>L.forEach((_,i)=>renderPrice(i));
+const renderAllPrices=()=>{L.forEach((_,i)=>renderPrice(i));$('#promo').innerHTML=promoInner()};
 renderAllPrices();
 
 /* rooms play like clips; live cards run a chat */
@@ -585,17 +693,19 @@ function play(i){
  watchT=setTimeout(()=>S.watched.add(L[i].key),3000);
  if(L[i].live)startLive(i);
 }
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const i=+e.target.dataset.i;if(i!==S.active&&S.view==='feed')play(i)}}),{root:feed,threshold:.6});
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting||S.view!=='feed')return;
+ if(e.target.dataset.promo){stopPlayback();$$('.card.active').forEach(c=>c.classList.remove('active'));S.active=-2;return}
+ const i=+e.target.dataset.i;if(i!==S.active)play(i)}),{root:feed,threshold:.6});
 $$('.card',feed).forEach(c=>io.observe(c));
 
-const LIVEPOOL=[['kels_atx','that tile is unreal'],['porchperson','is the backyard fenced?'],['mattycodes','how old is the roof'],['nora.p','what are taxes like?'],['firsthomefund','coming saturday!'],['tx.trailmix','is there a garage?'],['zilker.dad','show the primary closet pls'],['jordan.builds','windows look new'],['slowweekends','I can see myself on that porch']];
-const LIVEANS=[[/garage/i,'Two-car detached, wired for an EV charger.'],[/hoa/i,'No HOA on this one.'],[/tax/i,'About $13K a year at current rates. A homestead exemption brings it down.'],[/roof/i,'Roof is from 2021 with a transferable warranty.'],[/school/i,'District maps are linked on the listing details. Happy to send them.'],[/offer/i,'Offers are reviewed Monday at 5. Ask me anything before then.'],[/fence/i,'Fully fenced, with a dog door in the mudroom.'],[/closet/i,'Heading there now.'],[/price|negotia/i,'Seller is open to offers. Message me after the tour.']];
+const LIVEPOOL=[['kels.det','that kitchen tile is unreal'],['porchperson','is the backyard fenced?'],['mattycodes','how old is the roof'],['nora.p','what are taxes like?'],['firsthomefund','coming saturday!'],['mi.trailmix','is there a garage?'],['nine.mile.ned','show the basement pls'],['jordan.builds','windows look new'],['slowweekends','close to 9 Mile?']];
+const LIVEANS=[[/garage/i,'Two-car detached, wired for an EV charger.'],[/hoa/i,'No HOA on this one.'],[/tax/i,'About $6,900 a year right now. Michigan’s principal residence exemption brings it down.'],[/roof/i,'Roof is from 2021 with a transferable warranty.'],[/school/i,'District maps are linked on the listing details. Happy to send them.'],[/offer/i,'Offers are reviewed Monday at 5. Have your agent send them through.'],[/fence/i,'Fully fenced, with a dog door in the mudroom.'],[/basement/i,'Heading down now. It’s dry and has a new sump pump.'],[/price|negotia/i,'Seller is open to offers. Talk to your agent after the tour.'],[/afford|loan|mortgage|rate/i,'Tap “Afford it?” to compare lenders right here.']];
 let lp=0;
 function chatLine(i,who,txt,cls){const el=$('#chat'+i);if(!el)return;const p=document.createElement('p');if(cls)p.className=cls;p.innerHTML=`<b>@${esc(who)}</b>${esc(txt)}`;el.appendChild(p);while(el.children.length>6)el.firstChild.remove()}
 function floatHeart(i){if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;const c=card(i),h=document.createElement('div');h.className='fh';h.style.setProperty('--dx',(Math.random()*-50-5).toFixed(0)+'px');h.innerHTML=I.heart;c.appendChild(h);setTimeout(()=>h.remove(),1900)}
 function startLive(i){
  const l=L[i];
- if(!$('#chat'+i).children.length){chatLine(i,l.agent,'Welcome in! Starting out front, then the kitchen.','host');chatLine(i,'kels_atx','that tile is unreal')}
+ if(!$('#chat'+i).children.length){chatLine(i,l.agent,'Welcome in! Starting out front, then the kitchen.','host');chatLine(i,'kels.det','that kitchen tile is unreal')}
  liveT=setInterval(()=>{const[m,t]=LIVEPOOL[lp++%LIVEPOOL.length];chatLine(i,m,t);if(/\?$/.test(t)&&Math.random()<.5){const a=LIVEANS.find(([r])=>r.test(t));if(a)setTimeout(()=>chatLine(i,l.agent,a[1],'host'),1200)}
   l.watching+=Math.round(Math.random()*12-4);$('#lv'+i).textContent=fmtK(l.watching)+' watching'},1900);
  heartT=setInterval(()=>floatHeart(i),900);
@@ -604,16 +714,17 @@ function startLive(i){
 /* ---------- shared UI ---------- */
 const layer=$('#layer');
 let toastT;
-function toast(msg){clearTimeout(toastT);layer.querySelector('.toast')?.remove();const t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.textContent=msg;layer.appendChild(t);toastT=setTimeout(()=>t.remove(),2600)}
-function sheet(html){closeSheet();layer.insertAdjacentHTML('beforeend',`<div class="sheet-wrap" data-close><div class="sheet" role="dialog" aria-modal="true"><div class="handle"></div>${html}</div></div>`);const f=layer.querySelector('.sheet button, .sheet input');f&&f.focus({preventScroll:true})}
+function toast(msg){clearTimeout(toastT);layer.querySelector('.toast')?.remove();const t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.textContent=msg;layer.appendChild(t);toastT=setTimeout(()=>t.remove(),2800)}
+function sheet(html){closeSheet();layer.insertAdjacentHTML('beforeend',`<div class="sheet-wrap" data-close><div class="sheet" role="dialog" aria-modal="true"><div class="handle"></div>${html}</div></div>`);const tt=layer.querySelector('.toast');if(tt)layer.appendChild(tt);const f=layer.querySelector('.sheet button, .sheet input');f&&f.focus({preventScroll:true})}
 function closeSheet(){layer.querySelectorAll('.sheet-wrap,.match').forEach(n=>n.remove())}
 function gate(why,fn){
  if(S.signedIn)return fn();
  S.pending=fn;
- sheet(`<h3>${why}</h3><p class="sub">Browsing never needs an account. Saving, messaging and alerts do, so we can reach you.</p>
+ sheet(`<h3>${why}</h3><p class="sub">Browsing never needs an account. Saving, offers, messages and alerts do, so we can reach you.</p>
   <div class="rows"><button class="row" data-signup>Continue with Apple<span>Fastest</span></button><button class="row" data-signup>Continue with Google<span></span></button><button class="row" data-signup>Use my phone number<span>Text code</span></button></div>
   <p class="fine">Demo only. Nothing is sent anywhere.</p>`);
 }
+function notify(n){INBOX.unshift(Object.assign({unread:true},n));badges();if(S.view==='inbox')renderInbox()}
 
 function updateRail(i){
  const l=L[i],c=card(i),lk=$('[data-act=like]',c),sv=$('[data-act=save]',c),cm=$('[data-act=comments] span',c);
@@ -621,7 +732,7 @@ function updateRail(i){
  sv.classList.toggle('on',S.saved.has(i));$('span',sv).textContent=fmtK(l.saves+(S.saved.has(i)?1:0));
  if(cm)cm.textContent=fmtK(l.cc+C[l.key].length);
 }
-function syncFollow(h){$$('.card').forEach(c=>{const l=L[+c.dataset.i];if(l.agent===h){const b=$('.follow',c);b.classList.toggle('on',S.follow.has(h));b.textContent=S.follow.has(h)?'Following':'Follow'}})}
+function syncFollow(h){$$('.card[data-i]').forEach(c=>{const l=L[+c.dataset.i];if(l.agent===h){const b=$('.follow',c);b.classList.toggle('on',S.follow.has(h));b.textContent=S.follow.has(h)?'Following':'Follow'}})}
 function badges(){
  const b=$('#badge');b.hidden=!S.matches.length;b.textContent=S.matches.length;
  const n=INBOX.filter(x=>x.unread).length,ib=$('#ibadge');ib.hidden=!n;ib.textContent=n;
@@ -643,7 +754,7 @@ function showMatch(i){
 }
 function goCard(i){go('feed');requestAnimationFrame(()=>card(i).scrollIntoView({behavior:'smooth'}))}
 
-/* ---------- sheets ---------- */
+/* ---------- listing sheets ---------- */
 function commentsSheet(i,warn,draft){
  const l=L[i];
  const rows=C[l.key].map(([h,t,k])=>`<div class="cmt"><span class="av">${esc(h.slice(0,2).toUpperCase())}</span><div><b>@${esc(h)}</b>${k?`<span class="badge2 ${k==='seller'?'seller':''}">${k==='agent'?'Listing agent':'Seller'}</span>`:''}<div>${esc(t)}</div></div></div>`).join('');
@@ -660,25 +771,31 @@ function shareSheet(i){
   <button class="row" data-share="tiktok">Repost to TikTok<span>Adds the Dreamscrol watermark</span></button>
   <button class="row" data-share="reels">Repost to Reels<span>Adds the Dreamscrol watermark</span></button></div>`);
 }
+function rateLine(){return S.lender?`${S.lender.rate.toFixed(3)}% rate (${S.lender.apr.toFixed(3)}% APR) from ${esc(S.lender.n)}`:S.bp?`${(BASE_RATE+CREDIT[S.bp.credit]).toFixed(3)}% example rate for your credit range`:`${BASE_RATE.toFixed(2)}% example rate (${BASE_APR.toFixed(2)}% APR)`}
 function affordSheet(i){
- const l=L[i],p=pay(l.price);
- sheet(`<h3>Can I afford it?</h3><p class="sub">Estimate for ${esc(l.addr)} at ${(RATE*100).toFixed(1)}% fixed, 30 years, ${DOWN*100}% down.</p>
-  <div class="pay"><div><span>Price</span><span>${money(l.price)}</span></div><div><span>Down payment</span><span>${money(l.price*DOWN)}</span></div>
+ const l=L[i],p=pay(l.price,l.tax),f=fit(l);
+ const next=S.preapproved?(l.offmarket?'':`<button class="btn" data-offer="${i}">Make an offer</button>`)
+  :S.bp?`<button class="btn" data-open="lenders" data-for="${i}">Compare lenders for this home</button>`
+  :`<button class="btn" data-open="bp">Find my buying power</button><button class="btn ghost" data-open="lenders" data-for="${i}">Compare lenders</button>`;
+ sheet(`<h3>Can I afford it?</h3><p class="sub">${esc(l.addr)} · ${rateLine()}, 30-year fixed, ${money(p.down)} down.</p>
+  ${f?`<div class="${f[0]==='over'?'warn':'ok'}"><b>${f[1]}.</b> Your buying power is up to ${money(S.bp.max)}.</div>`:''}
+  <div class="pay"><div><span>Price</span><span>${money(l.price)}</span></div><div><span>Down payment</span><span>${money(p.down)}</span></div>
   <div><span>Principal and interest</span><span>${money(p.pi)}</span></div><div><span>Property tax (est.)</span><span>${money(p.tax)}</span></div>
-  <div><span>Home insurance (est.)</span><span>${money(p.ins)}</span></div>${l.hoa?`<div><span>HOA</span><span>${money(l.hoa)}</span></div>`:''}<div class="total"><span>Monthly</span><span>${money(p.total+(l.hoa||0))}</span></div></div>
-  <button class="btn" data-pre>Get pre-approved in 3 minutes</button>
-  <p class="fine">Estimate only, not a loan offer. Rates and taxes vary.</p>`);
+  <div><span>Home insurance (est.)</span><span>${money(p.ins)}</span></div>${l.hoa?`<div><span>HOA or co-op fee</span><span>${money(l.hoa)}</span></div>`:''}<div class="total"><span>Monthly</span><span>${money(p.total+(l.hoa||0))}</span></div></div>
+  ${l.rough?'<p class="muted">Renovation loans such as FHA 203(k) or Fannie Mae HomeStyle can roll repair costs into the mortgage. Ask lenders when you compare.</p>':''}
+  ${next}
+  <p class="fine">Estimate only, not a loan offer. Taxes are estimated from the local rate; actual taxes depend on assessment and exemptions.</p>`);
 }
 function detailsSheet(i){
- const l=L[i],p=pay(l.price),following=S.homeFollow.has(l.key);
- sheet(`<h3>${esc(l.addr)}</h3><p class="sub">${esc(l.hood)}, Austin area, TX</p>
+ const l=L[i],p=pay(l.price,l.tax),following=S.homeFollow.has(l.key);
+ sheet(`<h3>${esc(l.addr)}</h3><p class="sub">${esc(l.hood)}, ${esc(l.city)}, MI</p>
   <div class="bigprice"><b>${l.offmarket?'Would move for '+short(l.price):money(l.price)}</b><span>≈ ${money(p.total)}/mo</span></div>
   <div class="fgrid"><div><b>${l.beds}</b><span>Beds</span></div><div><b>${l.baths}</b><span>Baths</span></div><div><b>${l.sqft.toLocaleString('en-US')}</b><span>Sq ft</span></div><div><b>${l.year}</b><span>Built</span></div>
-   <div><b>${l.lot}</b><span>Lot</span></div><div><b>${l.hoa?money(l.hoa):'None'}</b><span>HOA/mo</span></div><div><b>${short(l.price*TAX)}</b><span>Tax/yr est.</span></div><div><b>${Math.round(l.price/l.sqft)}</b><span>$/sq ft</span></div></div>
+   <div><b>${l.lot}</b><span>Lot</span></div><div><b>${l.hoa?money(l.hoa):'None'}</b><span>HOA/mo</span></div><div><b>${short(l.price*l.tax)}</b><span>Tax/yr est.</span></div><div><b>${Math.round(l.price/l.sqft)}</b><span>$/sq ft</span></div></div>
   <h4>Jump to</h4><div class="jump">${l.rooms.map((r,k)=>`<button data-jump="${i}:${k}">${r}</button>`).join('')}</div>
   ${l.open?`<h4>Open house</h4><p class="muted">${esc(l.open)}</p>`:''}
-  <div class="btns2"><button class="btn${following?' ghost':''}" data-followhome="${i}">${following?'Following':'Follow this home'}</button><button class="btn ghost" data-tour="${i}">${l.offmarket?'Send interest':l.fsbo?'Message owner':'Request tour'}</button></div>
-  <p class="fine">Following a home tells you about price changes, open houses and what it sells for, when the agent or seller shares it. Details come from @${l.agent} and aren’t verified by Dreamscrol.</p>`);
+  <div class="btns2"><button class="btn${following?' ghost':''}" data-followhome="${i}">${following?'Following':'Follow this home'}</button><button class="btn ghost" data-afford="${i}">Can I afford it?</button></div>
+  <p class="fine">Following a home tells you about price changes, open houses and what it sells for. Details come from @${l.agent} and aren’t verified by Dreamscrol.</p>`);
 }
 function profileSheet(h){
  const a=AG[h],mine=L.filter(l=>l.agent===h),on=S.follow.has(h);
@@ -689,15 +806,124 @@ function profileSheet(h){
   <div class="stats three"><div class="stat"><b>${fmtK(a.followers+(on?1:0))}</b><span>Followers</span></div><div class="stat"><b>${mine.length+(a.sold||[]).length}</b><span>Homes</span></div><div class="stat"><b>${a.views?fmtK(a.views):'—'}</b><span>Views this week</span></div></div>
   <button class="btn${on?' ghost':''}" data-followagent="${h}">${on?'Following':'Follow'}</button>
   <div class="grid3">${tiles}</div>
-  ${a.owner?'':`<p class="fine">Broker: ${esc(a.b)} · TX license #0000000 (sample) · Information About Brokerage Services · Consumer Protection Notice</p>`}`);
+  ${a.owner?'':`<p class="fine">Broker: ${esc(a.b)} · MI license #0000000 (sample)</p>`}`);
 }
 function soldSheet(){
- const l=L[IX.avef];
- sheet(`<h3>${esc(l.addr)} sold</h3><p class="sub">Listed at ${money(l.price)}. What do you think it went for?</p>
-  ${S.revealed?`<div class="reveal"><b>$961,000</b><span>3.9% over asking · 6 days on market · 4 offers</span></div>
-   <p class="fine">Texas doesn’t make sale prices public. This one was shared by @jules.homes with the sellers’ OK.</p>`
+ sheet(`<h3>2245 Wabash St sold</h3><p class="sub">Corktown · listed at $420,000. What do you think it went for?</p>
+  ${S.revealed?`<div class="reveal"><b>$436,000</b><span>3.8% over asking · 9 days on market · 3 offers</span></div>
+   <p class="fine">Sale price from the public deed record.</p>`
   :`<div class="price-tags"><span>Under asking</span><span>At asking</span><span><b>Over asking?</b></span></div><button class="btn" data-reveal>Reveal the sale price</button>`}`);
 }
+
+/* ---------- mortgage: buying power, lenders, pre-approval ---------- */
+let lenderFor=null;
+function bpSheet(){
+ const b=S.bp||{income:95000,debts:450,down:30000,credit:'700–739',first:true};
+ sheet(`<h3>Your buying power</h3><p class="sub">An estimate from four answers. No credit check, nothing shared with lenders until you choose one.</p>
+  <form class="form" data-bp>
+   <div class="two"><label class="fld" for="bpInc">Household income / yr<input id="bpInc" inputmode="numeric" value="${money(b.income)}"></label>
+   <label class="fld" for="bpDebt">Monthly debt payments<input id="bpDebt" inputmode="numeric" value="${money(b.debts)}"></label></div>
+   <div class="two"><label class="fld" for="bpDown">Cash for down payment<input id="bpDown" inputmode="numeric" value="${money(b.down)}"></label>
+   <label class="fld" for="bpCredit">Credit score<select id="bpCredit">${Object.keys(CREDIT).map(k=>`<option${k===b.credit?' selected':''}>${k}</option>`).join('')}</select></label></div>
+   <label class="sw" for="bpFirst"><span>First-time buyer<small>Unlocks low-down-payment options when you compare lenders</small></span><input type="checkbox" id="bpFirst"${b.first?' checked':''}></label>
+   <div class="result" id="bpOut"></div>
+   <button class="btn" type="submit">Use this budget</button>
+  </form>
+  <p class="fine">Uses common lending limits (28% of income for housing, 43% for all debts) and an example rate. A lender’s pre-approval is what counts.</p>`);
+ calcBP();
+}
+const num=v=>+String(v).replace(/[^0-9.]/g,'')||0;
+function readBP(){return{income:num($('#bpInc').value),debts:num($('#bpDebt').value),down:num($('#bpDown').value),credit:$('#bpCredit').value,first:$('#bpFirst').checked}}
+function calcBP(){const b=readBP(),r=buyingPower(b);$('#bpOut').innerHTML=`<small>You could buy up to</small><b>${money(r.max)}</b><span>About ${money(r.cap)}/mo for housing at a ${r.rate.toFixed(3)}% example rate</span>`}
+
+function lendersSheet(i){
+ if(i!=null)lenderFor=i;
+ const l=lenderFor!=null?L[lenderFor]:null,price=l?l.price:(S.bp?S.bp.max:350000),tax=l?l.tax:.022;
+ const adj=S.bp?CREDIT[S.bp.credit]:0;
+ const rows=LENDERS.map(x=>{const rate=x.rate+adj,apr=x.apr+adj,p=pay(price,tax,{rate});return{...x,rate,apr,mo:p.total}});
+ const key={apr:(a,b)=>a.apr-b.apr,mo:(a,b)=>a.mo-b.mo,fees:(a,b)=>a.fees-b.fees,close:(a,b)=>a.close-b.close}[S.lenderSort];
+ const sp=rows.filter(x=>x.sponsored),ranked=rows.filter(x=>!x.sponsored).sort(key);
+ const card=x=>`<button class="lender" data-lender="${x.id}" aria-pressed="${S.lender&&S.lender.id===x.id}"><span class="lg">${x.i}</span><b>${esc(x.n)}</b><span class="mo2">${money(x.mo)}<small style="font-family:var(--body);font-size:11px;color:var(--muted)">/mo</small></span>
+   <span class="q"><span><strong>${x.rate.toFixed(3)}%</strong> rate</span><span><strong>${x.apr.toFixed(3)}%</strong> APR</span><span><strong>${x.pts}</strong> pts</span><span><strong>${money(x.fees)}</strong> fees</span><span>★ ${x.stars} (${fmtK(x.reviews)})</span><span>~${x.close} days to close</span></span></button>`;
+ sheet(`<h3>Compare lenders</h3><p class="sub">${l?esc(l.addr)+' · ':''}${money(price)} price, ${money(pay(price,tax).down)} down, 30-year fixed${S.bp?`, ${esc(S.bp.credit)} credit`:''}.</p>
+  <div class="pills" role="group" aria-label="Sort lenders">${[['apr','Lowest APR'],['mo','Lowest payment'],['fees','Lowest fees'],['close','Fastest close']].map(([k,t])=>`<button data-sort="${k}" aria-pressed="${S.lenderSort===k}">${t}</button>`).join('')}</div>
+  ${sp.length?`<span class="spons">Sponsored</span>${sp.map(card).join('')}`:''}
+  <span class="spons">Ranked by ${{apr:'lowest APR',mo:'lowest payment',fees:'lowest fees',close:'fastest close'}[S.lenderSort]} · lenders can’t pay to change this order</span>
+  <div class="rows">${ranked.map(card).join('')}</div>
+  <p class="fine">Example quotes for the demo, not offers. Real quotes come from each lender after you share your details with them. Ranking is the same for everyone with the same inputs.</p>`);
+}
+function lenderPick(id){
+ const x=LENDERS.find(z=>z.id===id),adj=S.bp?CREDIT[S.bp.credit]:0;
+ sheet(`<h3>Get pre-approved with ${esc(x.n)}</h3><p class="sub">Takes about 10 minutes. ${esc(x.n)} handles your application, not Dreamscrol.</p>
+  <div class="steps">
+   <div class="step${S.bp?' ok':''}"><span class="k">1</span><span>Your budget<small>${S.bp?'Up to '+money(S.bp.max):'Answer four questions first'}</small></span>${S.bp?'<span class="done">Done</span>':'<button data-open="bp">Start</button>'}</div>
+   <div class="step"><span class="k">2</span><span>Share your info with ${esc(x.n)}<small>Name, income, assets. Only this lender sees it.</small></span></div>
+   <div class="step"><span class="k">3</span><span>Credit check by the lender<small>A hard inquiry. Shopping several lenders within a few weeks usually counts as one.</small></span></div>
+   <div class="step"><span class="k">4</span><span>Pre-approval letter<small>Attach it to offers in one tap</small></span></div></div>
+  <div class="pay"><div><span>Quoted rate</span><span>${(x.rate+adj).toFixed(3)}% (${(x.apr+adj).toFixed(3)}% APR)</span></div><div><span>Points and lender fees</span><span>${x.pts} pts · ${money(x.fees)}</span></div></div>
+  <button class="btn" data-preapprove="${x.id}"${S.bp?'':' disabled'}>Continue with ${esc(x.n)}</button>
+  <p class="fine">Demo only. In the real app this hands off to the lender’s own secure application.</p>`);
+}
+function preapprove(id){
+ const x=LENDERS.find(z=>z.id===id),adj=CREDIT[S.bp.credit];
+ S.lender={...x,rate:x.rate+adj,apr:x.apr+adj};S.preapproved=true;
+ renderAllPrices();
+ notify({id:'pre',ic:'bank',t:`Pre-approved with ${x.n}`,s:`Up to ${money(S.bp.max)} at ${S.lender.rate.toFixed(3)}%. Your letter is ready to attach to offers.`,act:'letter'});
+ letterSheet(true);
+}
+function letterSheet(fresh){
+ sheet(`<h3>${fresh?'You’re pre-approved':'Your pre-approval'}</h3>
+  <div class="letter"><small>PRE-APPROVAL LETTER · SAMPLE</small><b>Up to ${money(S.bp.max)}</b><span>${esc(S.lender.n)} · 30-year fixed at ${S.lender.rate.toFixed(3)}% (${S.lender.apr.toFixed(3)}% APR)</span><span>Valid for 90 days. Subject to appraisal and final underwriting.</span></div>
+  <p class="muted">Every home in your feed now shows your real payment, and offers include this letter automatically.</p>
+  <div class="btns2"><button class="btn" data-close-go="feed">Back to homes</button><button class="btn ghost" data-open="lenders">Compare again</button></div>`);
+}
+
+/* ---------- offers go through the buyer's own agent ---------- */
+const BUYER_AGENTS=['kiana.sells.detroit','corktown.cass','marcus.tours','royaloak.ryan'];
+function linkAgentSheet(i){
+ const list=[...BUYER_AGENTS].sort(()=>Math.random()-.5);
+ sheet(`<h3>Link your agent to make offers</h3><p class="sub">Offers go to your own agent. They review it, fill in the purchase agreement and submit it. Dreamscrol never sends offers itself.</p>
+  <h4>Your agent is on Dreamscrol</h4>
+  <div class="rows">${list.map(h=>`<button class="arow" data-linkagent="${h}" data-for="${i}"><span class="av">${AG[h].i}</span><span>@${h}<small>${esc(AG[h].n)} · ${esc(AG[h].b)}</small></span><em>Link</em></button>`).join('')}</div>
+  <h4>Or invite them</h4>
+  <form class="compose" data-invite="${i}" style="position:static;padding:0"><input id="invIn" autocomplete="off" placeholder="Agent’s email or phone" aria-label="Agent's email or phone"><button type="submit">Invite</button></form>
+  <p class="fine">Shown in random order. Agents don’t pay to appear here. Don’t have an agent yet? Pick one you’ve met, or invite one you trust. Since August 2024, agents need a written buyer agreement with you before touring homes.</p>`);
+}
+function linkAgent(h,i){
+ S.agent=h;closeSheet();
+ notify({id:'agent',ic:'chat',t:`@${h} is now your agent`,s:'They’ll send a buyer agreement to sign if you don’t have one yet.',act:'none'});
+ toast(`@${h} linked as your agent`);
+ if(i!=null&&!isNaN(i))setTimeout(()=>offerSheet(i),250);
+}
+function offerSheet(i){
+ const l=L[i],down=S.bp?Math.min(S.bp.down,l.price):l.price*DOWN,dual=S.agent===l.agent;
+ sheet(`<h3>Offer on ${esc(l.addr)}</h3><p class="sub">Listed at ${money(l.price)}. Your agent @${S.agent} reviews this before anything is sent.</p>
+  ${dual?'<div class="warn"><b>Heads up:</b> your agent is also the listing agent. Michigan allows this only with written consent from both sides. Your agent will explain.</div>':''}
+  <form class="form" data-offerform="${i}">
+   <div class="two"><label class="fld" for="ofPrice">Offer price<input id="ofPrice" inputmode="numeric" value="${money(l.price)}"></label>
+   <label class="fld" for="ofEm">Earnest money<input id="ofEm" inputmode="numeric" value="${money(Math.max(1000,Math.round(l.price*.01/500)*500))}"></label></div>
+   <div class="two"><label class="fld" for="ofDown">Down payment<input id="ofDown" inputmode="numeric" value="${money(down)}"></label>
+   <label class="fld" for="ofClose">Close in<select id="ofClose"><option>21 days</option><option selected>30 days</option><option>45 days</option></select></label></div>
+   <label class="fld" for="ofFin">Financing<select id="ofFin">${S.preapproved?`<option>Conventional · ${esc(S.lender.n)}</option>`:''}<option>Conventional</option><option>FHA</option>${l.rough?'<option>FHA 203(k) renovation</option>':''}<option>Cash</option></select></label>
+   <div class="warn" id="ofOver"${S.bp&&l.price>S.bp.max?'':' hidden'}><b>Above your budget.</b> Your ${S.preapproved?'pre-approval':'buying power'} is up to ${S.bp?money(S.bp.max):''}. Sellers may ask how you’ll cover the difference.</div>
+   <label class="sw" for="ofInsp"><span>Inspection contingency<small>Lets you back out or renegotiate after inspection</small></span><input type="checkbox" id="ofInsp" checked></label>
+   <label class="sw" for="ofAppr"><span>Appraisal contingency<small>Protects you if the appraisal comes in low</small></span><input type="checkbox" id="ofAppr" checked></label>
+   ${S.couples?`<label class="sw" for="ofCo"><span>Add ${PARTNER} as co-buyer<small>${PARTNER} gets a copy to review</small></span><input type="checkbox" id="ofCo" checked></label>`:''}
+   ${S.preapproved?`<div class="ok"><b>Pre-approval attached.</b> ${esc(S.lender.n)}, up to ${money(S.bp.max)}.</div>`:`<div class="warn"><b>No pre-approval yet.</b> Sellers take offers more seriously with one. <button type="button" data-open="lenders" data-for="${i}" style="text-decoration:underline;font-weight:800">Compare lenders</button></div>`}
+   <div class="pay"><div class="total"><span>Your monthly at this price</span><span id="ofMo">${money(pay(l.price,l.tax,{down}).total+(l.hoa||0))}</span></div></div>
+   <button class="btn" type="submit">Send to @${S.agent} for review</button>
+  </form>
+  <p class="fine">This isn’t a binding offer. Your agent turns it into the official purchase agreement, and nothing is final until you sign that.</p>`);
+}
+function sendOffer(i){
+ const l=L[i],price=num($('#ofPrice').value)||l.price,fin=$('#ofFin').value;
+ S.offers.push({i,price,fin,status:'With your agent'});closeSheet();
+ notify({id:'of'+S.offers.length,ic:'offer',t:`@${S.agent} is reviewing your offer on ${l.addr}`,s:`${money(price)} · ${fin}. They’ll call before submitting.`,act:'goto',k:l.key});
+ toast(`Sent to @${S.agent}. They’ll call you before submitting.`);
+ setTimeout(()=>{const o=S.offers.find(x=>x.i===i&&x.status==='With your agent');if(!o)return;o.status='Submitted';notify({id:'sub'+i,ic:'offer',t:`Offer submitted on ${l.addr}`,s:`@${S.agent} sent it to @${l.agent}. Response expected by Monday 5pm.`,act:'goto',k:l.key})},8000);
+}
+
+/* ---------- posting ---------- */
 let postRole='agent';
 function postSheet(role){
  postRole=role||postRole;
@@ -710,28 +936,28 @@ function postSheet(role){
    <div>${sw('o1','Open on the best shot','AI picks the hook for the first 2 seconds')}${sw('o2','Captions and room labels','Auto-generated, editable')}
    ${sw('o3','Price and monthly payment overlay','Pulled from the listing')}${sw('o4','Licensed trending music','Cleared for TikTok and Reels')}
    ${sw('o5','Cross-post to TikTok and Reels','With the Dreamscrol watermark')}${sw('o6','Invite sellers to collab','They can add a “From the sellers” clip after you approve it',false)}
-   ${sw('o7','Show brokerage name','Required on every ad by Texas rules, at least half the size of your contact info',true,true)}
-   ${sw('o8','This listing is filed in Unlock MLS','Active, Coming Soon or Flex. A public post counts as marketing under Clear Cooperation',false)}</div>
-   <button class="btn" data-publish="agent" id="pubAgent" disabled style="opacity:.5">Publish</button>`;
+   ${sw('o7','Show brokerage name','Required on every ad by state rules',true,true)}
+   ${sw('o8','This listing is filed in the MLS','Realcomp or your local MLS. A public post counts as marketing under Clear Cooperation',false)}</div>
+   <button class="btn" data-publish="agent" id="pubAgent" disabled>Publish</button>`;
  }else if(postRole==='fsbo'){
   body=`<div class="steps">
-    <div class="step ok"><span class="k">1</span><span>Name matches county records<small>Travis Central Appraisal District</small></span><span class="done">Done</span></div>
+    <div class="step ok"><span class="k">1</span><span>Name matches county records<small>Wayne County Register of Deeds</small></span><span class="done">Done</span></div>
     <div class="step${S.idOk?' ok':''}"><span class="k">2</span><span>Confirm it’s you<small>Photo ID and a selfie</small></span>${S.idOk?'<span class="done">Done</span>':'<button data-verify>Verify</button>'}</div>
     <div class="step"><span class="k">3</span><span>Add clips<small>We cut the video for you</small></span></div></div>
-   <div class="clips">${clipsFor(L[IX.berkman])}</div>
+   <div class="clips">${clipsFor(L[IX.lafayette])}</div>
    <div class="price-tags"><span><b>Free</b> to post</span><span>No commission</span><span>Boosts coming soon</span></div>
    <div>${sw('f1','Let local agents offer help','You can say no. Turn this off any time.',true)}${sw('f2','Show “Verified owner” badge','Appears after step 2',true,true)}</div>
-   <button class="btn" data-publish="fsbo"${S.idOk?'':' disabled style="opacity:.5"'}>Publish</button>
-   <p class="fine">Dreamscrol never takes a cut of the sale and doesn’t negotiate for you.</p>`;
+   <button class="btn" data-publish="fsbo"${S.idOk?'':' disabled'}>Publish</button>
+   <p class="fine">Dreamscrol never takes a cut of the sale and doesn’t negotiate for you. Buyers’ offers come through their own agents.</p>`;
  }else{
-  body=`<label class="field" for="mmPrice">Your “make me move” price<input id="mmPrice" inputmode="numeric" value="$1,400,000"></label>
-   <div class="clips">${clipsFor(L[IX.kinney])}</div>
+  body=`<label class="fld" for="mmPrice">Your “make me move” price<input id="mmPrice" inputmode="numeric" value="$1,250,000"></label>
+   <div class="clips">${clipsFor(L[IX.lakepointe])}</div>
    <div>${sw('u1','Show exact address','Off shows the neighborhood only',false)}${sw('u2','Only show to likely buyers','People who saved similar homes nearby',true)}${sw('u3','Let agents contact me','Off means buyers only',false)}</div>
    <button class="btn" data-publish="unless">Post</button>
    <p class="fine">This isn’t a listing. If you decide to sell with an agent later, they’ll handle the MLS.</p>`;
  }
  sheet(`<h3>Post a home</h3><p class="sub">Drop raw phone clips. We cut the video in about 60 seconds.</p>
-  <div class="opts">${opt('agent','I’m an agent','Post your listing, keep your leads')}${opt('fsbo','I’m selling my own home','Verified owners, flat fee')}${opt('unless','Not selling… unless?','Name your price and see who bites')}</div>${body}`);
+  <div class="opts">${opt('agent','I’m an agent','Post your listing, keep your leads')}${opt('fsbo','I’m selling my own home','Verified owners, free to post')}${opt('unless','Not selling… unless?','Name your price and see who bites')}</div>${body}`);
 }
 
 /* ---------- views ---------- */
@@ -749,20 +975,20 @@ function go(v){
 function renderMatches(){
  const el=$('#vMatches');
  const head=`<div class="v-head"><h1>Matches</h1><p>Homes you and ${PARTNER} both liked.</p></div>`;
- if(!S.matches.length){el.innerHTML=head+`<div class="empty">No matches yet. Turn on <b>Couples</b> at the top of the feed, then like homes. When ${PARTNER} has liked the same one, it lands here. In this demo, ${PARTNER} has liked four of the seven.</div>`;return}
- el.innerHTML=head+`<div class="mlist">${S.matches.map(i=>{const l=L[i];return `<button class="mrow" data-goto="${i}"><span class="thumb">${scene(l,0)}</span><span><em>You + ${PARTNER}</em><b>${money(l.price)}</b><span>${esc(l.addr)} · ${esc(l.hood)}</span><span>${l.beds} bd · ${l.baths} ba · ≈ ${money(pay(l.price).total)}/mo</span></span></button>`}).join('')}</div>`;
+ if(!S.matches.length){el.innerHTML=head+`<div class="empty">No matches yet. Turn on <b>Couples</b> at the top of the feed, then like homes. When ${PARTNER} has liked the same one, it lands here. In this demo, ${PARTNER} has liked four of the eight.</div>`;return}
+ el.innerHTML=head+`<div class="mlist">${S.matches.map(i=>{const l=L[i];return `<button class="mrow" data-goto="${i}"><span class="thumb">${scene(l,0)}</span><span><em>You + ${PARTNER}</em><b>${money(l.price)}</b><span>${esc(l.addr)} · ${esc(l.hood)}</span><span>${l.beds} bd · ${l.baths} ba · ≈ ${money(pay(l.price,l.tax).total)}/mo</span></span></button>`}).join('')}</div>`;
 }
 function renderInbox(){
- $('#vInbox').innerHTML=`<div class="v-head"><h1>Inbox</h1><p>Homes you follow, ${PARTNER}’s likes, and replies.</p></div>
+ $('#vInbox').innerHTML=`<div class="v-head"><h1>Inbox</h1><p>Your offers, homes you follow, ${PARTNER}’s likes, and replies.</p></div>
   <div class="inbox">${INBOX.map(n=>`<button class="note" data-note="${n.id}"><span class="ic ${n.ic}">${NI[n.ic]}</span><span><b>${esc(n.t)}</b><span>${esc(n.s)}</span></span><i class="${n.unread?'':'read'}"></i></button>`).join('')}</div>`;
 }
 function taste(){
  const pool=[...new Set([...S.liked,...S.saved,...[...S.watched].map(k=>IX[k])])].map(i=>L[i]);
  if(!pool.length)return null;
- const STY={modern:'Modern',aframe:'Cabins',farmhouse:'Farmhouse',bungalow:'Craftsman',townhouse:'Townhomes',ranch:'Single-story',unless:'Big lots'};
+ const STY={tudor:'Historic',aframe:'Cabins',farmhouse:'Farmhouse',bungalow:'Victorian',townhouse:'Townhomes',modern:'Mid-century',fixer:'Fixers',unless:'Waterfront'};
  const count=f=>{const m={};pool.forEach(l=>{const k=f(l);m[k]=(m[k]||0)+(S.liked.has(l.id)?2:1)});return Object.entries(m).sort((a,b)=>b[1]-a[1])};
  const avg=pool.reduce((s,l)=>s+l.price,0)/pool.length;
- const band=avg<550000?'Under $550K':avg<800000?'$550K–$800K':avg<1100000?'$800K–$1.1M':'$1.1M+';
+ const band=avg<250000?'Under $250K':avg<400000?'$250K–$400K':avg<600000?'$400K–$600K':'$600K+';
  return [...count(l=>STY[l.style]).slice(0,2),...count(l=>l.hood).slice(0,2)].map(([k])=>k).concat(band);
 }
 function renderMe(){
@@ -771,17 +997,25 @@ function renderMe(){
  if(S.me==='buyer'){
   const t=taste(),gc=Object.keys(S.guesses).length,acc=gc?Math.round(Object.values(S.guesses).reduce((s,g)=>s+g.acc,0)/gc*100):0;
   const saved=[...S.saved].map(i=>L[i]);
-  el.innerHTML=`${seg}<div class="me-head"><span class="big">You</span><div><h1>${S.signedIn?'Your house hunt':'Guest'}</h1><p>${S.couples?`House hunting with ${PARTNER}`:'Browsing solo'} · Austin area</p></div></div>
+  const money_=S.bp?`<div class="big">Up to ${money(S.bp.max)}</div>
+    <div class="kv"><span>Lender</span><b>${S.preapproved?esc(S.lender.n)+' · pre-approved':'<button data-open="lenders" style="color:var(--porch);font-weight:800">Compare lenders</button>'}</b></div>
+    <div class="kv"><span>Rate</span><b>${rateLine()}</b></div>
+    <div class="kv"><span>Your agent</span><b>${S.agent?'@'+S.agent:'<button data-open="linkagent" style="color:var(--porch);font-weight:800">Link your agent</button>'}</b></div>
+    ${S.offers.length?S.offers.map(o=>`<div class="kv"><span>Offer · ${esc(L[o.i].addr)}</span><b>${money(o.price)} · ${o.status}</b></div>`).join(''):''}
+    <button class="btn ghost" data-open="bp">Update my budget</button>`
+   :`<p class="muted">Find out what you can afford. Four questions, no credit check. Then compare local lenders side by side.</p><button class="btn" data-open="bp">Find my buying power</button>`;
+  el.innerHTML=`${seg}<div class="me-head"><span class="big">You</span><div><h1>${S.signedIn?'Your house hunt':'Guest'}</h1><p>${S.couples?`House hunting with ${PARTNER}`:'Browsing solo'} · Metro Detroit</p></div></div>
+   <div class="panel"><h2>Buying power</h2>${money_}</div>
    <div class="stats three"><div class="stat"><b>${S.watched.size}</b><span>Homes watched</span></div><div class="stat"><b>${S.liked.size}</b><span>Liked</span></div><div class="stat"><b>${gc?acc+'%':'—'}</b><span>Guess accuracy</span></div></div>
    <div class="panel"><h2>Your taste</h2>${t?`<div class="taste">${t.map(x=>`<span>${esc(x)}</span>`).join('')}</div><p class="muted">Learned from what you watch, like and save. The feed leans this way.</p>`:'<p class="muted">Watch and like a few homes. Your taste shows up here and the feed starts leaning toward it.</p>'}</div>
    <div class="panel"><h2>Saved</h2>${saved.length?`<div class="grid3">${saved.map(l=>`<button class="tile" data-goto="${l.id}">${scene(l,0)}<span>${short(l.price)}</span></button>`).join('')}</div>`:'<p class="muted">Tap the bookmark on any home to save it. We’ll tell you when the price changes.</p>'}</div>
    <div class="panel"><h2>Settings</h2>
-    <label class="sw" for="setMonthly" style="border-top:0;padding-top:0"><span>Lead with monthly payment<small>Shows “$5,150/mo” big and the price small</small></span><input type="checkbox" id="setMonthly"${S.monthly?' checked':''}></label>
+    <label class="sw" for="setMonthly" style="border-top:0;padding-top:0"><span>Lead with monthly payment<small>Shows the payment big and the price small</small></span><input type="checkbox" id="setMonthly"${S.monthly?' checked':''}></label>
     <label class="sw" for="setCouples"><span>Couples mode<small>Match homes with ${PARTNER}</small></span><input type="checkbox" id="setCouples"${S.couples?' checked':''}></label></div>`;
  }else{
-  el.innerHTML=`${seg}<div class="me-head"><span class="big">MO</span><div><h1>@mariasellsatx</h1><p>Lone Oak Realty · viewing as an agent (demo)</p></div></div>
-   <div class="panel"><h2>Top creators in Austin this week</h2>
-    ${[['hillcountrykay',212000],['jules.homes',188000],['mariasellsatx',161000],['andre.tours',140000],['rr.realty.rob',97000]].map(([h,v],k)=>`<div class="lb${h==='mariasellsatx'?' me':''}"><span class="n">${k+1}</span><span class="av">${AG[h].i}</span><span>@${h}<small>${esc(AG[h].b)}</small></span><span class="v">${fmtK(v)}</span></div>`).join('')}</div>
+  el.innerHTML=`${seg}<div class="me-head"><span class="big">KB</span><div><h1>@kiana.sells.detroit</h1><p>Woodward Realty Group · viewing as an agent (demo)</p></div></div>
+   <div class="panel"><h2>Top creators in Metro Detroit this week</h2>
+    ${[['fixit.dee',256000],['corktown.cass',184000],['kiana.sells.detroit',171000],['marcus.tours',132000],['royaloak.ryan',104000]].map(([h,v],k)=>`<div class="lb${h==='kiana.sells.detroit'?' me':''}"><span class="n">${k+1}</span><span class="av">${AG[h].i}</span><span>@${h}<small>${esc(AG[h].b)}</small></span><span class="v">${fmtK(v)}</span></div>`).join('')}</div>
    ${reportHTML()}`;
  }
 }
@@ -793,12 +1027,13 @@ function reportHTML(){
  const labs=days.map((t,k)=>`<text class="sp-lab" x="${x(k)}" y="146" text-anchor="middle">${t}</text>`).join('');
  const spark=`<svg class="sp" viewBox="0 0 340 152" role="img" aria-label="Daily views over 7 days, rising from 3.1K to 9.2K">${grid}<polygon class="sp-area" points="${x(0)},124 ${pts} ${x(6)},124"/><polyline class="sp-line" points="${pts}"/><circle class="sp-dot" cx="${x(6)}" cy="${y(9200)}" r="4.5"/>${labs}</svg>`;
  const bar=(t,p)=>`<div class="bar"><span>${t}</span><span>${p}%</span><i><b style="width:${p}%"></b></i></div>`;
- return `<div class="v-head"><h1 style="font-size:24px">Seller report<span class="tag">Sample data</span></h1><p>1407 Haskell St · live 7 days. Bring this to your next listing pitch.</p></div>
+ return `<div class="v-head"><h1 style="font-size:24px">Seller report<span class="tag">Sample data</span></h1><p>1840 Chicago Blvd · live 7 days. Bring this to your next listing pitch.</p></div>
   <div class="stats"><div class="stat"><b>48.2K</b><span>Views</span></div><div class="stat"><b>1,206</b><span>Saves</span></div><div class="stat"><b>37</b><span>Tour requests</span></div><div class="stat"><b>2,914</b><span>Shares</span></div></div>
+  <div class="panel"><h2>Ready-to-buy signal</h2><p class="callout"><b>14 pre-approved buyers</b> saved this home, and <b>2 offers</b> are being prepared by buyers’ agents.</p><p class="muted">Counts only. Buyers’ details stay private until their agent submits an offer.</p></div>
   <div class="panel"><h2>Views per day</h2>${spark}</div>
-  <div class="panel"><p class="callout">This home got <b>3.4× more views</b> than the median East Austin listing this week.</p></div>
+  <div class="panel"><p class="callout">This home got <b>3.4× more views</b> than the median Detroit listing this week.</p></div>
   <div class="panel"><h2>Where viewers came from</h2>${bar('For You feed',71)}${bar('Shared by the sellers',18)}${bar('TikTok and Reels reposts',11)}</div>
-  <div class="panel"><h2>Buyers keep asking</h2><div class="ask">Is the garage EV-ready?<span>12 asked</span></div><div class="ask">Is there an HOA?<span>9 asked</span></div><div class="ask">Which schools is it zoned for?<span>7 asked</span></div></div>
+  <div class="panel"><h2>Buyers keep asking</h2><div class="ask">What does it cost to heat in winter?<span>15 asked</span></div><div class="ask">Is the boiler original?<span>9 asked</span></div><div class="ask">Which schools is it zoned for?<span>7 asked</span></div></div>
   <div class="panel"><h2>Leads</h2><p class="callout">All <b>37 tour requests</b> and <b>64 messages</b> went to you. None were sold to other agents.</p></div>
   <button class="btn" data-send-report>Send report to the sellers</button>`;
 }
@@ -816,10 +1051,18 @@ function act(a,i){
   case 'profile':profileSheet(l.agent);break;
   case 'follow':gate('Follow @'+l.agent,()=>{const h=l.agent;S.follow.has(h)?S.follow.delete(h):S.follow.add(h);syncFollow(h)});break;
   case 'tour':gate(l.offmarket?'Message the homeowners':l.fsbo?'Message the owners':'Request a tour',()=>toast(l.offmarket?'Interest sent to the homeowners (demo)':l.fsbo?'Message sent to the owners (demo)':`Tour request sent to @${l.agent} (demo)`));break;
+  case 'offer':gate('Make an offer',()=>S.agent?offerSheet(i):linkAgentSheet(i));break;
   case 'lock':{const p=l.price,g=+$('#gr'+i).value,acc=Math.max(0,1-Math.abs(g-p)/p),pts=Math.round(acc*100);
    S.guesses[i]={g,acc,pts};S.score+=pts;renderPrice(i);header();
    toast(acc>.95?`Nailed it. +${pts} pts`:acc>.85?`Close. +${pts} pts`:`Off by ${money(Math.abs(g-p))}. +${pts} pts`);break}
  }
+}
+function openThing(k,forI){
+ if(k==='post')postSheet();
+ else if(k==='bp')bpSheet();
+ else if(k==='lenders')lendersSheet(forI);
+ else if(k==='letter')letterSheet(false);
+ else if(k==='linkagent')gate('Link your agent',()=>linkAgentSheet(null));
 }
 $('#app').addEventListener('click',e=>{
  const t=e.target,d=(k)=>t.closest(`[data-${k}]`);
@@ -832,29 +1075,42 @@ $('#app').addEventListener('click',e=>{
    const done=()=>{closeSheet();toast('Link copied')},fail=()=>{const r=document.createRange();r.selectNodeContents($('span',el));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Link selected. Copy it to share.')};
    try{navigator.clipboard.writeText(url).then(done,fail)}catch(_){fail()}return}
   closeSheet();toast(k==='partner'?`Sent to ${PARTNER}`:'Reposted with watermark (demo)');return}
- if(d('pre')){closeSheet();toast('Pre-approval would start here (demo)');return}
+ if(el=d('open')){const f=el.dataset.for;openThing(el.dataset.open,f!=null?+f:undefined);return}
+ if(el=d('sort')){S.lenderSort=el.dataset.sort;lendersSheet();return}
+ if(el=d('lender')){lenderPick(el.dataset.lender);return}
+ if(el=d('preapprove')){preapprove(el.dataset.preapprove);return}
+ if(el=d('close-go')){closeSheet();go(el.dataset.closeGo);return}
+ if(el=d('offer')){closeSheet();act('offer',+el.dataset.offer);return}
+ if(el=d('afford')){affordSheet(+el.dataset.afford);return}
+ if(el=d('linkagent')){linkAgent(el.dataset.linkagent,el.dataset.for===''?null:+el.dataset.for);return}
  if(el=d('role')){postSheet(el.dataset.role);return}
  if(d('verify')){S.idOk=true;postSheet('fsbo');toast('ID verified (demo)');return}
  if(el=d('publish')){const k=el.dataset.publish;closeSheet();toast(k==='agent'?'Published. Nearby buyers see it first (demo)':k==='fsbo'?'Posted with a Verified owner badge (demo)':'Posted. Only likely buyers will see it (demo)');return}
- if(d('open')){postSheet();return}
  if(el=d('view')){go(el.dataset.view);return}
  if(el=d('goto')){closeSheet();goCard(+el.dataset.goto);return}
  if(el=d('jump')){const[i,k]=el.dataset.jump.split(':').map(Number);closeSheet();if(S.active!==i)goCard(i);else{play(i);setRoom(i,k);}return}
  if(el=d('followhome')){const l=L[+el.dataset.followhome];gate('Follow this home',()=>{S.homeFollow.has(l.key)?S.homeFollow.delete(l.key):S.homeFollow.add(l.key);detailsSheet(l.id);if(S.homeFollow.has(l.key))toast('You’ll hear about price changes and the sale.')});return}
- if(el=d('tour')){closeSheet();act('tour',+el.dataset.tour);return}
  if(el=d('followagent')){const h=el.dataset.followagent;gate('Follow @'+h,()=>{S.follow.has(h)?S.follow.delete(h):S.follow.add(h);syncFollow(h);profileSheet(h)});return}
  if(d('reveal')){S.revealed=true;soldSheet();return}
  if(el=d('note')){const n=INBOX.find(x=>x.id===el.dataset.note);n.unread=false;badges();
-  if(n.act==='sold')soldSheet();else if(n.act==='guess'){if(!S.guess){S.guess=true;renderAllPrices();header()}go('feed')}else goCard(IX[n.k]);return}
+  if(n.act==='sold')soldSheet();else if(n.act==='letter')letterSheet(false);else if(n.act==='guess'){if(!S.guess){S.guess=true;renderAllPrices();header()}go('feed')}else if(n.act==='goto')goCard(IX[n.k]);else renderInbox();return}
  if(el=d('me')){S.me=el.dataset.me;renderMe();return}
  if(d('send-report')){toast('Report sent to the sellers (demo)');return}
  if(el=d('act')){const c=el.closest('.card');if(c)act(el.dataset.act,+c.dataset.i)}
 });
 $('#app').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('[role=button][data-act]')){const c=e.target.closest('.card');act(e.target.dataset.act,+c.dataset.i)}});
 $('#app').addEventListener('change',e=>{
- if(e.target.id==='setMonthly'){S.monthly=e.target.checked;renderAllPrices()}
- if(e.target.id==='setCouples'){setCouples(e.target.checked)}
- if(e.target.id==='o8'){const b=$('#pubAgent');b.disabled=!e.target.checked;b.style.opacity=e.target.checked?'':'.5'}
+ const id=e.target.id;
+ if(id==='setMonthly'){S.monthly=e.target.checked;renderAllPrices()}
+ if(id==='setCouples'){setCouples(e.target.checked)}
+ if(id==='o8'){$('#pubAgent').disabled=!e.target.checked}
+ if(id==='bpCredit'||id==='bpFirst')calcBP();
+});
+$('#app').addEventListener('input',e=>{
+ const id=e.target.id;
+ if(e.target.type==='range'){const i=id.slice(2);$('#go'+i).textContent=money(+e.target.value)}
+ if(/^bp(Inc|Debt|Down)$/.test(id))calcBP();
+ if(id==='ofPrice'||id==='ofDown'){const f=e.target.closest('form'),l=L[+f.dataset.offerform],p=num($('#ofPrice').value),dn=num($('#ofDown').value);if(p){$('#ofMo').textContent=money(pay(p,l.tax,{down:dn}).total+(l.hoa||0));$('#ofOver').hidden=!(S.bp&&p>S.bp.max)}}
 });
 $('#app').addEventListener('submit',e=>{
  e.preventDefault();const f=e.target;
@@ -863,14 +1119,18 @@ $('#app').addEventListener('submit',e=>{
   gate('Join the conversation',()=>{C[L[i].key].push(['you',v]);updateRail(i);commentsSheet(i)});return}
  if(f.dataset.live!=null){const i=+f.dataset.live,inp=$('#ask'+i),v=inp.value.trim();if(!v)return;
   if(fhFlag(v)){toast('Can’t post that. Fair housing rules don’t allow comments about who should live somewhere.');return}
-  gate('Ask the agent',()=>{inp.value='';chatLine(i,'you',v,'you');const a=LIVEANS.find(([r])=>r.test(v));setTimeout(()=>chatLine(i,L[i].agent,a?a[1]:'Good question. Let me show you in a sec.','host'),1300)})}
+  gate('Ask the agent',()=>{inp.value='';chatLine(i,'you',v,'you');const a=LIVEANS.find(([r])=>r.test(v));setTimeout(()=>chatLine(i,L[i].agent,a?a[1]:'Good question. Let me show you in a sec.','host'),1300)});return}
+ if(f.dataset.bp!=null){const b=readBP(),r=buyingPower(b);S.bp={...b,max:r.max,cap:r.cap,rate:r.rate};if(S.lender&&!S.preapproved)S.lender=null;closeSheet();renderAllPrices();
+  toast(`Budget set: up to ${money(r.max)}. Homes now show if they fit.`);if(S.view==='me')renderMe();return}
+ if(f.dataset.offerform!=null){sendOffer(+f.dataset.offerform);return}
+ if(f.dataset.invite!=null){const v=$('#invIn').value.trim();if(!v){toast('Add your agent’s email or phone first.');return}
+  closeSheet();toast('Invite sent (demo). You can make offers once they join.');return}
 });
-feed.addEventListener('input',e=>{if(e.target.type==='range'){const i=e.target.id.slice(2);$('#go'+i).textContent=money(+e.target.value)}});
 
 let lastTap=0,lastCard=null;
 feed.addEventListener('pointerup',e=>{
- if(e.target.closest('button,input,label,output,form,.guess,[data-act]'))return;
- const c=e.target.closest('.card');if(!c)return;
+ if(e.target.closest('button,input,label,output,form,select,.guess,[data-act]'))return;
+ const c=e.target.closest('.card[data-i]');if(!c)return;
  const now=Date.now();
  if(now-lastTap<320&&lastCard===c){like(+c.dataset.i,true);burst(c);lastTap=0}else{lastTap=now;lastCard=c}
 });
@@ -890,8 +1150,8 @@ $('#tCouples').addEventListener('click',()=>setCouples(!S.couples));
 
 document.addEventListener('keydown',e=>{
  if(e.key==='Escape'){closeSheet();return}
- if(S.view!=='feed'||layer.querySelector('.sheet-wrap,.match')||/INPUT/.test(document.activeElement.tagName))return;
- if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const n=Math.max(0,Math.min(L.length-1,S.active+(e.key==='ArrowDown'?1:-1)));card(n).scrollIntoView({behavior:'smooth'})}
+ if(S.view!=='feed'||layer.querySelector('.sheet-wrap,.match')||/INPUT|SELECT/.test(document.activeElement.tagName))return;
+ if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const cards=$$('.card',feed),cur=cards.findIndex(c=>c.classList.contains('active'));const at=cur<0?cards.indexOf($('#promo')):cur;const n=cards[Math.max(0,Math.min(cards.length-1,at+(e.key==='ArrowDown'?1:-1)))];n.scrollIntoView({behavior:'smooth'})}
 });
 
 badges();
