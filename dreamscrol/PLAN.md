@@ -1,177 +1,231 @@
 # Dreamscrol plan
 
-A full-screen vertical feed of homes, one per swipe. Video first, price on top, likes, comments and shares. Agents post their own listings, owners can co-post or sell on their own, and casual viewers get a reason to keep scrolling.
+A full-screen vertical feed of homes, one per swipe. Video first, price on top, likes, comments and shares. People come because it's fun to watch. Dreamscrol makes its money on what happens next: finding out what you can afford, comparing lenders, getting pre-approved, and sending an offer through your own agent.
 
-Research date: October 18, 2026. The facts below come from web research that read search-result summaries of trade press, regulators and court coverage, not the primary documents. Anything legal here needs a Texas real estate attorney before launch. Full notes with sources are summarized in section 10.
+Launch city: **Metro Detroit.**
+
+Research date: October 18, 2026. The facts below come from two rounds of web research that read search-result summaries of statutes, regulators, MLS pages, filings and trade press, not the primary documents. Nothing here is legal advice. Section 9 lists what to ask Michigan counsel. The earlier Austin version of this plan is in git history.
 
 ---
 
 ## 1. The bet
 
-Most people scrolling homes aren't buying. They watch for fun. Zillow Gone Wild has about 2.3 million Instagram followers and became an HGTV show. Build for the people watching for fun, and give agents a reason to put their listings in front of them.
+Most people scrolling homes aren't buying yet. They watch for fun: Zillow Gone Wild has about 2.3 million Instagram followers and an HGTV show. Dreamscrol turns that attention into buyers by asking one question at the right moment: **what can you actually afford?**
 
-**What the numbers say about who actually buys** (NAR 2025 and 2026 reports):
-- 4.06 million existing homes sold in 2025, the lowest since 1995.
-- First-time buyers were 21% of buyers, a record low, and their median age is 40. The median buyer overall is 59.
-- Gen Z and Millennials together are about 30% of buyers.
+The funnel:
 
-So the people who will love a TikTok-style feed are mostly not this year's buyers. That's fine for attention and for agents' marketing, but expect a gap between views and closed deals. Agents will judge Dreamscrol on leads and on how it helps them win listings, not on likes.
+1. **Watch.** Swipe through homes, like, save, play Guess the price, match with your partner.
+2. **Budget.** Four questions, no credit check, and every home is marked "in your budget," "a stretch" or "over budget."
+3. **Lenders.** Every participating local lender side by side, ranked by APR or whatever the buyer picks. The buyer applies with the lender they choose.
+4. **Agent.** Link your agent, or get connected to one. The listing agent is offered first.
+5. **Offer.** Build the terms, attach a pre-approval from any lender, and send it to your agent. Your agent writes and submits the real offer.
 
-**Why Austin works as city #1:** the market is slow. Unlock MLS reported 6.5 months of inventory and 91 days on market in February 2026, the longest since 2011. Agents with homes sitting on the market want marketing that works.
+**Who actually buys** (NAR 2025 and 2026 reports):
+- 4.06 million existing homes sold in 2025.
+- First-time buyers were 21% of buyers, and their median age is 40. The median buyer overall is 59.
 
-## 2. What's already out there
+Expect a gap between views and closings. The money comes from the small share of viewers who move down the funnel.
 
-The format isn't new. Being first won't protect Dreamscrol. How well it's executed and how dense it gets in one city will.
+## 2. Why Detroit
+
+- **You're here.** You can recruit agents face to face, film sample content and show up at open houses.
+- **Detroit homes already go viral.** $1,000 Land Bank homes, $38K brick fixers, Boston-Edison mansions. The Detroit Land Bank Authority runs daily auctions and "Own It Now" sales starting at $1,000.
+- **It's affordable**, so first-time buyers and the "can I afford it?" question are front and center:
+  - City of Detroit median sale price is about $100K (Redfin, October 2026; Realcomp put it at $105.5K in June).
+  - Metro median was $300K in August 2026 (Realcomp) and $331K in September (RE/MAX), with about 27–34 days on market.
+- **Sale prices are public in Michigan.** "Follow a home and see what it sold for" works for every home.
+- **Taxes are a real affordability issue.** Detroit's effective homestead property tax rate is about 3% of market value, the highest of any large US city (Lincoln Institute). Taxes reset when a home sells, so buyers often see a jump. Showing the true monthly cost is a genuine service here.
+- **One MLS covers most of the metro:** Realcomp, owned by seven local Realtor associations.
+
+**The catch: Rocket is headquartered downtown.** It owns Redfin and Mr. Cooper, and offers Redfin buyers rate buydowns or credits when they use a Redfin or partner agent and Rocket financing. It's recruiting Detroit agents. UWM, the largest wholesale lender, is in Pontiac. Dreamscrol is launching on a vertically integrated competitor's home turf. The answer is to be the neutral option: every lender, every agent, the buyer's choice.
+
+**Where to start:** a few neighborhoods, not the whole metro. For example, Corktown, Midtown/Woodbridge, Boston-Edison and Lafayette Park in the city, plus Ferndale or Royal Oak as a suburban test.
+
+## 3. What's already out there
 
 | Who | What | Takeaway |
 |---|---|---|
-| realestate.com.au (Australia's #1 portal) | Since July 2026, a personalized swipe feed of listing walkthrough videos on the app home screen | Proof the format works, and proof an incumbent can bolt it on fast |
-| Klipster (New York) | Nearly the same idea: short listing clips, AI walkthroughs, agent messaging. Launched October 2025 | No traction numbers published. An Inman review in January 2026 was skeptical. No owner or FSBO layer |
-| Scroll Home (London) | Video-first listing app, $2.6M seed | Same model in the UK |
-| Zillow | Video inside premium Showcase listings; Zillow Preview for pre-market listings | No vertical feed yet, but could ship one |
-| Realtor.com | Paid "Spotlight" placement | Already sells what Dreamscrol calls boosts |
-| TikTok, Instagram | Where agents post video today | Only about 16% of Realtors use TikTok for work (NAR 2026). Most agents don't make video |
-| Zillow "Make Me Move" | Owners posting a dream price on unlisted homes, about 15 years | Zillow dropped it. Treat "Not for sale… unless?" as an engagement feature, not a source of homes |
+| realestate.com.au (Australia's #1 portal) | Personalized swipe feed of listing walkthrough videos since July 2026 | The format works, and incumbents can add it |
+| Klipster (New York) | Nearly the same idea, launched October 2025 | No traction numbers published; no mortgage or owner layer |
+| Scroll Home (London) | Video-first listing app, $2.6M seed | Same model, UK |
+| Rocket + Redfin | Search, agents and mortgage bundled with discounts | The integrated competitor, based in Detroit |
+| Zillow | Zillow Home Loans grew purchase volume 95% year over year in Q2 2026; agents get "contact agent" leads | Same funnel idea, but buyers go to paying agents and an in-house lender, which is what regulators are now questioning |
+| LendingTree | Lender comparison, licensed as a mortgage broker including in Michigan | The licensing model for a lender marketplace |
+| TikTok, Instagram | Where agents post video today | Only about 16% of Realtors use TikTok for work |
 
-**What Dreamscrol has that the others don't:**
-- Game mechanics that make browsing social: Guess the price, Couples matching, following a home to see what it sells for.
-- Owners in the story: "From the sellers" clips on agent listings, plus verified FSBO posts.
-- A hard promise to listing agents: every lead on your listing goes to you.
-- The seller report, which agents use to win their next listing.
+**What makes Dreamscrol different:**
+- It's fun first: Guess the price, Couples matching, live open houses, sold-price reveals, owners' stories.
+- It's neutral where others steer. Every lender is ranked the same way and none can pay to move up. Buyers can use any lender's pre-approval. Listing agents keep their leads, and introductions to buyer's agents are free.
+- It shows the real monthly cost with taxes reset for a new owner, which matters most in Detroit.
 
-**Biggest supply problem:** most agents don't shoot video. Dreamscrol has to make posting nearly effortless. That means an AI edit from raw phone clips, plus a video generated from the agent's listing photos when there's no footage. Photo-to-video tools such as Reel Estate could be suppliers.
+## 4. What Dreamscrol does and doesn't do
 
-## 3. Why agents would post
+The licensing lines shape the product. This is the design:
 
-1. **Their listing, their leads.** On Zillow, "Contact agent" and "Request a tour" usually go to Premier Agent advertisers, not the listing agent. On Dreamscrol every message and tour request goes to the listing agent, enforced in the database.
-2. **The seller report.** Views, saves, shares, tour requests and the questions buyers keep asking. Agents bring it to listing pitches. Once sellers ask "will my home be on Dreamscrol?", agents have to show up.
-3. **Guaranteed first audience.** Every new listing is shown to likely local buyers in its first 48 hours, even if the agent has no followers.
-4. **Posting takes about a minute.** Raw clips go in; a cut with a hook, captions, room labels and music comes out. One tap reposts to TikTok and Reels with a Dreamscrol watermark.
-5. **Status.** Follower counts, city leaderboards and creator badges.
-6. **Fear of missing out.** View counts are public, so agents can see when the listing down the street got 50,000 views.
+| Step | Dreamscrol does | Dreamscrol doesn't |
+|---|---|---|
+| Budget | Estimates buying power from the buyer's own answers | Pull credit or take a loan application |
+| Lenders | Shows every participating lender, sorted by APR, payment, fees or speed (the buyer picks). Shows APR next to every rate. Charges each lender the same flat listing fee | Rank by who pays, label a "top pick," sell better placement, or put paid placements inside the comparison |
+| Pre-approval | Hands the buyer to the chosen lender's own application. Stores the letter the buyer gets back | Say "get pre-approved by Dreamscrol" (that would need a Michigan mortgage broker license) |
+| Agent | Lets buyers link their agent or request a free intro. Offers the listing agent first, with a note on representing both sides | Charge agents per lead, per tour or per closing (Michigan bars agents from paying unlicensed referrers) |
+| Offer | Captures the buyer's terms as a term sheet and sends it to the buyer's own agent, ideally straight into the agent's forms system | Send offers to sellers or listing agents, suggest offer prices, or write the purchase agreement |
+| Listings | Shows agent and owner posts with the required broker disclosures | Let agents post listings that aren't filed in the MLS |
 
-## 4. The rules that shape the product
+## 5. Why agents post
 
-### Listing agents must keep their MLS obligations
-- NAR's Clear Cooperation Policy is still in force. A listing that's publicly marketed has to be in the MLS within one business day. NAR's definition of public marketing includes apps open to the general public, so a Dreamscrol post counts. Austin's Unlock MLS is Realtor-owned, so this applies.
-- Since 2025 sellers can choose a "delayed marketing" option: the listing is filed in the MLS but held back from other websites for a while. NAR's FAQ suggests the listing firm can still market it. Unlock MLS has a "Flex" status along these lines. **Confirm the exact Unlock rules.**
-- Enforcement is uneven, and Compass says it won't follow the policy. Dreamscrol shouldn't build on agents breaking it.
-- **Product decision:** agents confirm the listing is filed in the MLS (Active, Coming Soon or Flex) before posting. Position "see it first" as "filed, not yet everywhere," never "off-MLS."
-- Homeowners with no listing agreement, including FSBO and "Not for sale… unless?", are outside this policy.
+1. **Their listing, their leads.** Tour requests and messages go to the listing agent. When a buyer asks for an agent, the listing agent is offered first.
+2. **The ready-to-buy signal.** The seller report shows how many **pre-approved** buyers saved the home, and how many offers buyers' agents are preparing. No other channel tells a listing agent that.
+3. **Free buyer introductions.** Agents get matched with buyers who already know their budget and have a lender lined up.
+4. **The seller report** for listing pitches: views, saves, shares, tour requests, top questions.
+5. **Guaranteed first audience** for every new listing, and posting that takes about a minute with an AI edit.
+6. **Status:** follower counts and city leaderboards.
 
-### Zillow's listing ban mostly doesn't apply, but pre-market is now a fight
-- In March 2026 Zillow rewrote its rules after winning the first round against Compass. It no longer bans listings first marketed on a public app. It still bans listings that are hidden behind a login or that require buyers to use a specific brokerage. **Dreamscrol listings must be viewable without an account**, including on a public web share page.
-- Zillow Preview launched in March 2026 with 60+ brokerages, including Keller Williams, RE/MAX and HomeServices. Partners agree to show their coming-soon listings only on Zillow and their own sites, and Realtor.com joined in May. Compass runs its own "See It First" hub and puts its coming-soon listings on Redfin.
-- **So:** many agents may not be allowed by their brokerage to post coming-soon listings on Dreamscrol. Compete on active listings and on engagement, not on pre-market exclusives. Ask each brokerage about its policy when recruiting agents.
+Supply is still the hardest part, because most agents don't make video. Plan for AI editing from raw phone clips and photo-to-video as a fallback.
 
-### Brokerage name on every post
-- Texas (TREC Rule 535.155): every ad shows the agent's name and the broker's name. The broker's name must be at least half the size of the largest contact information. On social media it can sit on the profile or on a page one tap away.
-- Texas also requires links to the Information About Brokerage Services form and the Consumer Protection Notice on an agent's business site, and TREC says a business social profile can count.
-- **Product decision:** broker name and license number are required profile fields, drawn at a compliant size, with the two Texas links on every agent profile. Expanding to other states needs a per-state rules table.
+## 6. Michigan rules that shape the product
 
-### Fair housing
-- Platforms are generally protected for what users write (Craigslist, 7th Cir. 2008). They lose that protection for what they build into the product: forms, prompts or filters that ask about protected traits (Roommates.com, 9th Cir. 2008).
-- A 2024 appeals ruling (Anderson v. TikTok, 3d Cir.) treated TikTok's recommendation algorithm as TikTok's own speech, outside Section 230. Other circuits disagree, but a feed that amplifies discriminatory content could carry risk.
-- FSBO owners exempt from most of the Fair Housing Act are still bound by its ban on discriminatory ads.
-- Meta's 2022 settlement with the Justice Department ended targeting of housing ads by protected traits.
-- **Product decisions:**
-  - Filter comments, captions, AI-written text and live chat.
-  - No demographic data, and no neighborhood labels or school ratings that act as stand-ins.
-  - Rank homes on the home itself and on the viewer's own behavior.
-  - Boosts target only by location and interest in similar homes.
-  - Check whether boosted homes reach some groups of people much more than others.
+### Listing posts and the MLS
+- Realcomp requires a listing to be filed in the MLS within one business day of public marketing, and its definition includes "applications available to the general public." A Dreamscrol post counts.
+- Realcomp's Coming Soon status allows no showings, including by the listing agent, and must go active within 5 business days.
+- Realcomp adopted NAR's 2025 "delayed marketing" option; the delay length wasn't found. Treat delayed-marketing and office-exclusive listings as not postable until Realcomp confirms.
+- **Product:** agents confirm the listing is Active or Coming Soon in the MLS (with its MLS number) before posting. No tour booking on Coming Soon.
+- FSBO and "Not for sale… unless?" posts by owners are outside this rule.
+- No Michigan law on private listings was found.
 
-### Charging owners
-- A percentage of the sale or a fee paid at closing needs a broker license. That part is clear.
-- Flat fees aren't clearly safe in Texas. The state's definition of "broker" includes charging an advance fee to promote a property in a publication used mainly for listing real estate. TREC sent a cease-and-desist to Owners.com, a flat-fee FSBO site, in 2012. A 2004 California ruling went the other way on First Amendment grounds, but it doesn't bind Texas.
-- **Product decision:** FSBO posting starts free in Texas until a Texas attorney signs off on a fee. The other options are to become a licensed brokerage or partner with one.
+### Agent ads (MCL 339.2512e)
+- Every ad must show the broker's name, the broker's phone number or street address, and a statement that the advertiser is a real estate broker.
+- When an agent or team is named, the broker's name must be in **equal or larger type**.
+- There's no special social media rule; the statute covers any ad.
+- **Product:** broker name, phone and "Real Estate Broker" render automatically on every agent post and profile, with the broker name at least as large as the agent's. The prototype does this.
 
-### Mortgage and lead money
-- RESPA Section 8 bans payments for mortgage referrals. Lenders can pay fair-market advertising fees not tied to closed loans.
-- The CFPB's 2023 advisory opinion says comparison tools that steer people to whoever pays most break the law. Show lenders neutrally, or label paid placements as sponsored.
-- On October 15, 2026, Senators Warren and Booker asked the FTC to look at private listings, "contact agent" lead routing and mortgage steering. Dreamscrol's "leads go to the listing agent" promise is on the right side of that. Selling buyer leads to other agents would be on the wrong side.
-- Taking referral fees from agents at closing needs a broker license in Texas.
+### Referral fees (MCL 339.2512)
+- Michigan agents can't pay unlicensed people for referrals, and Michigan Realtors says "there is no gray area."
+- Michigan Realtors has sued an unlicensed operator before (Remark Consultants, 2001) and won.
+- **Product:** agent intros are free. Agents pay only flat subscription or advertising fees. Per-lead, per-tour and per-closing fees would need a Michigan real estate broker license.
 
-### Sale prices in Texas
-Texas doesn't make sale prices public. "See what it sold for" only works when the agent or seller agrees to share. The prototype already shows this.
+### FSBO fees
+- Unlike Texas, Michigan's broker definition (MCL 339.2501) has no clause about advance fees for listing publications.
+- A flat fee for self-serve ad space looks permissible. Risk rises if Dreamscrol calls it a "listing," gives pricing opinions ("market analysis" is a broker activity), handles offers, or takes success fees.
+- **Product:** FSBO stays free at launch. A flat posting or boost fee is likely fine in Michigan after counsel signs off.
 
-## 5. How Dreamscrol makes money
+### Buyer agreements and representing both sides
+- Since August 17, 2024, MLS agents working with a buyer need a written buyer agreement before the first tour, including video tours. Realcomp restates this.
+- Michigan requires a written agency disclosure (MCL 339.2517), and one agent can represent both sides only with written consent.
+- **Product:** a linked agent confirms a buyer agreement exists before Dreamscrol books tours or routes offers. Intros to the listing agent carry a dual-agency note.
 
-The research changes this section the most. Selling buyer leads to other agents would break the core promise to listing agents and is under regulatory pressure. Revised order:
+### Sale prices and taxes
+- Michigan is a disclosure state. Property Transfer Affidavits are "not confidential," and Detroit publishes a property sales dataset. Filter out non-arm's-length sales.
+- Taxable value resets to State Equalized Value (about half of market value) after a sale.
+- **Product:** estimate taxes as a new owner would pay them, not from the seller's current bill.
 
-1. **Agent Pro subscription** (phase 2): unlimited AI edits, seller reports with comparisons, priority in the first-48-hours audience, live open houses. Free tier stays generous so agents keep posting.
-2. **Boosts:** paid extra reach for agents, FSBO sellers once cleared, builders. Location and interest targeting only.
-3. **Lender advertising:** a "Can I afford it?" flow with lenders shown neutrally or clearly labeled as sponsored, paid as flat or impression-based advertising.
-4. **Builders and new construction:** paid placement for new communities. Builders already buy ads and aren't bound by the MLS rules.
-5. **Later, a licensed brokerage arm:** Redfin's route. It makes referral fees and a full MLS listings feed possible, but it puts Dreamscrol in competition with the agents it relies on. Decide this only after city #1 works.
+### Mortgage marketplace
+- **Licensing:** Michigan's Mortgage Brokers, Lenders, and Servicers Licensing Act treats anyone who "serves or offers to serve as an agent for a person in an attempt to obtain a mortgage loan" as a mortgage broker. Taking or sending applications fits that. LendingTree holds a Michigan 1st Mortgage Broker license. Three paths:
+  1. **Neutral rate display plus a hand-off to each lender's own application.** Dreamscrol takes no application data. Lowest licensing exposure. **Start here.**
+  2. Get a Michigan 1st Mortgage Broker license through NMLS and take applications. Staff who take applications need individual loan originator licenses.
+  3. Partner with a licensed marketplace and embed it.
+- A pending bill, HB 6177 (July 2026), would replace Michigan's mortgage licensing laws. Track it.
+- **RESPA Section 8:** the CFPB's 2023 advisory opinion on comparison platforms appears to still be in effect.
+  - It's illegal to show lenders non-neutrally in a way that steers buyers while being paid partly for that.
+  - Disclosure doesn't cure it.
+  - Safe pattern: neutral ranking on buyer-chosen factors, all participating lenders shown, the same fee for every lender.
+  - The CFPB is barely functioning, but private class actions with triple damages (Taylor v. Zillow was refiled in August 2026), state attorneys general and the FTC are active.
+- **Steering:** the October 15, 2026 Warren/Booker letter asks the FTC to look at agents steering buyers to affiliated lenders. Dreamscrol accepts pre-approvals from any lender and never rewards agents for lender choice.
+- **Rate ads:** any rate shown must come with its APR, and monthly payment figures trigger extra disclosures (12 CFR 1026.24). This applies to non-lenders too.
+- **Credit pulls:** if Dreamscrol ever runs soft pulls, it needs separate, logged consent. A law restricting mortgage "trigger leads" took effect around March 2026.
+- **Data security:** GLBA privacy and the FTC Safeguards Rule likely apply.
 
-## 6. Launch plan
+### Fair housing and fair lending
+- Fair Housing Act, Michigan's Elliott-Larsen Civil Rights Act, and the Equal Credit Opportunity Act. ECOA's definition of "creditor" covers anyone who regularly refers applicants to lenders.
+- In Detroit, showing fewer lenders, worse rates or less mortgage marketing to city ZIP codes than to the suburbs would look like redlining.
+- **Product:**
+  - The same lender list and ranking for every ZIP code.
+  - Comment and caption filters.
+  - No demographic data or stand-ins in ranking or ads.
+  - Regular audits of who sees what.
 
-**Phase 0, validate (2–3 weeks)**
-- Show the prototype to 20 Austin agents across different brokerages. Ask what their brokerage allows and what they'd post.
-- Hand-edit vertical videos for 10 real listings with agent permission, and post them to TikTok and Instagram under a Dreamscrol account. Measure watch time and DMs.
-- Confirm Unlock MLS rules for Flex and delayed marketing.
-- Get a Texas attorney to answer the questions in section 8.
+### Zillow's listing rules
+Zillow's March 2026 rules no longer ban listings first marketed on a public app, but they refuse listings behind a login. Keep every listing viewable without an account.
 
-**Phase 1, MVP in one area (8–10 weeks):** East Austin plus a few nearby neighborhoods, not the whole metro. Agent posting with AI edit, leads to the listing agent, seller report, Guess, Couples, inbox. Details are in `MVP_SPEC.md`.
+## 7. How Dreamscrol makes money
 
-**Density goal before expanding:** 30% or more of new listings in the launch area posted on Dreamscrol, and 5,000 weekly viewers. Then add Austin neighborhoods one at a time before a second metro.
+1. **Lender listing fees.** Every participating lender pays the same flat monthly fee, or the same per-lead fee if counsel approves. No placement upsells. This is the biggest early revenue line, and it's why the funnel matters.
+2. **Agent Pro subscription:** unlimited AI edits, seller reports with comparisons, live open houses, priority in the first-48-hours audience. Flat monthly, never per lead.
+3. **Boosts** for agents, builders and (after counsel signs off) FSBO sellers. Location and interest targeting only, never protected traits.
+4. **Builders and new construction:** paid placement for new communities.
+5. **Later, licenses that unlock more:**
+   - A **Michigan mortgage broker license** lets Dreamscrol take applications and earn broker compensation.
+   - A **Michigan real estate broker license** makes referral fees legal.
+   - Both increase regulatory weight and conflicts. Decide after the first area works.
 
-**Phase 2:** FSBO (free or cleared pricing), seller clips, live open houses, boosts, Pro.
+**Not allowed without licenses:** per-lead or per-closing fees from agents, lender rankings that respond to payment, and requiring a Dreamscrol-marketplace pre-approval to make an offer.
 
-**Phase 3:** a second city such as Nashville or Phoenix. Decide the brokerage question.
+## 8. Launch plan
 
-## 7. Who might buy Dreamscrol
+**Phase 0, validate (3–4 weeks)**
+- Show the prototype to 20 Detroit-area agents across brokerages. Ask what they'd post and what their brokerage allows.
+- Show it to 5 local lenders and credit unions. Would they pay a flat fee to be listed next to everyone else?
+- Hand-edit vertical videos for 10 real listings with agent permission, plus a few Land Bank homes. Post them on TikTok and Instagram and measure watch time, DMs and "what would my payment be?" questions.
+- Ask Realcomp compliance about agent posts on third-party apps and the delayed-marketing window.
+- Meet with Michigan real estate and mortgage-licensing counsel (section 9).
 
-The likely buyers have consolidated since 2025:
-- **Rocket** owns Redfin (closed July 2025) and Mr. Cooper (closed October 2025), and has a three-year deal to show Compass coming-soon listings on Redfin.
-- **Compass** closed its purchase of Anywhere Real Estate in January 2026.
-- **Zillow and Realtor.com** cooperate on Zillow Preview.
-- **CoStar** is cutting Homes.com spending by more than $300 million in 2026.
+**Phase 1, MVP in one area (8–10 weeks):** feed, agent posting with automatic broker disclosures, budget tool, lender comparison with hand-off to lenders, agent link and intro, offer term sheets to agents, seller report with the ready-to-buy signal. See `MVP_SPEC.md`.
 
-What makes Dreamscrol worth buying:
-- A young audience that comes back daily.
-- Agents who create content.
-- Data on what buyers actually watch and save.
+**Density goal before expanding:** 30% or more of new listings in the launch area on Dreamscrol, 5,000 weekly viewers, 10+ participating lenders, and offers flowing through linked agents.
 
-All three are hard for a portal to copy quickly even if it ships a feed. Likely buyers: Zillow, Realtor.com, Rocket/Redfin, Compass, or a foreign portal entering the US. Plan for 3–5 years, and build a business that could stand on its own if no one buys.
+**Phase 2:** FSBO with flat fees once cleared, live open houses, Pro, boosts, more neighborhoods.
 
-## 8. Questions for a Texas real estate attorney
+**Phase 3:** a second Michigan market (Grand Rapids or Ann Arbor) before leaving the state, since the rules carry over. Decide the license questions.
 
-1. Can Dreamscrol charge FSBO sellers a flat fee to post or boost without a broker license, given Tex. Occ. Code § 1101.002 and the 2012 Owners.com order?
-2. Does a Dreamscrol post by a Realtor count as public marketing under Unlock MLS rules, and what statuses (Active, Coming Soon, Flex, delayed marketing) allow it?
-3. What exactly must appear on an agent's Dreamscrol profile and posts under TREC 535.155, 531.18 and 531.20?
-4. Can lenders pay for placement in the "Can I afford it?" flow, and on what terms, under RESPA and the CFPB's 2023 advisory opinion? Does Texas require a license for mortgage lead generation?
-5. Do AI-written captions and the recommendation feed change Dreamscrol's Section 230 position, given Anderson v. TikTok?
-6. Can owners post "Not for sale… unless?" homes with a price without that being treated as a listing?
-7. What terms of service and seller consent are needed for "From the sellers" clips and for sharing sale prices?
+## 9. Questions for Michigan counsel
 
-## 9. Biggest risks
+Real estate:
+1. Can Dreamscrol charge FSBO owners a flat fee to post or boost without a broker license under MCL 339.2501?
+2. Is a free agent-intro feature, paid for by a flat agent subscription, consistent with MCL 339.2512? Where's the line between a subscription and a referral fee?
+3. Does sending a buyer's term sheet only to the buyer's own agent stay outside "negotiating" under MCL 339.2501(u)?
+4. Exactly what must appear on agent video posts and profiles under MCL 339.2512e?
+5. Under Realcomp rules, can agents post Coming Soon or delayed-marketing listings on Dreamscrol?
+
+Mortgage:
+6. Does neutral rate display with a hand-off to each lender's own application require a Michigan mortgage broker license? What about per-lead fees from lenders? Ask DIFS for its position.
+7. What does a compliant lender fee look like under RESPA Section 8 and the CFPB's 2023 opinion: flat monthly, per lead, or per application?
+8. What Reg Z disclosures are needed next to the monthly payment shown on each home?
+9. What ECOA and fair housing monitoring should be in place for the feed and the lender list?
+
+Company:
+10. If a lender invests, what terms avoid an affiliated business arrangement or a disguised referral payment? No placement rights, no volume-linked terms.
+
+## 10. If you work at a mortgage lender
+
+- Read your employment agreement's invention-assignment, confidentiality, non-compete and moonlighting clauses. Michigan doesn't appear to have a law protecting inventions made on your own time, so the contract governs.
+- Get a written IP carve-out or employer acknowledgment before building further.
+- Build only on personal time and equipment.
+- Keep your employer neutral in the lender rankings, or off the platform, until you leave.
+- If you're a licensed loan originator, check NMLS sponsorship rules. Never take compensation from your employer tied to platform referrals.
+
+## 11. Biggest risks
 
 | Risk | What to do about it |
 |---|---|
-| Agents don't post, because making video is work | AI edit from raw clips, photo-to-video fallback, and recruit agents in person in one small area |
-| Brokerage rules block posts (Zillow Preview exclusivity, Clear Cooperation) | Focus on active listings, add an MLS check to posting, and ask each brokerage up front |
-| A portal ships the same feed (realestate.com.au already did) | Win one city's agents first, and lean on what portals won't do: leads to listing agents, seller co-posts, game mechanics |
-| Views without deals (young audience, median buyer 59) | Measure agents' outcomes (tour requests, listings won with the report), not just views |
-| Licensing for fees (Texas) | Free FSBO at first. Get a written legal opinion before charging |
-| Fair housing incident in comments or ranking | Filters at launch, ranking without protected traits, regular audits |
-| Video streaming costs | Short videos, efficient encoding, and watch caching (see `MVP_SPEC.md`) |
+| Agents don't post | AI edit, photo-to-video fallback, recruit in person in a small area, the ready-to-buy signal |
+| Rocket/Redfin bundle discounts | Be the neutral choice: every lender, any pre-approval, listing agents keep their leads |
+| Mortgage licensing | Start with hand-offs to lenders' own applications; get licensed later if the numbers justify it |
+| RESPA steering claims | Neutral ranking logged and auditable, same fee for every lender, no paid placement in the comparison |
+| Fair lending and fair housing in Detroit | Same lenders and rankings for every ZIP, content filters, regular audits |
+| Views without deals | Measure budget completions, lender hand-offs, agent links and offers, not just views |
+| A portal ships the same feed | Win one area's agents and lenders first |
 
-## 10. Research notes
+## 12. Research notes
 
-Verified items and where they come from:
-- Clear Cooperation kept and seller options added, Mar 25, 2025: nar.realtor; NAR guidance Jul 9, 2026.
-- Zillow rules rewritten Mar 17, 2026; Compass dropped its suit Mar 18–19: zillow.com/news, realestatenews.com.
-- Zillow v. MRED: injunction denied and sent to arbitration Sep 15, 2026: rismedia.com, housingwire.com.
-- Zillow Preview partners and exclusivity; Realtor.com joined May 5, 2026: Zillow press releases.
-- Craigslist (7th Cir. 2008), Roommates.com (9th Cir. 2008, en banc), Anderson v. TikTok (3d Cir. 2024), U.S. v. Meta (2022), 42 U.S.C. § 3603(b).
-- Tex. Occ. Code § 1101.002 advance-fee wording, read via mirrors, not the official site. Owners.com cease-and-desist: Inman, Feb 2012.
-- TREC Rule 535.155 and social media guidance: trec.texas.gov.
-- Rocket–Redfin, Rocket–Mr. Cooper, Compass–Anywhere close dates; CoStar Homes.com spending: company filings and trade press.
-- NAR 2025 Profile of Home Buyers and Sellers; NAR 2026 Member Profile and Generational Trends.
-- realestate.com.au feed, Klipster, Scroll Home: itbrief.com.au, HousingWire, Inman.
-- RESPA § 8 and CFPB 2023 advisory opinion on comparison platforms: consumerfinance.gov.
-- Warren and Booker letter to the FTC, Oct 15, 2026: realestatenews.com.
+Verified (from search summaries of primary or official sources):
+- Realcomp ownership, Clear Cooperation policy and Coming Soon rules: realcomp.moveinmichigan.com.
+- MCL 339.2512e (ad rules), 339.2512 (referral fees), 339.2501 (broker definition), 339.2517 (agency disclosure).
+- Michigan Association of Realtors v. Remark Consultants (2001).
+- Property Transfer Affidavit and Detroit property sales dataset; Proposal A uncapping.
+- Detroit and metro prices: Redfin, Realcomp via the Detroit News, RE/MAX of Southeast Michigan; Lincoln Institute effective tax rates.
+- Detroit Land Bank Authority programs; Rocket Preferred Pricing and the Rocket–Compass alliance.
+- MCL 445.1651a (mortgage broker definition); LendingTree licensing disclosures; HB 6177 of 2026.
+- CFPB 2023 advisory opinion on comparison-shopping platforms; 12 CFR 1026.24; ECOA's Reg B 1002.2(l).
+- Taylor v. Zillow refiled August 17, 2026; Warren/Booker letter October 15, 2026.
+- Plus the first round: Clear Cooperation status, Zillow's March 2026 rule change and Preview, Section 230 cases, competitors, NAR buyer statistics.
 
-Not verified: Unlock MLS's official Flex rules and fines; the outcome of the Owners.com order; whether Anderson v. TikTok reached the Supreme Court; exact end dates for Zillow's Make Me Move and video walkthroughs.
+Not verified: Realcomp's delayed-marketing period; DIFS's position on lead generators; total tax rates for Ferndale and Royal Oak; whether Zillow and Bankrate hold Michigan broker licenses.

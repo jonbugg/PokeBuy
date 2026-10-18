@@ -120,6 +120,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focu
 .agent b{font-weight:700}
 .agent em{font-style:normal;color:var(--match);font-weight:700}
 .agent small{display:block;color:var(--muted);font-size:11.5px}
+.agent .brk{display:block;font-size:13px;font-weight:700;color:var(--text)}
+.agent .brk i{font-style:normal;font-weight:500;color:var(--muted)}
 .who{display:flex;align-items:center;gap:8px;min-width:0;text-align:left}
 .who>span:last-child{min-width:0}
 .follow{margin-left:auto;font-size:12px;font-weight:800;padding:5px 11px;border-radius:99px;border:1.5px solid var(--text);text-shadow:none;flex:none}
@@ -395,21 +397,21 @@ const short=n=>n>=1e6?'$'+(n/1e6).toFixed(2).replace(/0$/,'').replace(/\.0$/,'')
 const fmtK=n=>n>=1e6?(n/1e6).toFixed(1).replace(/\.0$/,'')+'M':n>=1e4?(n/1e3).toFixed(1).replace(/\.0$/,'')+'K':n.toLocaleString('en-US');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const PARTNER='Sam';
-const BASE_RATE=6.5, BASE_APR=6.62, DOWN=.2, INS=150; // example rate shown until the buyer picks a lender
+const BASE_RATE=6.5, BASE_APR=6.62, APR_ADD=.12, DOWN=.2, INS=150; // example rate shown until the buyer picks a lender
 
 /* ---------- sample data: every address, person, lender and price here is made up ---------- */
 const AG={
- 'kiana.sells.detroit':{n:'Kiana Brooks',b:'Woodward Realty Group',i:'KB',followers:14200,views:171000,rank:'#3 creator in Detroit',sold:[412000,286000,530000]},
- 'upnorth.ellie':{n:'Ellie Novak',b:'Northern Pines Realty',i:'EN',followers:22900,views:198000,rank:'#1 creator for Up North cabins',sold:[245000,318000]},
- 'marcus.tours':{n:'Marcus Hill',b:'Woodward Realty Group',i:'MH',followers:8800,views:132000,rank:'Most live tours in Metro Detroit',sold:[301000]},
- 'corktown.cass':{n:'Cassandra Reyes',b:'Riverfront Homes',i:'CR',followers:18600,views:184000,rank:'#2 creator in Detroit',sold:[436000,598000]},
+ 'kiana.sells.detroit':{n:'Kiana Brooks',b:'Woodward Realty Group',ph:'(313) 555-0142',i:'KB',followers:14200,views:171000,rank:'#3 creator in Detroit',sold:[412000,286000,530000]},
+ 'upnorth.ellie':{n:'Ellie Novak',b:'Northern Pines Realty',ph:'(989) 555-0117',i:'EN',followers:22900,views:198000,rank:'#1 creator for Up North cabins',sold:[245000,318000]},
+ 'marcus.tours':{n:'Marcus Hill',b:'Woodward Realty Group',ph:'(313) 555-0142',i:'MH',followers:8800,views:132000,rank:'Most live tours in Metro Detroit',sold:[301000]},
+ 'corktown.cass':{n:'Cassandra Reyes',b:'Riverfront Homes',ph:'(313) 555-0188',i:'CR',followers:18600,views:184000,rank:'#2 creator in Detroit',sold:[436000,598000]},
  'the.osei.family':{n:'Ama & Kofi Osei',b:'Homeowners · for sale by owner',i:'AO',followers:410,owner:true},
- 'royaloak.ryan':{n:'Ryan Kowalski',b:'Lakeside Partners',i:'RK',followers:6100,views:104000,rank:'Top 10 in Royal Oak',sold:[489000,512000]},
- 'fixit.dee':{n:'Dee Carter',b:'Riverfront Homes',i:'DC',followers:41200,views:256000,rank:'#1 creator in Detroit',sold:[29000,61000,44000]},
+ 'royaloak.ryan':{n:'Ryan Kowalski',b:'Lakeside Partners',ph:'(248) 555-0163',i:'RK',followers:6100,views:104000,rank:'Top 10 in Royal Oak',sold:[489000,512000]},
+ 'fixit.dee':{n:'Dee Carter',b:'Riverfront Homes',ph:'(313) 555-0188',i:'DC',followers:41200,views:256000,rank:'#1 creator in Detroit',sold:[29000,61000,44000]},
  'gp.lakehouse':{n:'The Harmons',b:'Homeowners · not listed',i:'TH',followers:2300,owner:true}
 };
 const L=[
- {key:'chicago',style:'tudor',price:649000,beds:6,baths:4.5,sqft:5200,year:1915,lot:'0.42 ac',hoa:0,tax:.028,open:'Sun 1–4',addr:'1840 Chicago Blvd',hood:'Boston-Edison',city:'Detroit',
+ {key:'chicago',style:'tudor',price:649000,beds:6,baths:4.5,sqft:5200,year:1915,lot:'0.42 ac',hoa:0,tax:.030,open:'Sun 1–4',addr:'1840 Chicago Blvd',hood:'Boston-Edison',city:'Detroit',
   agent:'kiana.sells.detroit',chips:[{t:'New · 3h ago',k:'new'}],watching:486,likes:31200,cc:1904,saves:2810,shares:6120,
   cap:'1915 Tudor. Six bedrooms, a third-floor ballroom and all the original woodwork.',rooms:['Exterior','Living','Kitchen','Primary suite'],
   sky:['#1b2050','#e98a5f'],orb:[312,232,24],orbC:'#ffe2b8',hill:'#2e2a3a',ground:'#24261f',wall:['#e9dcc6','#cbb796'],floor:'#7a5a3e',trim:'#3a2a20',sofa:'#6b2f2f'},
@@ -421,7 +423,7 @@ const L=[
   agent:'marcus.tours',chips:[{t:'Open house',k:'open'}],watching:1240,likes:9800,cc:0,saves:520,shares:830,
   cap:'Live open house. Ask anything.',rooms:['Exterior','Kitchen','Living','Backyard'],
   sky:['#2a3b63','#f2b07a'],orb:[310,230,30],orbC:'#fff1d6',hill:'#33405a',ground:'#2c3a2c',wall:['#f5f2ec','#e3ddd2'],floor:'#b88d63',trim:'#1f1e22',sofa:'#7d8f74'},
- {key:'corktown',style:'bungalow',price:465000,beds:3,baths:2.5,sqft:1820,year:1890,lot:'0.08 ac',hoa:0,tax:.028,open:null,addr:'1734 Leverette St',hood:'Corktown',city:'Detroit',collab:'the.lindqvists',
+ {key:'corktown',style:'bungalow',price:465000,beds:3,baths:2.5,sqft:1820,year:1890,lot:'0.08 ac',hoa:0,tax:.030,open:null,addr:'1734 Leverette St',hood:'Corktown',city:'Detroit',collab:'the.lindqvists',
   agent:'corktown.cass',chips:[{t:'Listed yesterday',k:'new'}],watching:264,likes:15900,cc:688,saves:1240,shares:2650,
   cap:'1890 brick Victorian, two blocks from the train station.',rooms:['Exterior','Living','Backyard','From the sellers'],
   quote:'We watched the train station come back to life from this porch.',
@@ -435,7 +437,7 @@ const L=[
   agent:'royaloak.ryan',chips:[{t:'Price drop −$15K',k:'drop'}],watching:141,likes:6040,cc:288,saves:733,shares:954,
   cap:'New-build townhome, rooftop deck, walk to everything on Main.',rooms:['Exterior','Kitchen','Living','Primary suite'],
   sky:['#5e8fc4','#f2d7a8'],orb:[80,160,34],orbC:'#fff7dd',hill:'#5d6f7a',ground:'#4a5543',wall:['#f1ece4','#ddd4c6'],floor:'#c09a6b',trim:'#3d4650',sofa:'#5b7a6a'},
- {key:'ilene',style:'fixer',rough:true,price:38000,beds:3,baths:1,sqft:1100,year:1926,lot:'0.11 ac',hoa:0,tax:.028,open:'Sat 10–12',addr:'17336 Ilene St',hood:'Bagley',city:'Detroit',
+ {key:'ilene',style:'fixer',rough:true,price:38000,beds:3,baths:1,sqft:1100,year:1926,lot:'0.11 ac',hoa:0,tax:.030,open:'Sat 10–12',addr:'17336 Ilene St',hood:'Bagley',city:'Detroit',
   agent:'fixit.dee',chips:[{t:'Fixer',k:'drop'},{t:'Renovation loan eligible',k:'reno'}],watching:912,likes:58300,cc:3410,saves:5120,shares:11800,
   cap:'Needs everything. Solid brick bones. $38K cash, or roll the repairs into a renovation loan.',rooms:['Exterior','Living','Kitchen','Backyard'],
   sky:['#46566e','#c9b294'],orb:[300,200,26],orbC:'#f3e9d6',hill:'#47504a',ground:'#3d4a2e',wall:['#cfc3ad','#a8977b'],floor:'#6f5a43',trim:'#4a3f33',sofa:'#6b6252'},
@@ -452,7 +454,7 @@ L.forEach(l=>l.partner=SAM_LIKES.includes(l.key));
 const PROMO_AFTER=3; // the "what can you afford" card sits after this many listings
 
 const LENDERS=[
- {id:'woodward',n:'Woodward Home Loans',i:'WH',rate:6.250,apr:6.338,pts:0,fees:1950,stars:4.6,reviews:2310,close:18,sponsored:true},
+ {id:'woodward',n:'Woodward Home Loans',i:'WH',rate:6.250,apr:6.338,pts:0,fees:1950,stars:4.6,reviews:2310,close:18},
  {id:'lakeshore',n:'Lakeshore Mortgage',i:'LM',rate:6.125,apr:6.284,pts:.5,fees:2890,stars:4.8,reviews:1240,close:21},
  {id:'greatlakes',n:'Great Lakes Credit Union',i:'GL',rate:6.000,apr:6.191,pts:1,fees:3420,stars:4.7,reviews:860,close:28},
  {id:'motorcity',n:'Motor City Lending',i:'MC',rate:6.375,apr:6.452,pts:0,fees:1600,stars:4.5,reviews:540,close:25}
@@ -611,7 +613,7 @@ const NI={
 const feed=$('#feed');
 function agentRow(l){
  const a=l.ag;
- return `<div class="agent"><button class="who" data-act="profile"><span class="av">${a.i}</span><span><b>@${l.agent}</b>${l.collab?` <em>with @${l.collab}</em>`:''}<small>${esc(a.b)}</small></span></button><button class="follow" data-act="follow">Follow</button></div>`;
+ return `<div class="agent"><button class="who" data-act="profile"><span class="av">${a.i}</span><span><b>@${l.agent}</b>${l.collab?` <em>with @${l.collab}</em>`:''}${a.owner?`<small>${esc(a.b)}</small>`:`<span class="brk">${esc(a.b)}</span><small>Real Estate Broker · ${a.ph}</small>`}</span></button><button class="follow" data-act="follow">Follow</button></div>`;
 }
 function cardHTML(l){
  const chips=`<span class="chip budget" hidden></span>`+l.chips.map(c=>`<span class="chip ${c.k||''}">${c.t}</span>`).join('')+(l.live?'':`<span class="chip live"><i></i>${l.watching} watching</span>`);
@@ -651,7 +653,7 @@ function promoInner(){
  if(S.bp)return `<div class="eyebrow">Your buying power</div><h2>Up to ${money(S.bp.max)}</h2><p>The feed now marks which homes fit. ${S.preapproved?`You’re pre-approved with ${esc(S.lender.n)}.`:'Next step: compare local lenders and get pre-approved so your offers count.'}</p>
   <button class="btn" data-open="${S.preapproved?'letter':'lenders'}">${S.preapproved?'See my pre-approval':'Compare lenders'}</button>`;
  return `<div class="eyebrow">Quick check</div><h2>What can you actually afford?</h2><p>Four questions. No credit check. Your feed starts showing what fits.</p>
-  <ul><li>Your real monthly payment on every home</li><li>Local lenders side by side, ranked by APR</li><li>Pre-approved before you fall for one</li></ul>
+  <ul><li>Your real monthly payment on every home</li><li>Every local lender side by side, ranked by APR</li><li>Pre-approved before you fall for one</li></ul>
   <button class="btn" data-open="bp">Find my buying power</button>`;
 }
 feed.innerHTML=L.map((l,k)=>cardHTML(l)+(k===PROMO_AFTER-1?promoHTML():'')).join('');
@@ -771,7 +773,7 @@ function shareSheet(i){
   <button class="row" data-share="tiktok">Repost to TikTok<span>Adds the Dreamscrol watermark</span></button>
   <button class="row" data-share="reels">Repost to Reels<span>Adds the Dreamscrol watermark</span></button></div>`);
 }
-function rateLine(){return S.lender?`${S.lender.rate.toFixed(3)}% rate (${S.lender.apr.toFixed(3)}% APR) from ${esc(S.lender.n)}`:S.bp?`${(BASE_RATE+CREDIT[S.bp.credit]).toFixed(3)}% example rate for your credit range`:`${BASE_RATE.toFixed(2)}% example rate (${BASE_APR.toFixed(2)}% APR)`}
+function rateLine(){return S.lender?`${S.lender.rate.toFixed(3)}% rate (${S.lender.apr.toFixed(3)}% APR) from ${esc(S.lender.n)}`:S.bp?`${(BASE_RATE+CREDIT[S.bp.credit]).toFixed(3)}% example rate (${(BASE_RATE+CREDIT[S.bp.credit]+APR_ADD).toFixed(3)}% APR) for your credit range`:`${BASE_RATE.toFixed(2)}% example rate (${BASE_APR.toFixed(2)}% APR)`}
 function affordSheet(i){
  const l=L[i],p=pay(l.price,l.tax),f=fit(l);
  const next=S.preapproved?(l.offmarket?'':`<button class="btn" data-offer="${i}">Make an offer</button>`)
@@ -784,7 +786,7 @@ function affordSheet(i){
   <div><span>Home insurance (est.)</span><span>${money(p.ins)}</span></div>${l.hoa?`<div><span>HOA or co-op fee</span><span>${money(l.hoa)}</span></div>`:''}<div class="total"><span>Monthly</span><span>${money(p.total+(l.hoa||0))}</span></div></div>
   ${l.rough?'<p class="muted">Renovation loans such as FHA 203(k) or Fannie Mae HomeStyle can roll repair costs into the mortgage. Ask lenders when you compare.</p>':''}
   ${next}
-  <p class="fine">Estimate only, not a loan offer. Taxes are estimated from the local rate; actual taxes depend on assessment and exemptions.</p>`);
+  <p class="fine">Estimate only, not a loan offer. Michigan resets a home’s taxable value after it sells, so taxes are estimated for a new owner, not from the seller’s current bill.</p>`);
 }
 function detailsSheet(i){
  const l=L[i],p=pay(l.price,l.tax),following=S.homeFollow.has(l.key);
@@ -806,7 +808,7 @@ function profileSheet(h){
   <div class="stats three"><div class="stat"><b>${fmtK(a.followers+(on?1:0))}</b><span>Followers</span></div><div class="stat"><b>${mine.length+(a.sold||[]).length}</b><span>Homes</span></div><div class="stat"><b>${a.views?fmtK(a.views):'—'}</b><span>Views this week</span></div></div>
   <button class="btn${on?' ghost':''}" data-followagent="${h}">${on?'Following':'Follow'}</button>
   <div class="grid3">${tiles}</div>
-  ${a.owner?'':`<p class="fine">Broker: ${esc(a.b)} · MI license #0000000 (sample)</p>`}`);
+  ${a.owner?'':`<p class="fine">${esc(a.b)}, Real Estate Broker · ${a.ph} · MI license #0000000 (sample)</p>`}`);
 }
 function soldSheet(){
  sheet(`<h3>2245 Wabash St sold</h3><p class="sub">Corktown · listed at $420,000. What do you think it went for?</p>
@@ -834,7 +836,7 @@ function bpSheet(){
 }
 const num=v=>+String(v).replace(/[^0-9.]/g,'')||0;
 function readBP(){return{income:num($('#bpInc').value),debts:num($('#bpDebt').value),down:num($('#bpDown').value),credit:$('#bpCredit').value,first:$('#bpFirst').checked}}
-function calcBP(){const b=readBP(),r=buyingPower(b);$('#bpOut').innerHTML=`<small>You could buy up to</small><b>${money(r.max)}</b><span>About ${money(r.cap)}/mo for housing at a ${r.rate.toFixed(3)}% example rate</span>`}
+function calcBP(){const b=readBP(),r=buyingPower(b);$('#bpOut').innerHTML=`<small>You could buy up to</small><b>${money(r.max)}</b><span>About ${money(r.cap)}/mo for housing at a ${r.rate.toFixed(3)}% example rate (${(r.rate+APR_ADD).toFixed(3)}% APR), 30-year fixed</span>`}
 
 function lendersSheet(i){
  if(i!=null)lenderFor=i;
@@ -842,15 +844,14 @@ function lendersSheet(i){
  const adj=S.bp?CREDIT[S.bp.credit]:0;
  const rows=LENDERS.map(x=>{const rate=x.rate+adj,apr=x.apr+adj,p=pay(price,tax,{rate});return{...x,rate,apr,mo:p.total}});
  const key={apr:(a,b)=>a.apr-b.apr,mo:(a,b)=>a.mo-b.mo,fees:(a,b)=>a.fees-b.fees,close:(a,b)=>a.close-b.close}[S.lenderSort];
- const sp=rows.filter(x=>x.sponsored),ranked=rows.filter(x=>!x.sponsored).sort(key);
+ const ranked=rows.sort(key);
  const card=x=>`<button class="lender" data-lender="${x.id}" aria-pressed="${S.lender&&S.lender.id===x.id}"><span class="lg">${x.i}</span><b>${esc(x.n)}</b><span class="mo2">${money(x.mo)}<small style="font-family:var(--body);font-size:11px;color:var(--muted)">/mo</small></span>
    <span class="q"><span><strong>${x.rate.toFixed(3)}%</strong> rate</span><span><strong>${x.apr.toFixed(3)}%</strong> APR</span><span><strong>${x.pts}</strong> pts</span><span><strong>${money(x.fees)}</strong> fees</span><span>★ ${x.stars} (${fmtK(x.reviews)})</span><span>~${x.close} days to close</span></span></button>`;
  sheet(`<h3>Compare lenders</h3><p class="sub">${l?esc(l.addr)+' · ':''}${money(price)} price, ${money(pay(price,tax).down)} down, 30-year fixed${S.bp?`, ${esc(S.bp.credit)} credit`:''}.</p>
   <div class="pills" role="group" aria-label="Sort lenders">${[['apr','Lowest APR'],['mo','Lowest payment'],['fees','Lowest fees'],['close','Fastest close']].map(([k,t])=>`<button data-sort="${k}" aria-pressed="${S.lenderSort===k}">${t}</button>`).join('')}</div>
-  ${sp.length?`<span class="spons">Sponsored</span>${sp.map(card).join('')}`:''}
-  <span class="spons">Ranked by ${{apr:'lowest APR',mo:'lowest payment',fees:'lowest fees',close:'fastest close'}[S.lenderSort]} · lenders can’t pay to change this order</span>
+  <span class="spons">All ${ranked.length} local lenders · ranked by ${{apr:'lowest APR',mo:'lowest payment',fees:'lowest fees',close:'fastest close'}[S.lenderSort]}</span>
   <div class="rows">${ranked.map(card).join('')}</div>
-  <p class="fine">Example quotes for the demo, not offers. Real quotes come from each lender after you share your details with them. Ranking is the same for everyone with the same inputs.</p>`);
+  <p class="fine">How lenders pay us: every lender pays the same flat fee to be listed. No lender can pay for a higher spot, and the order is the same for everyone who enters the same numbers. Example quotes for the demo, not offers.</p>`);
 }
 function lenderPick(id){
  const x=LENDERS.find(z=>z.id===id),adj=S.bp?CREDIT[S.bp.credit]:0;
@@ -861,8 +862,8 @@ function lenderPick(id){
    <div class="step"><span class="k">3</span><span>Credit check by the lender<small>A hard inquiry. Shopping several lenders within a few weeks usually counts as one.</small></span></div>
    <div class="step"><span class="k">4</span><span>Pre-approval letter<small>Attach it to offers in one tap</small></span></div></div>
   <div class="pay"><div><span>Quoted rate</span><span>${(x.rate+adj).toFixed(3)}% (${(x.apr+adj).toFixed(3)}% APR)</span></div><div><span>Points and lender fees</span><span>${x.pts} pts · ${money(x.fees)}</span></div></div>
-  <button class="btn" data-preapprove="${x.id}"${S.bp?'':' disabled'}>Continue with ${esc(x.n)}</button>
-  <p class="fine">Demo only. In the real app this hands off to the lender’s own secure application.</p>`);
+  <button class="btn" data-preapprove="${x.id}"${S.bp?'':' disabled'}>Go to ${esc(x.n)}’s application</button>
+  <p class="fine">Dreamscrol doesn’t take loan applications. You apply with the lender directly; demo only.</p>`);
 }
 function preapprove(id){
  const x=LENDERS.find(z=>z.id===id),adj=CREDIT[S.bp.credit];
@@ -933,7 +934,7 @@ function introSheet(h,i,dual){
 }
 function linkAgent(h,i,signed){
  S.agent=h;closeSheet();
- notify({id:'agent',ic:'chat',t:`@${h} is now your agent`,s:signed?'Buyer agreement signed. You can tour and make offers together.':'They’ll send a buyer agreement to sign if you don’t have one yet.',act:'none'});
+ notify({id:'agent',ic:'chat',t:`@${h} is now your agent`,s:signed?'Buyer agreement signed. You can tour and make offers together.':'They’ll confirm you have a signed buyer agreement before touring or submitting offers.',act:'none'});
  toast(signed?`Buyer agreement signed with @${h} (demo)`:`@${h} linked as your agent`);
  if(i!=null&&!isNaN(i))setTimeout(()=>offerSheet(i),250);
  if(S.view==='me')renderMe();
@@ -947,12 +948,12 @@ function offerSheet(i){
    <label class="fld" for="ofEm">Earnest money<input id="ofEm" inputmode="numeric" value="${money(Math.max(1000,Math.round(l.price*.01/500)*500))}"></label></div>
    <div class="two"><label class="fld" for="ofDown">Down payment<input id="ofDown" inputmode="numeric" value="${money(down)}"></label>
    <label class="fld" for="ofClose">Close in<select id="ofClose"><option>21 days</option><option selected>30 days</option><option>45 days</option></select></label></div>
-   <label class="fld" for="ofFin">Financing<select id="ofFin">${S.preapproved?`<option>Conventional · ${esc(S.lender.n)}</option>`:''}<option>Conventional</option><option>FHA</option>${l.rough?'<option>FHA 203(k) renovation</option>':''}<option>Cash</option></select></label>
+   <label class="fld" for="ofFin">Financing<select id="ofFin">${S.preapproved?`<option>Conventional · ${esc(S.lender.n)}</option>`:''}<option>Pre-approved with another lender (upload letter)</option><option>Conventional</option><option>FHA</option>${l.rough?'<option>FHA 203(k) renovation</option>':''}<option>Cash</option></select></label>
    <div class="warn" id="ofOver"${S.bp&&l.price>S.bp.max?'':' hidden'}><b>Above your budget.</b> Your ${S.preapproved?'pre-approval':'buying power'} is up to ${S.bp?money(S.bp.max):''}. Sellers may ask how you’ll cover the difference.</div>
    <label class="sw" for="ofInsp"><span>Inspection contingency<small>Lets you back out or renegotiate after inspection</small></span><input type="checkbox" id="ofInsp" checked></label>
    <label class="sw" for="ofAppr"><span>Appraisal contingency<small>Protects you if the appraisal comes in low</small></span><input type="checkbox" id="ofAppr" checked></label>
    ${S.couples?`<label class="sw" for="ofCo"><span>Add ${PARTNER} as co-buyer<small>${PARTNER} gets a copy to review</small></span><input type="checkbox" id="ofCo" checked></label>`:''}
-   ${S.preapproved?`<div class="ok"><b>Pre-approval attached.</b> ${esc(S.lender.n)}, up to ${money(S.bp.max)}.</div>`:`<div class="warn"><b>No pre-approval yet.</b> Sellers take offers more seriously with one. <button type="button" data-open="lenders" data-for="${i}" style="text-decoration:underline;font-weight:800">Compare lenders</button></div>`}
+   ${S.preapproved?`<div class="ok"><b>Pre-approval attached.</b> ${esc(S.lender.n)}, up to ${money(S.bp.max)}.</div>`:`<div class="warn"><b>No pre-approval attached.</b> Sellers take offers more seriously with one from any lender. Upload yours under Financing, or <button type="button" data-open="lenders" data-for="${i}" style="text-decoration:underline;font-weight:800">compare lenders</button>.</div>`}
    <div class="pay"><div class="total"><span>Your monthly at this price</span><span id="ofMo">${money(pay(l.price,l.tax,{down}).total+(l.hoa||0))}</span></div></div>
    <button class="btn" type="submit">Send to @${S.agent} for review</button>
   </form>
@@ -979,7 +980,7 @@ function postSheet(role){
    <div>${sw('o1','Open on the best shot','AI picks the hook for the first 2 seconds')}${sw('o2','Captions and room labels','Auto-generated, editable')}
    ${sw('o3','Price and monthly payment overlay','Pulled from the listing')}${sw('o4','Licensed trending music','Cleared for TikTok and Reels')}
    ${sw('o5','Cross-post to TikTok and Reels','With the Dreamscrol watermark')}${sw('o6','Invite sellers to collab','They can add a “From the sellers” clip after you approve it',false)}
-   ${sw('o7','Show brokerage name','Required on every ad by state rules',true,true)}
+   ${sw('o7','Broker name, phone and “Real Estate Broker”','Shown at least as large as your name on every post (MCL 339.2512e)',true,true)}
    ${sw('o8','This listing is filed in the MLS','Realcomp or your local MLS. A public post counts as marketing under Clear Cooperation',false)}</div>
    <button class="btn" data-publish="agent" id="pubAgent" disabled>Publish</button>`;
  }else if(postRole==='fsbo'){
@@ -1093,7 +1094,7 @@ function act(a,i){
   case 'details':detailsSheet(i);break;
   case 'profile':profileSheet(l.agent);break;
   case 'follow':gate('Follow @'+l.agent,()=>{const h=l.agent;S.follow.has(h)?S.follow.delete(h):S.follow.add(h);syncFollow(h)});break;
-  case 'tour':gate(l.offmarket?'Message the homeowners':l.fsbo?'Message the owners':'Request a tour',()=>toast(l.offmarket?'Interest sent to the homeowners (demo)':l.fsbo?'Message sent to the owners (demo)':`Tour request sent to @${l.agent} (demo)`));break;
+  case 'tour':gate(l.offmarket?'Message the homeowners':l.fsbo?'Message the owners':'Request a tour',()=>toast(l.offmarket?'Interest sent to the homeowners (demo)':l.fsbo?'Message sent to the owners (demo)':`Tour request sent to @${l.agent}. They’ll send a short written agreement before the tour (MLS rule) (demo)`));break;
   case 'offer':gate('Make an offer',()=>S.agent?offerSheet(i):linkAgentSheet(i));break;
   case 'lock':{const p=l.price,g=+$('#gr'+i).value,acc=Math.max(0,1-Math.abs(g-p)/p),pts=Math.round(acc*100);
    S.guesses[i]={g,acc,pts};S.score+=pts;renderPrice(i);header();
