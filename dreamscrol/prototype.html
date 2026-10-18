@@ -879,21 +879,64 @@ function letterSheet(fresh){
 }
 
 /* ---------- offers go through the buyer's own agent ---------- */
-const BUYER_AGENTS=['kiana.sells.detroit','corktown.cass','marcus.tours','royaloak.ryan'];
+const BUYER_AGENTS=['kiana.sells.detroit','corktown.cass','marcus.tours','royaloak.ryan','fixit.dee'];
+const MATCH={ // sample stats used to suggest agents
+ 'kiana.sells.detroit':{sold:31,areas:['Boston-Edison','Midtown','Lafayette Park'],reply:12,stars:4.9,rev:118,langs:['English']},
+ 'corktown.cass':{sold:27,areas:['Corktown','Midtown','Lafayette Park'],reply:9,stars:4.9,rev:96,langs:['English','Spanish']},
+ 'marcus.tours':{sold:19,areas:['Ferndale','Royal Oak'],reply:6,stars:4.8,rev:74,langs:['English','Arabic']},
+ 'royaloak.ryan':{sold:22,areas:['Royal Oak','Ferndale','Grosse Pointe Park'],reply:15,stars:4.7,rev:61,langs:['English']},
+ 'fixit.dee':{sold:40,areas:['Bagley','Boston-Edison','Corktown'],reply:20,stars:4.8,rev:143,langs:['English','Bengali']}
+};
+const HOODS=['Corktown','Boston-Edison','Lafayette Park','Midtown','Bagley','Ferndale','Royal Oak','Grosse Pointe Park'];
+const idx=v=>v==null||v===''||v==='null'||v==='undefined'?null:+v;
+let matchPick=new Set();
 function linkAgentSheet(i){
  const list=[...BUYER_AGENTS].sort(()=>Math.random()-.5);
- sheet(`<h3>Link your agent to make offers</h3><p class="sub">Offers go to your own agent. They review it, fill in the purchase agreement and submit it. Dreamscrol never sends offers itself.</p>
-  <h4>Your agent is on Dreamscrol</h4>
+ sheet(`<h3>Who’s your agent?</h3><p class="sub">Offers go through a licensed agent who works for you. They review it, fill in the purchase agreement and submit it. Dreamscrol never sends offers itself.</p>
+  <button class="btn" data-match="${i}">Connect me with a local agent</button>
+  <h4>Or link the agent you have</h4>
   <div class="rows">${list.map(h=>`<button class="arow" data-linkagent="${h}" data-for="${i}"><span class="av">${AG[h].i}</span><span>@${h}<small>${esc(AG[h].n)} · ${esc(AG[h].b)}</small></span><em>Link</em></button>`).join('')}</div>
-  <h4>Or invite them</h4>
-  <form class="compose" data-invite="${i}" style="position:static;padding:0"><input id="invIn" autocomplete="off" placeholder="Agent’s email or phone" aria-label="Agent's email or phone"><button type="submit">Invite</button></form>
-  <p class="fine">Shown in random order. Agents don’t pay to appear here. Don’t have an agent yet? Pick one you’ve met, or invite one you trust. Since August 2024, agents need a written buyer agreement with you before touring homes.</p>`);
+  <form class="compose" data-invite="${i}" style="position:static;padding:0"><input id="invIn" autocomplete="off" placeholder="Not listed? Agent’s email or phone" aria-label="Agent's email or phone"><button type="submit">Invite</button></form>
+  <p class="fine">Shown in random order. Agents don’t pay to appear here. Since August 2024, agents need a written buyer agreement with you before touring homes.</p>`);
 }
-function linkAgent(h,i){
+function matchSheet(i){
+ const l=i!=null?L[i]:null;matchPick=new Set(l&&HOODS.includes(l.hood)?[l.hood]:[]);
+ sheet(`<h3>Find your agent</h3><p class="sub">Three quick answers and we’ll suggest agents who know the area. Free for you, no obligation.</p>
+  <form class="form" data-matchform="${i}">
+   <div class="fld">Where are you looking?<div class="pills" role="group" aria-label="Neighborhoods">${HOODS.map(h=>`<button type="button" data-hood="${h}" aria-pressed="${matchPick.has(h)}">${h}</button>`).join('')}</div></div>
+   <div class="two"><label class="fld" for="mTime">When do you want to buy?<select id="mTime"><option>In 1–3 months</option><option>Right away</option><option>In 3–6 months</option><option>Just looking</option></select></label>
+   <label class="fld" for="mBudget">Budget<input id="mBudget" inputmode="numeric" value="${money(S.bp?S.bp.max:(l?l.price:350000))}"></label></div>
+   <label class="fld" for="mLang">Language you’d like to work in<select id="mLang"><option>English</option><option>Spanish</option><option>Arabic</option><option>Bengali</option></select></label>
+   <button class="btn" type="submit">Show my matches</button></form>`);
+}
+function matchResults(i){
+ const l=i!=null?L[i]:null,lang=$('#mLang').value,listing=l&&!l.ag.owner&&MATCH[l.agent]?l.agent:null;
+ const scored=BUYER_AGENTS.filter(h=>h!==listing).map(h=>{const m=MATCH[h];return{h,m,score:m.areas.filter(a=>matchPick.has(a)).length*3+(m.langs.includes(lang)?2:0)+m.sold/50}}).sort((a,b)=>b.score-a.score).slice(0,3);
+ const anyLang=scored.some(x=>x.m.langs.includes(lang));
+ const row=(h,m,dual)=>`<button class="arow" data-intro="${h}" data-for="${i}"${dual?' data-dual="1"':''}><span class="av">${AG[h].i}</span><span>@${h}<small>${dual?'Listing agent for this home · ':''}${m.sold} homes sold · ${m.areas.slice(0,2).join(', ')}</small><small>Replies in ~${m.reply} min · ★ ${m.stars} (${m.rev})${m.langs.length>1?' · '+m.langs.join(', '):''}</small></span><em>Intro</em></button>`;
+ sheet(`<h3>Your matches</h3><p class="sub">Matched on where you’re looking${lang!=='English'?', your language':''} and experience. Agents don’t pay for these introductions.</p>
+  ${listing?`<h4>Knows this home best</h4>${row(listing,MATCH[listing],true)}<p class="fine">One agent representing both buyer and seller needs written consent from both sides.</p><h4>Agents who’d work only for you</h4>`:''}
+  ${!anyLang?`<p class="muted">No matches who work in ${esc(lang)} yet. Here are the closest matches.</p>`:''}
+  <div class="rows">${scored.map(x=>row(x.h,x.m,false)).join('')}</div>
+  <p class="fine">You choose who to talk to. Nothing is shared with an agent until you tap Intro.</p>`);
+}
+function introSheet(h,i,dual){
+ const m=MATCH[h];
+ sheet(`<h3>Intro to @${h}</h3><p class="sub">${esc(AG[h].n)} · ${esc(AG[h].b)}</p>
+  ${dual?`<div class="warn"><b>Heads up:</b> @${h} is the listing agent for this home. Michigan allows one agent to represent both sides only with written consent from you and the seller.</div>`:''}
+  <div class="steps">
+   <div class="step ok"><span class="k">1</span><span>Intro sent<small>They see your budget, timeline and the home you’re looking at</small></span><span class="done">Done</span></div>
+   <div class="step" id="stAccept"><span class="k">2</span><span>@${h} accepts<small>Usually within ${m.reply} minutes</small></span><span class="done" id="stAcceptD" hidden>Done</span></div>
+   <div class="step"><span class="k">3</span><span>Sign a buyer agreement<small>Says what they’ll do for you and how they’re paid. Required before touring.</small></span><button data-sign="${h}" data-for="${i}" id="signBtn" disabled>Review</button></div></div>
+  <p class="fine">Demo only. The agent accepts automatically after a moment.</p>`);
+ setTimeout(()=>{const a=$('#stAccept');if(!a)return;a.classList.add('ok');$('#stAcceptD').hidden=false;$('#signBtn').disabled=false},1600);
+}
+function linkAgent(h,i,signed){
  S.agent=h;closeSheet();
- notify({id:'agent',ic:'chat',t:`@${h} is now your agent`,s:'They’ll send a buyer agreement to sign if you don’t have one yet.',act:'none'});
- toast(`@${h} linked as your agent`);
+ notify({id:'agent',ic:'chat',t:`@${h} is now your agent`,s:signed?'Buyer agreement signed. You can tour and make offers together.':'They’ll send a buyer agreement to sign if you don’t have one yet.',act:'none'});
+ toast(signed?`Buyer agreement signed with @${h} (demo)`:`@${h} linked as your agent`);
  if(i!=null&&!isNaN(i))setTimeout(()=>offerSheet(i),250);
+ if(S.view==='me')renderMe();
 }
 function offerSheet(i){
  const l=L[i],down=S.bp?Math.min(S.bp.down,l.price):l.price*DOWN,dual=S.agent===l.agent;
@@ -1000,7 +1043,7 @@ function renderMe(){
   const money_=S.bp?`<div class="big">Up to ${money(S.bp.max)}</div>
     <div class="kv"><span>Lender</span><b>${S.preapproved?esc(S.lender.n)+' · pre-approved':'<button data-open="lenders" style="color:var(--porch);font-weight:800">Compare lenders</button>'}</b></div>
     <div class="kv"><span>Rate</span><b>${rateLine()}</b></div>
-    <div class="kv"><span>Your agent</span><b>${S.agent?'@'+S.agent:'<button data-open="linkagent" style="color:var(--porch);font-weight:800">Link your agent</button>'}</b></div>
+    <div class="kv"><span>Your agent</span><b>${S.agent?'@'+S.agent:'<button data-open="linkagent" style="color:var(--porch);font-weight:800">Link or find an agent</button>'}</b></div>
     ${S.offers.length?S.offers.map(o=>`<div class="kv"><span>Offer · ${esc(L[o.i].addr)}</span><b>${money(o.price)} · ${o.status}</b></div>`).join(''):''}
     <button class="btn ghost" data-open="bp">Update my budget</button>`
    :`<p class="muted">Find out what you can afford. Four questions, no credit check. Then compare local lenders side by side.</p><button class="btn" data-open="bp">Find my buying power</button>`;
@@ -1082,7 +1125,11 @@ $('#app').addEventListener('click',e=>{
  if(el=d('close-go')){closeSheet();go(el.dataset.closeGo);return}
  if(el=d('offer')){closeSheet();act('offer',+el.dataset.offer);return}
  if(el=d('afford')){affordSheet(+el.dataset.afford);return}
- if(el=d('linkagent')){linkAgent(el.dataset.linkagent,el.dataset.for===''?null:+el.dataset.for);return}
+ if(el=d('linkagent')){linkAgent(el.dataset.linkagent,idx(el.dataset.for));return}
+ if(el=d('match')){matchSheet(idx(el.dataset.match));return}
+ if(el=d('hood')){const h=el.dataset.hood;matchPick.has(h)?matchPick.delete(h):matchPick.add(h);el.setAttribute('aria-pressed',matchPick.has(h));return}
+ if(el=d('intro')){introSheet(el.dataset.intro,idx(el.dataset.for),!!el.dataset.dual);return}
+ if(el=d('sign')){linkAgent(el.dataset.sign,idx(el.dataset.for),true);return}
  if(el=d('role')){postSheet(el.dataset.role);return}
  if(d('verify')){S.idOk=true;postSheet('fsbo');toast('ID verified (demo)');return}
  if(el=d('publish')){const k=el.dataset.publish;closeSheet();toast(k==='agent'?'Published. Nearby buyers see it first (demo)':k==='fsbo'?'Posted with a Verified owner badge (demo)':'Posted. Only likely buyers will see it (demo)');return}
@@ -1123,6 +1170,7 @@ $('#app').addEventListener('submit',e=>{
  if(f.dataset.bp!=null){const b=readBP(),r=buyingPower(b);S.bp={...b,max:r.max,cap:r.cap,rate:r.rate};if(S.lender&&!S.preapproved)S.lender=null;closeSheet();renderAllPrices();
   toast(`Budget set: up to ${money(r.max)}. Homes now show if they fit.`);if(S.view==='me')renderMe();return}
  if(f.dataset.offerform!=null){sendOffer(+f.dataset.offerform);return}
+ if(f.dataset.matchform!=null){if(!matchPick.size){toast('Pick at least one neighborhood.');return}matchResults(idx(f.dataset.matchform));return}
  if(f.dataset.invite!=null){const v=$('#invIn').value.trim();if(!v){toast('Add your agent’s email or phone first.');return}
   closeSheet();toast('Invite sent (demo). You can make offers once they join.');return}
 });
