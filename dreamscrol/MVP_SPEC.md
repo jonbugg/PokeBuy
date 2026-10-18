@@ -6,6 +6,7 @@ The prototype (`prototype.html`) shows the experience. This document covers what
 
 Buyers (no account needed to browse):
 - Full-screen vertical feed of homes in one metro. Video autoplays muted, price and monthly payment overlaid.
+- Every listing has a public web page anyone can open without an account. Zillow's March 2026 rules refuse listings hidden behind a login, so a gated listing could hurt agents.
 - Like, comment, save, share. Saving, commenting and messaging ask for an account the first time.
 - Listing details, "Can I afford it?" payment estimate, request a tour or message.
 - Guess the price, Couples mode (pair two accounts, match on mutual likes).
@@ -15,13 +16,14 @@ Buyers (no account needed to browse):
 Agents:
 - Sign up with license number, verified against the state license database.
 - Upload raw phone clips. The server cuts a 30–60 second vertical video with a hook, captions, room labels, music and the price overlay.
-- Brokerage name shown on every post.
+- Before posting, confirm the listing is filed in the MLS (Active, Coming Soon or Flex). A public post counts as public marketing under NAR's Clear Cooperation Policy.
+- Broker name and license number required; the broker name is drawn at least half the size of the largest contact info (TREC 535.155). Texas agents' profiles carry the IABS and Consumer Protection Notice links.
 - Every message and tour request on their listing goes to them.
 - Seller report per listing: views, saves, shares, tour requests, traffic sources, common questions. One tap to send it to the sellers.
 - Invite sellers to add "From the sellers" clips, which the agent approves.
 
 Owners (phase 2):
-- FSBO: ownership check against county records plus ID check, flat posting fee, optional paid boost.
+- FSBO: ownership check against county records plus ID check. Free to post in Texas until a Texas attorney clears a fee (see `PLAN.md`, section 4).
 - "Not for sale… unless?": owner names a price, picks who can see it, and chooses whether to hide the exact address.
 
 Out of scope for MVP: MLS/IDX feed, live open houses, multiple metros, web version beyond share links.
@@ -36,7 +38,7 @@ Out of scope for MVP: MLS/IDX feed, live open houses, multiple metros, web versi
 | Auto-edit | Server job: ffmpeg for cutting and overlays, Claude (vision) to label rooms, pick the opening shot and write captions | Agents shoot raw clips. The edit is the product's main time-saver for them. |
 | Moderation | Fast keyword filter plus a Claude classifier for comments, captions and live chat | Fair housing and abuse. Keyword filter blocks the obvious cases instantly; the classifier catches coded language. |
 | Identity checks | Stripe Identity or Persona for owner ID | Owner verification for FSBO and off-market posts. |
-| Payments | Stripe | FSBO flat fees and boosts. |
+| Payments | Stripe | Boosts and Pro subscriptions; FSBO fees only once cleared. |
 | Notifications | Expo push notifications | Price drops, sale outcomes, partner likes, replies. |
 | Analytics | PostHog | Watch time, swipe-through, funnel to lead. |
 
@@ -106,13 +108,13 @@ Version 2 replaces the hand-tuned score with a learned model once there's enough
 
 | Rule | Where it shows up |
 |---|---|
-| State advertising rules require the brokerage name on agent ads (Texas: TREC §535.155) | Brokerage name is a required field for agents and is always drawn on their posts. |
+| State advertising rules require the brokerage name on agent ads (Texas: TREC §535.155, broker name at least half the size of the largest contact info; IABS and CPN links under §531.18 and §531.20) | Broker name and license number are required fields, drawn at a compliant size on posts and profiles. Texas profiles carry the two required links. Per-state rules table before leaving Texas. |
 | Fair Housing Act §3604(c), including for owners exempt from other parts of the Act | Comment, caption and chat filter. No demographic data, school "ratings" or neighborhood labels that act as stand-ins. Point school questions to district maps. |
-| Section 230 protects hosting user content but not content the platform helps create (Roommates.com) | Don't add prompts or filters that ask about protected traits. AI-written captions get the same fair housing check as user text. |
-| Housing ad targeting (HUD's 2022 settlement with Meta) | Boosts target by location and home interest only. |
-| Charging a cut of the sale price usually requires a broker license | FSBO pricing is flat fees and boosts only. Dreamscrol never negotiates or takes a success fee. |
-| RESPA Section 8 limits payments for mortgage referrals | Lender partnerships are paid as fair-market advertising, not per-referral kickbacks. Get counsel before launch. |
-| MLS and portal rules on marketing listings outside the MLS (see `PLAN.md`) | Agents confirm the listing is in the MLS, or that the seller signed any required waiver, before posting. |
+| Section 230 protects hosting user content but not content the platform helps create (Roommates.com); one appeals court treated a recommendation algorithm as the platform's own speech (Anderson v. TikTok, 3d Cir. 2024) | Don't add prompts or filters that ask about protected traits. AI-written captions get the same fair housing check as user text. Ranking never uses protected traits or stand-ins, and is audited. |
+| Housing ad targeting (U.S. v. Meta, 2022 Justice Department settlement) | Boosts target by location and home interest only. Check that delivery doesn't skew toward or away from groups of people. |
+| Charging a cut of the sale price requires a broker license; Texas's broker definition may also cover advance fees to list a home in a listings publication (Tex. Occ. Code §1101.002) | No success fees, ever. FSBO posting is free in Texas until counsel clears a fee. |
+| RESPA Section 8 limits payments for mortgage referrals; CFPB's 2023 advisory opinion covers steering on comparison tools | Lenders pay fair-market advertising fees not tied to closed loans, and are shown neutrally or labeled as sponsored. |
+| NAR Clear Cooperation Policy: publicly marketed listings go into the MLS within one business day; some brokerages' Zillow Preview deals keep coming-soon listings exclusive | Agents confirm the listing is filed in the MLS (Active, Coming Soon or Flex) before posting. Don't promise pre-market exclusives. |
 | Texas sale-price non-disclosure | Sale prices are shown only with the agent's or seller's opt-in. |
 | Music licensing | Use a licensed library cleared for social reposts. |
 
@@ -122,7 +124,7 @@ Version 2 replaces the hand-tuned score with a learned model once there's enough
 |---|---|---|---|
 | 0. Validate | 2–3 weeks | The prototype in front of 20 Austin agents and 30 buyers. A waitlist page. Hand-edited videos for 10 real listings posted to TikTok and Instagram as a test. | Agents say "I'd post here." Buyers watch more than 10 homes per session. |
 | 1. MVP | 8–10 weeks | Feed, agent sign-up and verification, upload with auto-edit, likes/comments/saves/shares, leads to agents, seller report, Guess, Couples, inbox, push. iOS and Android via TestFlight and Play testing. | 50 agents, 30% of new listings in the launch area, 5,000 weekly viewers. |
-| 2. Owners and live | 6–8 weeks | FSBO with verification and fees, "Not for sale… unless?", seller clips, live open houses, boosts. | First revenue. |
+| 2. Owners and live | 6–8 weeks | FSBO with verification (fees once cleared), "Not for sale… unless?", seller clips, live open houses, boosts. | First revenue. |
 | 3. Scale | ongoing | Broker partnership and IDX feed to fill gaps, a second metro, learned ranking, lender partnership. | City #2 reaches the same density in less time. |
 
 ## 8. Team and rough costs

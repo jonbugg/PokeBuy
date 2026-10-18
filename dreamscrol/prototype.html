@@ -688,7 +688,8 @@ function profileSheet(h){
   ${a.rank?`<span class="rank">${esc(a.rank)}</span>`:`<span class="rank" style="background:var(--match);color:var(--match-ink)">Verified homeowner</span>`}
   <div class="stats three"><div class="stat"><b>${fmtK(a.followers+(on?1:0))}</b><span>Followers</span></div><div class="stat"><b>${mine.length+(a.sold||[]).length}</b><span>Homes</span></div><div class="stat"><b>${a.views?fmtK(a.views):'—'}</b><span>Views this week</span></div></div>
   <button class="btn${on?' ghost':''}" data-followagent="${h}">${on?'Following':'Follow'}</button>
-  <div class="grid3">${tiles}</div>`);
+  <div class="grid3">${tiles}</div>
+  ${a.owner?'':`<p class="fine">Broker: ${esc(a.b)} · TX license #0000000 (sample) · Information About Brokerage Services · Consumer Protection Notice</p>`}`);
 }
 function soldSheet(){
  const l=L[IX.avef];
@@ -709,18 +710,19 @@ function postSheet(role){
    <div>${sw('o1','Open on the best shot','AI picks the hook for the first 2 seconds')}${sw('o2','Captions and room labels','Auto-generated, editable')}
    ${sw('o3','Price and monthly payment overlay','Pulled from the listing')}${sw('o4','Licensed trending music','Cleared for TikTok and Reels')}
    ${sw('o5','Cross-post to TikTok and Reels','With the Dreamscrol watermark')}${sw('o6','Invite sellers to collab','They can add a “From the sellers” clip after you approve it',false)}
-   ${sw('o7','Show brokerage name','Required on every post by state advertising rules',true,true)}</div>
-   <button class="btn" data-publish="agent">Publish</button>`;
+   ${sw('o7','Show brokerage name','Required on every ad by Texas rules, at least half the size of your contact info',true,true)}
+   ${sw('o8','This listing is filed in Unlock MLS','Active, Coming Soon or Flex. A public post counts as marketing under Clear Cooperation',false)}</div>
+   <button class="btn" data-publish="agent" id="pubAgent" disabled style="opacity:.5">Publish</button>`;
  }else if(postRole==='fsbo'){
   body=`<div class="steps">
     <div class="step ok"><span class="k">1</span><span>Name matches county records<small>Travis Central Appraisal District</small></span><span class="done">Done</span></div>
     <div class="step${S.idOk?' ok':''}"><span class="k">2</span><span>Confirm it’s you<small>Photo ID and a selfie</small></span>${S.idOk?'<span class="done">Done</span>':'<button data-verify>Verify</button>'}</div>
     <div class="step"><span class="k">3</span><span>Add clips<small>We cut the video for you</small></span></div></div>
    <div class="clips">${clipsFor(L[IX.berkman])}</div>
-   <div class="price-tags"><span><b>$99</b> to post</span><span>No commission</span><span><b>$29</b>/week boost</span></div>
+   <div class="price-tags"><span><b>Free</b> to post</span><span>No commission</span><span>Boosts coming soon</span></div>
    <div>${sw('f1','Let local agents offer help','You can say no. Turn this off any time.',true)}${sw('f2','Show “Verified owner” badge','Appears after step 2',true,true)}</div>
    <button class="btn" data-publish="fsbo"${S.idOk?'':' disabled style="opacity:.5"'}>Publish</button>
-   <p class="fine">Flat fees only. Dreamscrol never takes a cut of the sale and doesn’t negotiate for you.</p>`;
+   <p class="fine">Dreamscrol never takes a cut of the sale and doesn’t negotiate for you.</p>`;
  }else{
   body=`<label class="field" for="mmPrice">Your “make me move” price<input id="mmPrice" inputmode="numeric" value="$1,400,000"></label>
    <div class="clips">${clipsFor(L[IX.kinney])}</div>
@@ -852,6 +854,7 @@ $('#app').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('[
 $('#app').addEventListener('change',e=>{
  if(e.target.id==='setMonthly'){S.monthly=e.target.checked;renderAllPrices()}
  if(e.target.id==='setCouples'){setCouples(e.target.checked)}
+ if(e.target.id==='o8'){const b=$('#pubAgent');b.disabled=!e.target.checked;b.style.opacity=e.target.checked?'':'.5'}
 });
 $('#app').addEventListener('submit',e=>{
  e.preventDefault();const f=e.target;
