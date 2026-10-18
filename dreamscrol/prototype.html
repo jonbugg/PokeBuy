@@ -23,14 +23,24 @@
   --black:#000;
   --display:"Young Serif", Georgia, "Times New Roman", serif;
   --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ease-out:cubic-bezier(0.23,1,0.32,1);      /* UI enters and presses */
+  --ease-drawer:cubic-bezier(0.32,0.72,0,1);   /* sheets, iOS-like */
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
 html,body{height:100%}
+html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+::selection{background:var(--porch);color:var(--porch-ink)}
+input,select{caret-color:var(--porch);accent-color:var(--porch)}
+button,[role=button]{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 body{background:var(--ink);color:var(--text);font-family:var(--body);display:grid;place-items:center;overflow:hidden;
   padding-block:12px;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
 button:disabled{opacity:.5;cursor:not-allowed}
+.cta,.btn,.tog,.follow,.row,.arow,.lender,.opt,.pills button,.jump button,.mrow,.tile,.note,.who,.askrow button,.compose button,.step button,.seg button{transition:transform 140ms var(--ease-out),background-color 140ms var(--ease-out)}
+:is(.cta,.btn,.tog,.follow,.row,.arow,.lender,.opt,.pills button,.jump button,.mrow,.tile,.note,.who,.askrow button,.compose button,.step button,.seg button):active:not(:disabled){transform:scale(.97)}
+.nav button:active svg{transform:scale(.9)}
+.nav svg{transition:transform 140ms var(--ease-out)}
 button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focus-visible{outline:2px solid var(--porch);outline-offset:2px;border-radius:8px}
 
 .phone{position:relative;width:min(100%,420px);height:100%;max-height:880px;border-radius:28px;overflow:hidden;overflow:clip;background:var(--black);
@@ -42,7 +52,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focu
 .mark .moon{width:14px;height:14px;border-radius:50%;box-shadow:inset -4px -1px 0 0 var(--porch);transform:rotate(-20deg);flex:none}
 .mark small{font-family:var(--body);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:2px 6px;margin-left:2px}
 .toggles{display:flex;gap:6px;flex:none}
-.tog{font-size:12.5px;font-weight:700;padding:7px 11px;border-radius:99px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);white-space:nowrap}
+.tog{font-size:12.5px;font-weight:700;padding:9px 13px;border-radius:99px;background:rgba(12,10,16,.62);border:1px solid var(--line);white-space:nowrap}
 .tog[aria-pressed="true"]{background:var(--porch);color:var(--porch-ink);border-color:transparent}
 .tog.cpl[aria-pressed="true"]{background:var(--match);color:var(--match-ink)}
 
@@ -60,7 +70,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focu
 .shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,.5),transparent 20%,transparent 38%,rgba(0,0,0,.9) 86%)}
 
 .card.promo{display:grid;align-content:center;padding:28px 24px 40px;background:radial-gradient(120% 70% at 85% 8%,#3b2b57 0%,transparent 60%),radial-gradient(100% 60% at 0% 100%,#4d3118 0%,transparent 60%),var(--night)}
-.promo .eyebrow{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--porch);margin-bottom:10px}
 .promo h2{font-family:var(--display);font-weight:400;font-size:36px;line-height:1.1;margin:0 0 12px;text-wrap:balance}
 .promo p{color:var(--muted);font-size:15px;line-height:1.45;margin:0 0 18px;max-width:32ch}
 .promo ul{list-style:none;padding:0;margin:0 0 24px;display:grid;gap:10px;font-size:14.5px}
@@ -75,10 +84,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focu
 .segs i.done b{width:100%}
 .segs i.on b{animation:fill 3.5s linear forwards}
 @keyframes fill{to{width:100%}}
-.room{position:absolute;top:68px;left:14px;z-index:2;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:6px;background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.room{position:absolute;top:68px;left:14px;z-index:2;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:6px;background:rgba(12,10,16,.62)}
 .liveflag{position:absolute;top:64px;left:14px;z-index:2;display:flex;gap:6px;align-items:center}
 .liveflag b{font-size:11px;font-weight:800;letter-spacing:.08em;padding:4px 8px;border-radius:6px;background:var(--live)}
-.liveflag span{font-size:12px;font-weight:700;padding:4px 8px;border-radius:6px;background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.liveflag span{font-size:12px;font-weight:700;padding:4px 8px;border-radius:6px;background:rgba(12,10,16,.62)}
 .quote{position:absolute;left:22px;right:84px;top:28%;z-index:2;font-family:var(--display);font-size:22px;line-height:1.25;text-wrap:balance;text-shadow:0 2px 14px rgba(0,0,0,.7);animation:fadein .6s ease-out}
 .quote span{display:block;margin-top:8px;font-family:var(--body);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--porch)}
 
@@ -96,7 +105,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focu
 /* listing info */
 .info{position:absolute;left:14px;right:74px;bottom:16px;z-index:3;display:flex;flex-direction:column;gap:6px;text-shadow:0 1px 8px rgba(0,0,0,.55)}
 .chips{display:flex;flex-wrap:wrap;gap:5px}
-.chip{font-size:11.5px;font-weight:700;padding:4px 8px;border-radius:99px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);text-shadow:none}
+.chip{font-size:11.5px;font-weight:700;padding:4px 8px;border-radius:99px;background:rgba(12,10,16,.62);border:1px solid var(--line);text-shadow:none}
 .chip.new,.chip.unless,.chip.open,.chip.north{color:var(--porch)}
 .chip.drop{color:var(--heart)}
 .chip.fsbo,.chip.ver,.chip.reno{color:var(--match)}
@@ -106,7 +115,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focu
 .chip.live i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--heart);margin-right:5px;vertical-align:1px;animation:pulse 1.4s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.3}}
 .tapinfo{display:flex;flex-direction:column;gap:5px;cursor:pointer;border-radius:10px}
-.kicker{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--porch);margin-bottom:-3px}
+.pre{font-size:14px;font-weight:700;color:var(--porch);align-self:center}
 .price-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .price{font-family:var(--display);font-size:34px;line-height:1.05;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
 .was{font-size:14px;color:var(--muted);text-decoration:line-through}
@@ -123,8 +132,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focu
 .agent .brk{display:block;font-size:13px;font-weight:700;color:var(--text)}
 .agent .brk i{font-style:normal;font-weight:500;color:var(--muted)}
 .who{display:flex;align-items:center;gap:8px;min-width:0;text-align:left}
-.who>span:last-child{min-width:0}
-.follow{margin-left:auto;font-size:12px;font-weight:800;padding:5px 11px;border-radius:99px;border:1.5px solid var(--text);text-shadow:none;flex:none}
+.who>span:last-child{min-width:0;overflow:hidden}
+.who .hl{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agent .brk{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.follow{margin-left:auto;font-size:12px;font-weight:800;padding:8px 13px;border-radius:99px;border:1.5px solid var(--text);text-shadow:none;flex:none}
 .follow.on{background:var(--text);color:var(--ink)}
 .ctas{display:flex;gap:6px;margin-top:2px}
 .cta{flex:1;font-size:13px;font-weight:800;padding:10px 6px;border-radius:12px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);text-shadow:none;white-space:nowrap}
@@ -136,7 +147,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focu
 .chat p.host b{color:var(--porch)}
 .chat p.you b{color:var(--match)}
 .askrow{display:flex;gap:6px}
-.askrow input{flex:1;min-width:0;font:inherit;font-size:13.5px;color:var(--text);background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:10px 12px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.askrow input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--text);background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:10px 12px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .askrow button{font-size:13px;font-weight:800;padding:0 14px;border-radius:12px;background:var(--porch);color:var(--porch-ink)}
 
 .guess{padding:10px;border-radius:14px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:grid;gap:8px;text-shadow:none}
@@ -222,7 +233,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focu
 
 .inbox{display:grid;gap:2px}
 .note{display:grid;grid-template-columns:40px 1fr 10px;gap:12px;align-items:center;padding:12px 8px;border-radius:12px;text-align:left}
-.note:hover{background:var(--raise)}
+@media (hover:hover) and (pointer:fine){.note:hover{background:var(--raise)}.lender:hover,.arow:hover,.row:hover{background:var(--raise2)}}
 .note .ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--raise2)}
 .note .ic svg{width:20px;height:20px;fill:none;stroke:var(--text);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .note .ic.sold,.note .ic.offer{background:var(--porch)} .note .ic.sold svg,.note .ic.offer svg{stroke:var(--porch-ink)}
@@ -246,9 +257,18 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focu
 
 /* sheets, modal, toast */
 .sheet-wrap{position:absolute;inset:0;z-index:20;display:flex;align-items:flex-end;background:rgba(0,0,0,.45)}
-.sheet{width:100%;max-height:86%;overflow-y:auto;background:var(--night);border-radius:22px 22px 0 0;padding:10px 18px 22px;display:grid;gap:12px;animation:up .25s ease-out}
+.sheet{width:100%;max-height:86%;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--raise2) transparent;background:var(--night);border-radius:22px 22px 0 0;padding:0 18px 22px;display:grid;gap:12px;animation:sheetIn .42s var(--ease-drawer);box-shadow:0 -12px 40px rgba(0,0,0,.35)}
+@keyframes sheetIn{from{transform:translateY(100%)}}
+.sheet-wrap{animation:fadeWrap .2s var(--ease-out)}
+@keyframes fadeWrap{from{background:rgba(0,0,0,0)}}
+.sheet-wrap.closing{background:rgba(0,0,0,0);transition:background .2s var(--ease-out)}
+.sheet-wrap.closing .sheet{transform:translateY(100%);transition:transform .22s var(--ease-out)}
+.sheet.dragging{transition:none;animation:none}
+.view{overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--raise2) transparent}
 @keyframes up{from{transform:translateY(40px);opacity:.4}}
-.handle{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 2px}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,-8px) scale(.98)}}
+.grab{display:grid;place-items:center;height:26px;margin:0 -18px -6px;touch-action:none;cursor:grab;position:sticky;top:0;background:var(--night);z-index:1}
+.handle{width:40px;height:4px;border-radius:2px;background:var(--muted);opacity:.5}
 .sheet h3{margin:0;font-family:var(--display);font-weight:400;font-size:22px;text-wrap:balance}
 .sheet h4{margin:4px 0 -4px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .sheet p.sub{margin:-6px 0 0;color:var(--muted);font-size:13px;line-height:1.4}
@@ -259,7 +279,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focu
 .cmt .badge2{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:99px;margin-left:5px;background:var(--porch);color:var(--porch-ink)}
 .cmt .badge2.seller{background:var(--match);color:var(--match-ink)}
 .compose{display:flex;gap:8px;position:sticky;bottom:-22px;background:var(--night);padding-block:8px}
-.compose input{flex:1;min-width:0;font:inherit;font-size:14px;color:var(--text);background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.compose input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--text);background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
 .compose button{font-weight:800;color:var(--porch);padding:0 6px}
 .warn{font-size:12.5px;line-height:1.4;padding:10px 12px;border-radius:12px;background:rgba(255,92,124,.12);border:1px solid rgba(255,92,124,.35)}
 .warn b{color:var(--heart)}
@@ -338,6 +358,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focu
 .lender .mo2{font-family:var(--display);font-size:19px;text-align:right;font-variant-numeric:tabular-nums}
 .lender .q{grid-column:2/4;display:flex;gap:4px 12px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
 .lender .q strong{color:var(--text);font-variant-numeric:tabular-nums}
+.star{width:12px;height:12px;fill:var(--porch);vertical-align:-1px;margin-right:2px}
 .spons{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .letter{background:var(--text);color:var(--ink);border-radius:12px;padding:16px;display:grid;gap:6px;font-size:13px;line-height:1.45}
 .letter b{font-family:var(--display);font-weight:400;font-size:24px}
@@ -353,7 +374,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focu
 .match .btns{display:grid;gap:8px;width:100%;max-width:260px}
 
 .sheet-wrap~.toast,.match~.toast{top:14px}
-.toast{position:absolute;left:50%;top:100px;transform:translateX(-50%);z-index:40;max-width:calc(100% - 32px);width:max-content;font-size:13px;font-weight:700;padding:10px 14px;border-radius:12px;background:var(--text);color:var(--ink);box-shadow:0 10px 30px rgba(0,0,0,.4);animation:up .2s ease-out;text-align:center}
+.toast{position:absolute;left:50%;top:100px;transform:translateX(-50%);z-index:40;max-width:calc(100% - 32px);width:max-content;font-size:13px;font-weight:700;padding:10px 14px;border-radius:12px;background:var(--text);color:var(--ink);box-shadow:0 10px 30px rgba(0,0,0,.4);animation:toastIn .24s var(--ease-out);text-align:center}
 
 @media (prefers-reduced-motion:reduce){
   .card.active .media svg,.card.live.active .media svg,.segs i.on b,.burst.go,.chip.live i,.sheet,.match-in,.toast,.quote,.chat p{animation:none}
@@ -364,7 +385,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focu
 
 <div class="phone" id="app">
   <header class="top" id="top">
-    <div class="mark"><span class="moon" aria-hidden="true"></span>dreamscrol<small>Demo</small></div>
+    <div class="mark"><span class="moon" aria-hidden="true"></span>dreamscrol</div>
     <div class="toggles">
       <button class="tog" id="tGuess" aria-pressed="false">Guess</button>
       <button class="tog cpl" id="tCouples" aria-pressed="false">Couples</button>
@@ -591,6 +612,7 @@ function scene(l,ri){
 }
 
 /* ---------- icons ---------- */
+const STAR='<svg class="star" viewBox="0 0 24 24" aria-label="rating"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>';
 const I={
  heart:'<svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.1 4.3 2.4.7-1.3 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>',
  cmt:'<svg viewBox="0 0 24 24"><path d="M4 4.5h16a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 1-1.5 1.5H10l-5.5 4v-4H4A1.5 1.5 0 0 1 2.5 16V6A1.5 1.5 0 0 1 4 4.5z"/></svg>',
@@ -613,13 +635,12 @@ const NI={
 const feed=$('#feed');
 function agentRow(l){
  const a=l.ag;
- return `<div class="agent"><button class="who" data-act="profile"><span class="av">${a.i}</span><span><b>@${l.agent}</b>${l.collab?` <em>with @${l.collab}</em>`:''}${a.owner?`<small>${esc(a.b)}</small>`:`<span class="brk">${esc(a.b)}</span><small>Real Estate Broker · ${a.ph}</small>`}</span></button><button class="follow" data-act="follow">Follow</button></div>`;
+ return `<div class="agent"><button class="who" data-act="profile"><span class="av">${a.i}</span><span><span class="hl"><b>@${l.agent}</b>${l.collab?` <em>with @${l.collab}</em>`:''}</span>${a.owner?`<small>${esc(a.b)}</small>`:`<span class="brk">${esc(a.b)}</span><small>Real Estate Broker · ${a.ph}</small>`}</span></button><button class="follow" data-act="follow">Follow</button></div>`;
 }
 function cardHTML(l){
  const chips=`<span class="chip budget" hidden></span>`+l.chips.map(c=>`<span class="chip ${c.k||''}">${c.t}</span>`).join('')+(l.live?'':`<span class="chip live"><i></i>${l.watching} watching</span>`);
  const tap=`<div class="tapinfo" data-act="details" role="button" tabindex="0" aria-label="Details for ${esc(l.addr)}">
-    ${l.offmarket?'<div class="kicker">Make me move</div>':''}
-    <div class="price-row"><span class="price"></span><span class="was"${l.was?'':' hidden'}>${l.was?money(l.was):''}</span><span class="mo"></span></div>
+    <div class="price-row">${l.offmarket?'<span class="pre">Would move for</span>':''}<span class="price"></span><span class="was"${l.was?'':' hidden'}>${l.was?money(l.was):''}</span><span class="mo"></span></div>
     <div class="g-result" hidden></div>
     <div class="facts">${l.beds} bd · ${l.baths} ba · ${l.sqft.toLocaleString('en-US')} sqft</div>
     <div class="addr">${esc(l.addr)} · ${esc(l.hood)}<u>Details</u></div></div>`;
@@ -650,9 +671,9 @@ function promoHTML(){
  return `<article class="card promo" data-promo="1" aria-label="Find your buying power" id="promo">${promoInner()}</article>`;
 }
 function promoInner(){
- if(S.bp)return `<div class="eyebrow">Your buying power</div><h2>Up to ${money(S.bp.max)}</h2><p>The feed now marks which homes fit. ${S.preapproved?`You’re pre-approved with ${esc(S.lender.n)}.`:'Next step: compare local lenders and get pre-approved so your offers count.'}</p>
+ if(S.bp)return `<h2>You can look up to ${money(S.bp.max)}</h2><p>The feed now marks which homes fit. ${S.preapproved?`You’re pre-approved with ${esc(S.lender.n)}.`:'Next step: compare local lenders and get pre-approved so your offers count.'}</p>
   <button class="btn" data-open="${S.preapproved?'letter':'lenders'}">${S.preapproved?'See my pre-approval':'Compare lenders'}</button>`;
- return `<div class="eyebrow">Quick check</div><h2>What can you actually afford?</h2><p>Four questions. No credit check. Your feed starts showing what fits.</p>
+ return `<h2>What can you actually afford?</h2><p>Four questions. No credit check. Your feed starts showing what fits.</p>
   <ul><li>Your real monthly payment on every home</li><li>Every local lender side by side, ranked by APR</li><li>Pre-approved before you fall for one</li></ul>
   <button class="btn" data-open="bp">Find my buying power</button>`;
 }
@@ -664,7 +685,7 @@ function renderPrice(i){
  const pe=$('.price',c),me=$('.mo',c);
  if(hidden){pe.textContent='$???,???'}
  else if(S.monthly){pe.textContent=money(m)+'/mo';me.textContent=money(l.price)}
- else{pe.textContent=money(l.price);me.textContent='≈ '+money(m)+'/mo'}
+ else{pe.textContent=l.offmarket?short(l.price):money(l.price);me.textContent='≈ '+money(m)+'/mo'}
  me.hidden=hidden; $('.was',c).hidden=hidden||!l.was||S.monthly;
  const gp=$('.guess',c); if(gp)gp.hidden=!hidden;
  const r=$('.g-result',c);
@@ -717,8 +738,17 @@ function startLive(i){
 const layer=$('#layer');
 let toastT;
 function toast(msg){clearTimeout(toastT);layer.querySelector('.toast')?.remove();const t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.textContent=msg;layer.appendChild(t);toastT=setTimeout(()=>t.remove(),2800)}
-function sheet(html){closeSheet();layer.insertAdjacentHTML('beforeend',`<div class="sheet-wrap" data-close><div class="sheet" role="dialog" aria-modal="true"><div class="handle"></div>${html}</div></div>`);const tt=layer.querySelector('.toast');if(tt)layer.appendChild(tt);const f=layer.querySelector('.sheet button, .sheet input');f&&f.focus({preventScroll:true})}
-function closeSheet(){layer.querySelectorAll('.sheet-wrap,.match').forEach(n=>n.remove())}
+function sheet(html){closeSheet();layer.insertAdjacentHTML('beforeend',`<div class="sheet-wrap" data-close><div class="sheet" role="dialog" aria-modal="true"><div class="grab" aria-hidden="true"><div class="handle"></div></div>${html}</div></div>`);const tt=layer.querySelector('.toast');if(tt)layer.appendChild(tt);const f=layer.querySelector('.sheet button, .sheet input');f&&f.focus({preventScroll:true})}
+function closeSheet(animate){layer.querySelectorAll('.sheet-wrap,.match').forEach(n=>{
+ if(!animate||n.classList.contains('closing')||matchMedia('(prefers-reduced-motion: reduce)').matches){n.remove();return}
+ n.classList.add('closing');n.querySelector('.sheet')?.style.removeProperty('transform');setTimeout(()=>n.remove(),220)})}
+/* drag the grab bar down to dismiss: distance or a quick flick */
+let drag=null;
+layer.addEventListener('pointerdown',e=>{const g=e.target.closest('.grab');if(!g||drag)return;const sh=g.closest('.sheet');drag={sh,y:e.clientY,t:Date.now(),dy:0};sh.classList.add('dragging');g.setPointerCapture(e.pointerId)});
+layer.addEventListener('pointermove',e=>{if(!drag)return;let dy=e.clientY-drag.y;dy=dy<0?dy*.2:dy;drag.dy=dy;drag.sh.style.transform=`translateY(${dy}px)`});
+const endDrag=()=>{if(!drag)return;const{sh,dy,t}=drag;drag=null;sh.classList.remove('dragging');const v=Math.abs(dy)/Math.max(1,Date.now()-t);
+ if(dy>110||(dy>20&&v>.11)){closeSheet(true)}else{sh.style.transition='transform .3s var(--ease-drawer)';sh.style.transform='';setTimeout(()=>sh.style.removeProperty('transition'),300)}};
+layer.addEventListener('pointerup',endDrag);layer.addEventListener('pointercancel',endDrag);
 function gate(why,fn){
  if(S.signedIn)return fn();
  S.pending=fn;
@@ -836,7 +866,7 @@ function bpSheet(){
 }
 const num=v=>+String(v).replace(/[^0-9.]/g,'')||0;
 function readBP(){return{income:num($('#bpInc').value),debts:num($('#bpDebt').value),down:num($('#bpDown').value),credit:$('#bpCredit').value,first:$('#bpFirst').checked}}
-function calcBP(){const b=readBP(),r=buyingPower(b);$('#bpOut').innerHTML=`<small>You could buy up to</small><b>${money(r.max)}</b><span>About ${money(r.cap)}/mo for housing at a ${r.rate.toFixed(3)}% example rate (${(r.rate+APR_ADD).toFixed(3)}% APR), 30-year fixed</span>`}
+function calcBP(){const b=readBP(),r=buyingPower(b);if(b.income<10000||r.max<10000){$('#bpOut').innerHTML=`<small>You could buy up to</small><span>Add your yearly household income to see an estimate. If your debts are higher than 43% of income, lenders usually can’t approve a loan yet.</span>`;return}$('#bpOut').innerHTML=`<small>You could buy up to</small><b>${money(r.max)}</b><span>About ${money(r.cap)}/mo for housing at a ${r.rate.toFixed(3)}% example rate (${(r.rate+APR_ADD).toFixed(3)}% APR), 30-year fixed</span>`}
 
 function lendersSheet(i){
  if(i!=null)lenderFor=i;
@@ -846,7 +876,7 @@ function lendersSheet(i){
  const key={apr:(a,b)=>a.apr-b.apr,mo:(a,b)=>a.mo-b.mo,fees:(a,b)=>a.fees-b.fees,close:(a,b)=>a.close-b.close}[S.lenderSort];
  const ranked=rows.sort(key);
  const card=x=>`<button class="lender" data-lender="${x.id}" aria-pressed="${S.lender&&S.lender.id===x.id}"><span class="lg">${x.i}</span><b>${esc(x.n)}</b><span class="mo2">${money(x.mo)}<small style="font-family:var(--body);font-size:11px;color:var(--muted)">/mo</small></span>
-   <span class="q"><span><strong>${x.rate.toFixed(3)}%</strong> rate</span><span><strong>${x.apr.toFixed(3)}%</strong> APR</span><span><strong>${x.pts}</strong> pts</span><span><strong>${money(x.fees)}</strong> fees</span><span>★ ${x.stars} (${fmtK(x.reviews)})</span><span>~${x.close} days to close</span></span></button>`;
+   <span class="q"><span><strong>${x.rate.toFixed(3)}%</strong> rate</span><span><strong>${x.apr.toFixed(3)}%</strong> APR</span><span><strong>${x.pts}</strong> pts</span><span><strong>${money(x.fees)}</strong> fees</span><span>${STAR}${x.stars} (${fmtK(x.reviews)})</span><span>~${x.close} days to close</span></span></button>`;
  sheet(`<h3>Compare lenders</h3><p class="sub">${l?esc(l.addr)+' · ':''}${money(price)} price, ${money(pay(price,tax).down)} down, 30-year fixed${S.bp?`, ${esc(S.bp.credit)} credit`:''}.</p>
   <div class="pills" role="group" aria-label="Sort lenders">${[['apr','Lowest APR'],['mo','Lowest payment'],['fees','Lowest fees'],['close','Fastest close']].map(([k,t])=>`<button data-sort="${k}" aria-pressed="${S.lenderSort===k}">${t}</button>`).join('')}</div>
   <span class="spons">All ${ranked.length} local lenders · ranked by ${{apr:'lowest APR',mo:'lowest payment',fees:'lowest fees',close:'fastest close'}[S.lenderSort]}</span>
@@ -914,7 +944,7 @@ function matchResults(i){
  const l=i!=null?L[i]:null,lang=$('#mLang').value,listing=l&&!l.ag.owner&&MATCH[l.agent]?l.agent:null;
  const scored=BUYER_AGENTS.filter(h=>h!==listing).map(h=>{const m=MATCH[h];return{h,m,score:m.areas.filter(a=>matchPick.has(a)).length*3+(m.langs.includes(lang)?2:0)+m.sold/50}}).sort((a,b)=>b.score-a.score).slice(0,3);
  const anyLang=scored.some(x=>x.m.langs.includes(lang));
- const row=(h,m,dual)=>`<button class="arow" data-intro="${h}" data-for="${i}"${dual?' data-dual="1"':''}><span class="av">${AG[h].i}</span><span>@${h}<small>${dual?'Listing agent for this home · ':''}${m.sold} homes sold · ${m.areas.slice(0,2).join(', ')}</small><small>Replies in ~${m.reply} min · ★ ${m.stars} (${m.rev})${m.langs.length>1?' · '+m.langs.join(', '):''}</small></span><em>Intro</em></button>`;
+ const row=(h,m,dual)=>`<button class="arow" data-intro="${h}" data-for="${i}"${dual?' data-dual="1"':''}><span class="av">${AG[h].i}</span><span>@${h}<small>${dual?'Listing agent for this home · ':''}${m.sold} homes sold · ${m.areas.slice(0,2).join(', ')}</small><small>Replies in ~${m.reply} min · ${STAR}${m.stars} (${m.rev})${m.langs.length>1?' · '+m.langs.join(', '):''}</small></span><em>Intro</em></button>`;
  sheet(`<h3>Your matches</h3><p class="sub">Matched on where you’re looking${lang!=='English'?', your language':''} and experience. Agents don’t pay for these introductions.</p>
   ${listing?`<h4>Knows this home best</h4>${row(listing,MATCH[listing],true)}<p class="fine">One agent representing both buyer and seller needs written consent from both sides.</p><h4>Agents who’d work only for you</h4>`:''}
   ${!anyLang?`<p class="muted">No matches who work in ${esc(lang)} yet. Here are the closest matches.</p>`:''}
@@ -1072,7 +1102,7 @@ function reportHTML(){
  const spark=`<svg class="sp" viewBox="0 0 340 152" role="img" aria-label="Daily views over 7 days, rising from 3.1K to 9.2K">${grid}<polygon class="sp-area" points="${x(0)},124 ${pts} ${x(6)},124"/><polyline class="sp-line" points="${pts}"/><circle class="sp-dot" cx="${x(6)}" cy="${y(9200)}" r="4.5"/>${labs}</svg>`;
  const bar=(t,p)=>`<div class="bar"><span>${t}</span><span>${p}%</span><i><b style="width:${p}%"></b></i></div>`;
  return `<div class="v-head"><h1 style="font-size:24px">Seller report<span class="tag">Sample data</span></h1><p>1840 Chicago Blvd · live 7 days. Bring this to your next listing pitch.</p></div>
-  <div class="stats"><div class="stat"><b>48.2K</b><span>Views</span></div><div class="stat"><b>1,206</b><span>Saves</span></div><div class="stat"><b>37</b><span>Tour requests</span></div><div class="stat"><b>2,914</b><span>Shares</span></div></div>
+  <div class="stats"><div class="stat"><b>48.2K</b><span>Views · up 38% this week</span></div><div class="stat"><b>1,206</b><span>Saves · 2.5% of viewers</span></div><div class="stat"><b>37</b><span>Tour requests · 5 today</span></div><div class="stat"><b>2,914</b><span>Shares · 41% to a partner</span></div></div>
   <div class="panel"><h2>Ready-to-buy signal</h2><p class="callout"><b>14 pre-approved buyers</b> saved this home, and <b>2 offers</b> are being prepared by buyers’ agents.</p><p class="muted">Counts only. Buyers’ details stay private until their agent submits an offer.</p></div>
   <div class="panel"><h2>Views per day</h2>${spark}</div>
   <div class="panel"><p class="callout">This home got <b>3.4× more views</b> than the median Detroit listing this week.</p></div>
@@ -1110,7 +1140,7 @@ function openThing(k,forI){
 }
 $('#app').addEventListener('click',e=>{
  const t=e.target,d=(k)=>t.closest(`[data-${k}]`);
- if(t.matches('[data-close]')){closeSheet();return}
+ if(t.matches('[data-close]')){closeSheet(true);return}
  let el;
  if(el=d('m')){closeSheet();if(el.dataset.m==='tour')gate('Book a tour together',()=>toast(`Tour request sent for you and ${PARTNER} (demo)`));return}
  if(el=d('signup')){S.signedIn=true;closeSheet();const f=S.pending;S.pending=null;toast('Signed in (demo)');f&&setTimeout(f,150);return}
@@ -1198,7 +1228,7 @@ $('#tGuess').addEventListener('click',()=>{S.guess=!S.guess;renderAllPrices();he
 $('#tCouples').addEventListener('click',()=>setCouples(!S.couples));
 
 document.addEventListener('keydown',e=>{
- if(e.key==='Escape'){closeSheet();return}
+ if(e.key==='Escape'){closeSheet(true);return}
  if(S.view!=='feed'||layer.querySelector('.sheet-wrap,.match')||/INPUT|SELECT/.test(document.activeElement.tagName))return;
  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const cards=$$('.card',feed),cur=cards.findIndex(c=>c.classList.contains('active'));const at=cur<0?cards.indexOf($('#promo')):cur;const n=cards[Math.max(0,Math.min(cards.length-1,at+(e.key==='ArrowDown'?1:-1)))];n.scrollIntoView({behavior:'smooth'})}
 });
