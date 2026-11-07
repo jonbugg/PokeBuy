@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grade Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f6f5f4; --white: #ffffff; --ink: #000000;
+    --ink-95: rgba(0,0,0,.95); --ink-90: rgba(0,0,0,.9); --ink-60: rgba(0,0,0,.6);
+    --ink-40: rgba(0,0,0,.4); --ink-20: rgba(0,0,0,.2); --hair: rgba(0,0,0,.08); --hair-2: rgba(0,0,0,.05);
+    --blue: #0075de; --blue-hover: #005bab; --sky-tint: #e6f3fe; --sky-wash: #62aef0;
+    --marigold: #ffb110; --saffron: #e89d01; --coral: #f64932; --vermillion: #e32d14;
+    --midnight: #02093a; --mocha: #b18164; --graphite: #615d59;
+    --peach: #ffe4d4; --mint: #e3f5e9; --mint-ink: #1f7a45; --butter: #fff3d6; --rose: #fde7e3;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --serif: "Source Serif 4", Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; }
+  body { margin: 0; background: var(--paper); color: var(--ink-95); font: 16px/1.5 var(--sans); font-feature-settings: "lnum"; }
+  main { max-width: 1080px; margin: 0 auto; padding: 0 16px 96px; }
+  button { font: inherit; cursor: pointer; }
+  a { color: var(--blue); }
+
+  /* top bar */
+  .bar { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; color: var(--ink); }
+  .logo { width: 28px; height: 28px; border-radius: 7px; background: var(--ink); color: var(--white); display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+  .status { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-60); padding: 6px 12px; border-radius: 9999px; background: var(--white); border: 1px solid var(--hair); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-20); }
+  .dot.on { background: #2fb36a; box-shadow: 0 0 0 3px rgba(47,179,106,.15); }
+  .dot.off { background: var(--coral); }
+
+  /* hero */
+  .hero { padding: 40px 0 28px; }
+  h1 { font-size: clamp(40px, 7vw, 64px); line-height: 1.02; letter-spacing: -0.03em; font-weight: 700; margin: 0; color: var(--ink); }
+  .hl { display: inline-block; background: var(--peach); border-radius: 9999px; padding: 0 .28em; position: relative; }
+  .hl::before { content: ""; display: inline-block; width: .22em; height: .22em; border-radius: 50%; background: var(--coral); vertical-align: middle; margin: -.1em .14em 0 0; }
+  .lede { font-family: var(--serif); font-size: 20px; line-height: 1.5; color: var(--ink-60); max-width: 640px; margin: 16px 0 0; }
+
+  /* stepper */
+  .steps { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 20px; }
+  .step-pill { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--hair); background: var(--white); color: var(--ink-60); border-radius: 9999px; padding: 6px 14px 6px 6px; font-size: 14px; font-weight: 500; transition: background .2s ease, color .2s ease, border-color .2s ease; }
+  .step-pill .n { width: 22px; height: 22px; border-radius: 50%; background: var(--hair-2); display: grid; place-items: center; font-size: 12px; font-weight: 600; color: var(--ink-60); }
+  .step-pill.active { color: var(--ink); border-color: var(--ink-20); }
+  .step-pill.active .n { background: var(--ink); color: var(--white); }
+  .step-pill.done .n { background: var(--mint); color: var(--mint-ink); }
+  .step-pill .opt { font-size: 11px; color: var(--ink-40); font-weight: 500; }
+  .step-pill:hover { border-color: var(--ink-20); }
+
+  /* layout */
+  .work { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  @media (max-width: 860px) { .work { grid-template-columns: 1fr; } }
+  .card { background: var(--white); border: 1px solid var(--hair); border-radius: 12px; padding: 24px; }
+  .card h2 { font-size: 22px; letter-spacing: -0.011em; line-height: 1.25; margin: 0 0 6px; color: var(--ink); font-weight: 600; }
+  .muted { color: var(--ink-60); }
+  .small { font-size: 14px; }
+  .eyebrow { font-size: 12px; letter-spacing: .01em; text-transform: uppercase; color: var(--ink-40); font-weight: 600; margin-bottom: 8px; }
+
+  /* step panel */
+  .stage { display: grid; grid-template-columns: 180px 1fr; gap: 24px; align-items: center; margin: 20px 0 24px; }
+  @media (max-width: 520px) { .stage { grid-template-columns: 1fr; } .stage svg { max-width: 200px; } }
+  .checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .checklist li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: var(--ink-90); }
+  .tick { flex: none; width: 20px; height: 20px; border-radius: 6px; border: 1.5px solid var(--ink-20); margin-top: 1px; display: grid; place-items: center; cursor: pointer; transition: all .2s ease; background: var(--white); }
+  .tick.on { background: var(--ink); border-color: var(--ink); }
+  .tick.on::after { content: ""; width: 9px; height: 5px; border: 2px solid var(--white); border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px); }
+  .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .btn { border: 0; border-radius: 8px; padding: 10px 18px; font-size: 15px; font-weight: 500; transition: background .2s ease, transform .2s cubic-bezier(.34,1.56,.64,1); }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: var(--blue); color: var(--white); }
+  .btn-primary:hover { background: var(--blue-hover); }
+  .btn-primary:disabled { background: var(--ink-20); cursor: wait; }
+  .btn-ghost { background: var(--sky-tint); color: var(--blue); }
+  .btn-text { background: transparent; color: var(--ink-60); padding: 10px 12px; }
+  .btn-text:hover { color: var(--ink); }
+  .btn-big { padding: 14px 26px; font-size: 16px; font-weight: 600; }
+  .link-upload { font-size: 14px; color: var(--ink-60); cursor: pointer; text-decoration: underline; text-decoration-color: var(--ink-20); text-underline-offset: 3px; }
+  .link-upload input { display: none; }
+  .res { display: inline-flex; background: var(--hair-2); border-radius: 9999px; padding: 3px; gap: 2px; }
+  .res button { border: 0; background: transparent; border-radius: 9999px; padding: 5px 12px; font-size: 13px; font-weight: 500; color: var(--ink-60); }
+  .res button.on { background: var(--white); color: var(--ink); box-shadow: 0 0 0 1px var(--hair); }
+
+  .progress { height: 6px; background: var(--hair-2); border-radius: 9999px; overflow: hidden; margin-top: 16px; display: none; }
+  .progress.on { display: block; }
+  .progress i { display: block; height: 100%; width: 0; background: var(--blue); border-radius: 9999px; transition: width .4s linear; }
+  .msg { margin-top: 14px; font-size: 14px; padding: 10px 14px; border-radius: 8px; display: none; }
+  .msg.on { display: block; }
+  .msg.err { background: var(--rose); color: var(--vermillion); }
+  .msg.warn { background: var(--butter); color: #8a5a00; }
+  .msg.ok { background: var(--mint); color: var(--mint-ink); }
+
+  /* tray */
+  .tray { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .thumb { border: 1px solid var(--hair); border-radius: 10px; background: var(--paper); aspect-ratio: 5/7; display: grid; place-items: center; overflow: hidden; position: relative; cursor: pointer; transition: border-color .2s ease; }
+  .thumb:hover { border-color: var(--ink-20); }
+  .thumb img { width: 100%; height: 100%; object-fit: contain; }
+  .thumb .ph { color: var(--ink-40); font-size: 13px; text-align: center; padding: 8px; }
+  .thumb .tag { position: absolute; left: 8px; top: 8px; background: rgba(255,255,255,.92); border-radius: 9999px; padding: 2px 10px; font-size: 12px; font-weight: 500; color: var(--ink-90); }
+  .thumb .c { position: absolute; left: 8px; right: 8px; bottom: 8px; background: rgba(255,255,255,.92); border-radius: 8px; padding: 4px 8px; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--ink-90); text-align: center; }
+  .tray-sub { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .tray-sub .thumb { aspect-ratio: auto; height: 64px; }
+
+  /* results */
+  .results { margin-top: 48px; display: none; }
+  .results.on { display: block; }
+  .section-title { font-size: clamp(28px, 4vw, 40px); letter-spacing: -0.025em; line-height: 1.1; font-weight: 700; margin: 0 0 8px; color: var(--ink); }
+  .verdict { border-radius: 12px; padding: 32px; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; margin-top: 20px; }
+  @media (max-width: 640px) { .verdict { grid-template-columns: 1fr; } }
+  .verdict.good { background: var(--mint); }
+  .verdict.maybe { background: var(--butter); }
+  .verdict.no { background: var(--rose); }
+  .verdict.unknown { background: var(--sky-tint); }
+  .verdict h3 { font-size: clamp(26px, 4vw, 36px); letter-spacing: -0.02em; line-height: 1.12; margin: 0; color: var(--ink); }
+  .verdict p { font-family: var(--serif); font-size: 18px; color: var(--ink-60); margin: 10px 0 0; max-width: 560px; }
+  .big-num { font-size: 72px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; color: var(--ink); text-align: right; }
+  .big-num small { display: block; font-size: 13px; letter-spacing: 0; font-weight: 500; color: var(--ink-60); margin-top: 6px; }
+
+  .companies { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+  @media (max-width: 760px) { .companies { grid-template-columns: 1fr; } }
+  .co-name { display: flex; justify-content: space-between; align-items: center; }
+  .co-name b { font-size: 14px; letter-spacing: .02em; }
+  .pill { display: inline-block; border-radius: 9999px; padding: 3px 10px; font-size: 12px; font-weight: 500; }
+  .pill.good { background: var(--mint); color: var(--mint-ink); }
+  .pill.maybe { background: var(--butter); color: #8a5a00; }
+  .pill.no { background: var(--rose); color: var(--vermillion); }
+  .pill.grey { background: var(--hair-2); color: var(--ink-60); }
+  .grade-val { font-size: 40px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; margin: 14px 0 4px; color: var(--ink); }
+  .grade-sub { font-size: 14px; color: var(--ink-60); font-variant-numeric: tabular-nums; }
+  .why { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 8px; border-top: 1px solid var(--hair); padding-top: 14px; }
+  .why li { font-size: 14px; color: var(--ink-60); display: flex; gap: 8px; }
+  .why li::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--ink-20); margin-top: 8px; }
+
+  .measure { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+  @media (max-width: 760px) { .measure { grid-template-columns: 1fr; } }
+  .diagram { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
+  .diagram .cs { max-width: 460px; width: 100%; margin: 0 auto; }
+  .kv { display: grid; gap: 10px; font-size: 14px; }
+  .kv div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--hair-2); padding-bottom: 8px; }
+  .kv span:first-child { color: var(--ink-60); }
+  .kv span:last-child { font-variant-numeric: tabular-nums; font-weight: 500; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--ink-60); margin-top: 12px; }
+  .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .surface-img { width: 100%; border-radius: 8px; margin-top: 12px; border: 1px solid var(--hair); }
+
+  /* expected grades */
+  .xg { margin-top: 16px; }
+  .xg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid var(--hair); }
+  .xg-row { display: grid; grid-template-columns: 150px 220px 170px 1fr; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--hair-2); }
+  .xg-row:last-of-type { border-bottom: 0; }
+  @media (max-width: 860px) { .xg-row { grid-template-columns: 1fr 1fr; } .xg-why { grid-column: 1 / -1; } }
+  .xg-co { font-weight: 700; font-size: 18px; color: var(--ink); }
+  .xg-co span { display: block; font-weight: 400; font-size: 12px; color: var(--ink-40); margin-top: 6px; }
+  .xg-logo { display: block; height: 30px; width: auto; max-width: 110px; object-fit: contain; object-position: left center; }
+  .xg-logo-psa { height: 24px; }
+  .xg-grade { display: flex; align-items: center; gap: 10px; }
+  .xg-grade b { font-size: 24px; letter-spacing: -0.02em; color: var(--ink); }
+  .xg-sub { font-size: 13px; color: var(--ink-60); font-variant-numeric: tabular-nums; }
+  .xg-why { font-size: 13px; color: var(--ink-60); }
+
+  /* centering on the real scan */
+  .cs { position: relative; cursor: zoom-in; }
+  .cs img { width: 100%; display: block; border-radius: 6px; }
+  .cs svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .cs-card { fill: none; stroke: rgba(255,255,255,.55); stroke-width: .25; stroke-dasharray: 1 .8; }
+  .cs-inner { fill: none; stroke: #3fd0e6; stroke-width: .35; }
+  .cs-dim { stroke: #3fd0e6; stroke-width: .45; }
+  .cs-lbl { font: 600 3px Inter, sans-serif; fill: #fff; paint-order: stroke; stroke: rgba(0,0,0,.75); stroke-width: .7px; }
+
+  .spot { margin: 14px 0 0; cursor: zoom-in; }
+  .spot img { width: 100%; display: block; border-radius: 6px; border: 1px solid var(--hair); }
+  .spot figcaption { font-size: 13px; color: var(--ink-60); margin-top: 6px; }
+  .spot figcaption b { color: var(--ink); font-weight: 600; }
+
+  /* close-up inspection */
+  .tabs { display: inline-flex; background: var(--hair-2); border-radius: 9999px; padding: 3px; gap: 2px; margin-bottom: 16px; }
+  .tabs button { border: 0; background: transparent; border-radius: 9999px; padding: 6px 16px; font-size: 14px; font-weight: 500; color: var(--ink-60); }
+  .tabs button.on { background: var(--white); color: var(--ink); box-shadow: 0 0 0 1px var(--hair); }
+  .cu-top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 20px; align-items: start; }
+  @media (max-width: 760px) { .cu-top { grid-template-columns: 1fr; } }
+  figure { margin: 0; }
+  .cu-full img, .cu-tile img { width: 100%; display: block; border-radius: 6px; cursor: zoom-in; }
+  .cu-full figcaption, .cu-tile figcaption { font-size: 12px; color: var(--ink-60); margin-top: 6px; display: flex; align-items: center; gap: 6px; }
+  .cu-tile figcaption { text-transform: capitalize; }
+  .cu-tile .ends { margin-left: auto; display: flex; gap: 16px; flex: 1; justify-content: space-between; padding-left: 16px; text-transform: none; color: var(--ink-40); }
+  .cu-tile figcaption i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .cu-corners { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cu-edges { display: grid; gap: 12px; }
+  .findings { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .finding { display: grid; grid-template-columns: 96px 1fr; gap: 12px; align-items: center; border: 1px solid var(--hair); border-radius: 10px; padding: 8px; cursor: zoom-in; }
+  .finding img { width: 96px; height: 96px; object-fit: cover; border-radius: 6px; }
+  .finding b { display: block; margin: 4px 0 2px; font-size: 14px; text-transform: capitalize; }
+  .fine { font-family: var(--serif); font-size: 16px; color: var(--ink-60); margin-top: 28px; max-width: 720px; }
+  .modal { position: fixed; inset: 0; background: rgba(246,245,244,.92); display: none; place-items: center; z-index: 10; padding: 16px; }
+  .modal.on { display: grid; }
+  .modal img { max-width: min(560px, 100%); max-height: 90vh; border-radius: 12px; border: 1px solid var(--hair); background: var(--white); }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar">
+    <div class="brand"><div class="logo">10</div>Grade Check</div>
+    <div class="status"><span class="dot" id="dot"></span><span id="statusText">Looking for your scanner…</span></div>
+  </div>
+
+  <section class="hero">
+    <h1>Is it a <span class="hl">10</span>?</h1>
+    <p class="lede">Scan your card on your printer and get a TAG, PSA and CGC grade estimate before you pay to submit.</p>
+  </section>
+
+  <nav class="steps" id="steps"></nav>
+
+  <div class="work">
+    <section class="card" id="panel"></section>
+    <aside class="card">
+      <div class="eyebrow">This card</div>
+      <div class="tray">
+        <div class="thumb" data-slot="front"><span class="tag">Front</span><div class="ph">Not scanned</div></div>
+        <div class="thumb" data-slot="back"><span class="tag">Back</span><div class="ph">Not scanned</div></div>
+      </div>
+      <div class="tray-sub">
+        <div class="thumb" data-slot="front_rot"><div class="ph">Front 180° · optional</div></div>
+        <div class="thumb" data-slot="back_rot"><div class="ph">Back 180° · optional</div></div>
+      </div>
+      <div class="actions" style="margin-top:16px; justify-content:space-between">
+        <span class="muted small" id="sessionLabel"></span>
+        <button class="btn btn-text" id="newCard">Start a new card</button>
+      </div>
+    </aside>
+  </div>
+
+  <section class="results" id="results"></section>
+</main>
+<div class="modal" id="modal"><img alt="Enlarged scan"></div>
+
+<script>
+const STEPS = [
+  {id: "prep", label: "Set up"},
+  {id: "front", label: "Front"},
+  {id: "back", label: "Back"},
+  {id: "front_rot", label: "Front 180°", optional: true},
+  {id: "back_rot", label: "Back 180°", optional: true},
+];
+const SCAN_SECONDS = {600: 40, 1200: 150};
+const state = {session: null, step: "prep", dpi: 1200, done: {}, data: {}, checks: [false, false, false, false]};
+
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+
+/* ---------- scanner status ---------- */
+async function checkScanner() {
+  try {
+    const r = await (await fetch("/api/scanner")).json();
+    $("#dot").className = "dot " + (r.ok ? "on" : "off");
+    $("#statusText").textContent = r.ok ? "HP ENVY · " + r.state.toLowerCase() : "Scanner not found";
+    if (r.ok && r.located && !state.located) { state.located = true; if (state.step === "prep") renderPanel(); }
+  } catch { $("#dot").className = "dot off"; $("#statusText").textContent = "Scanner not found"; }
+}
+
+/* ---------- stepper ---------- */
+function renderSteps() {
+  $("#steps").innerHTML = STEPS.map((s, i) => {
+    const cls = [s.id === state.step ? "active" : "", (s.id === "prep" ? state.checks.every(Boolean) && state.step !== "prep" : state.done[s.id]) ? "done" : ""].join(" ");
+    const mark = (s.id === "prep" ? state.step !== "prep" : state.done[s.id]) ? "✓" : i + 1;
+    return `<button class="step-pill ${cls}" data-step="${s.id}"><span class="n">${mark}</span>${s.label}${s.optional ? ' <span class="opt">optional</span>' : ""}</button>`;
+  }).join("");
+  document.querySelectorAll("[data-step]").forEach(b => b.onclick = () => go(b.dataset.step));
+}
+
+function go(step) { state.step = step; renderSteps(); renderPanel(); }
+
+/* ---------- placement diagram ---------- */
+function platenSVG({flipped = false, rotated = false} = {}) {
+  const card = flipped ? "#3c5aa6" : "#ffd84d";
+  const rot = rotated ? "rotate(180 92 112)" : "";
+  return `<svg viewBox="0 0 170 210" width="100%" role="img" aria-label="The card sitting in the scan guide's window">
+    <rect x="4" y="4" width="162" height="202" rx="10" fill="#fff" stroke="rgba(0,0,0,.2)"/>
+    <path d="M14 14 L34 14 M14 14 L14 34 M14 14 L30 30" stroke="#0075de" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <rect x="36" y="40" width="112" height="144" rx="8" fill="#111"/>
+    <g transform="${rot}">
+      <rect x="48" y="52" width="88" height="122" rx="6" fill="${card}" stroke="rgba(0,0,0,.25)"/>
+      <rect x="55" y="59" width="74" height="108" rx="3" fill="${flipped ? "#6f8fd6" : "#fff4c2"}"/>
+      ${rotated ? "" : `<text x="92" y="118" text-anchor="middle" font-size="16" font-weight="700" font-family="Inter, sans-serif" fill="rgba(0,0,0,.55)">${flipped ? "BACK" : "FRONT"}</text>`}
+      ${rotated ? `<text x="92" y="118" text-anchor="middle" font-size="16" font-weight="700" font-family="Inter, sans-serif" fill="rgba(0,0,0,.55)" transform="rotate(180 92 112)">${flipped ? "BACK" : "FRONT"}</text>` : ""}
+    </g>
+    <text x="40" y="32" font-size="10" font-family="Inter, sans-serif" fill="rgba(0,0,0,.5)">guide in the arrow corner</text>
+    <text x="85" y="200" text-anchor="middle" font-size="10" font-family="Inter, sans-serif" fill="rgba(0,0,0,.5)">card in window, black cover on top</text>
+  </svg>`;
+}
+
+/* ---------- step panel ---------- */
+const PREP = [
+  `<a href="/guide" target="_blank" rel="noopener">Print the scan guide</a> (two sheets) and cut out sheet 1's window. One time only.`,
+  "Lay sheet 1 on the glass, printed side up, blue corner in the scanner's arrow corner.",
+  "Drop the card into the window face down, lined up with the little ticks.",
+  "Lay sheet 2 on top, black side down, then close the lid gently.",
+];
+const SCAN_COPY = {
+  front: {title: "Scan the front", body: "Card face down in the window, black cover sheet on top.", svg: {}},
+  back: {title: "Scan the back", body: "Lift the cover, flip the card over inside the window, put the cover back.", svg: {flipped: true}},
+  front_rot: {title: "Front, turned upside down", body: "For the surface check: front facing the glass again, turned 180° in the window. The light then hits from the other side, so dents and scratches show up.", svg: {rotated: true}},
+  back_rot: {title: "Back, turned upside down", body: "Same idea for the back: flip it, then turn it 180°.", svg: {flipped: true, rotated: true}},
+};
+
+function renderPanel() {
+  const p = $("#panel");
+  if (state.step === "prep") {
+    const loc = state.locate;
+    p.innerHTML = `
+      <div class="eyebrow">Step 1</div>
+      <h2>Set up the scanner</h2>
+      <p class="muted small" style="margin:0">The printed guide holds the card in the same spot every time and gives it the black background edge checks need.</p>
+      <div class="stage">
+        ${loc && loc.preview ? `<img src="${esc(loc.preview)}" alt="Preview of the scanner glass" style="width:100%;border-radius:8px;border:1px solid var(--hair);cursor:zoom-in" id="prevImg">` : platenSVG()}
+        <ul class="checklist">${PREP.map((t, i) => `<li><span class="tick ${state.checks[i] ? "on" : ""}" data-check="${i}" role="checkbox" aria-checked="${state.checks[i]}" tabindex="0"></span><span>${t}</span></li>`).join("")}</ul>
+      </div>
+      <div class="actions">
+        <button class="btn ${loc && loc.region ? "btn-ghost" : "btn-primary btn-big"}" id="locate">${loc && loc.region ? "Find it again" : "Find my card"}</button>
+        ${loc && loc.region ? `<button class="btn btn-primary btn-big" id="ready">Looks good, scan the front</button>` : ""}
+        ${state.located && !loc ? `<button class="btn btn-text" id="ready">Skip, the guide hasn't moved</button>` : ""}
+      </div>
+      <div class="progress" id="prog"><i></i></div>
+      <div class="msg" id="msg"></div>`;
+    p.querySelectorAll("[data-check]").forEach(t => t.onclick = () => { state.checks[+t.dataset.check] ^= 1; renderPanel(); });
+    $("#locate").onclick = locateCard;
+    if ($("#ready")) $("#ready").onclick = () => { state.checks = state.checks.map(() => true); go("front"); };
+    if ($("#prevImg")) $("#prevImg").onclick = () => { $("#modal img").src = loc.preview; $("#modal").classList.add("on"); };
+    if (loc) {
+      if (!loc.region) showMsg((loc.warnings || []).join(" ") || loc.error || "Couldn't find the card.", "err");
+      else if (loc.warnings && loc.warnings.length) showMsg(loc.warnings.join(" "), "warn");
+      else showMsg(loc.mode === "guide" ? "Found the guide and your card, nicely inside the window." : "Found your card.", "ok");
+    }
+    return;
+  }
+  const c = SCAN_COPY[state.step];
+  const idx = STEPS.findIndex(s => s.id === state.step) + 1;
+  const done = state.done[state.step];
+  p.innerHTML = `
+    <div class="eyebrow">Step ${idx}${STEPS[idx - 1].optional ? " · optional" : ""}</div>
+    <h2>${c.title}</h2>
+    <p class="muted small" style="margin:0">${c.body}</p>
+    <div class="stage">
+      ${platenSVG(c.svg)}
+      <div>
+        <div class="eyebrow">Resolution</div>
+        <div class="res" id="res">
+          <button data-dpi="600" class="${state.dpi === 600 ? "on" : ""}">600 dpi · ~40s</button>
+          <button data-dpi="1200" class="${state.dpi === 1200 ? "on" : ""}">1200 dpi · ~2½ min</button>
+        </div>
+        <p class="muted small">1200 shows the finest edge wear. 600 is quicker and still fine for centering.</p>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary btn-big" id="scanBtn">${done ? "Scan again" : "Scan " + STEPS[idx - 1].label.toLowerCase()}</button>
+      ${done ? `<button class="btn btn-ghost" id="nextBtn">${nextStep() ? "Next step" : "See results"}</button>` : ""}
+      ${STEPS[idx - 1].optional && !done ? `<button class="btn btn-text" id="skipBtn">Skip</button>` : ""}
+      <label class="link-upload">or upload an image<input type="file" accept="image/*" id="file"></label>
+    </div>
+    <div class="progress" id="prog"><i></i></div>
+    <div class="msg" id="msg"></div>`;
+  p.querySelectorAll("[data-dpi]").forEach(b => b.onclick = () => { state.dpi = +b.dataset.dpi; renderPanel(); });
+  $("#scanBtn").onclick = () => scan(state.step);
+  $("#file").onchange = e => upload(state.step, e.target.files[0]);
+  if ($("#nextBtn")) $("#nextBtn").onclick = advance;
+  if ($("#skipBtn")) $("#skipBtn").onclick = advance;
+  const d = state.data[state.step];
+  if (d && d.warnings && d.warnings.length) showMsg(d.warnings.join(" "), "warn");
+}
+
+function nextStep() {
+  const order = STEPS.map(s => s.id);
+  const i = order.indexOf(state.step);
+  return order.slice(i + 1).find(id => id !== "prep" && !state.done[id]);
+}
+function advance() {
+  const n = nextStep();
+  if (n) go(n); else { buildReport(); $("#results").scrollIntoView({behavior: "smooth"}); }
+}
+
+function showMsg(text, kind) {
+  const m = $("#msg"); if (!m) return;
+  m.className = "msg on " + kind; m.textContent = text;
+}
+
+async function locateCard() {
+  const btn = $("#locate");
+  btn.disabled = true; btn.textContent = "Taking a quick preview…";
+  startProgress(15);
+  let d;
+  try { d = await (await fetch(`/api/locate/${state.session}`, {method: "POST"})).json(); }
+  catch (e) { d = {error: "Couldn't reach the scanner: " + e}; }
+  stopProgress();
+  state.locate = d;
+  if (d.region) state.checks = state.checks.map(() => true);
+  renderPanel();
+}
+
+/* ---------- scanning ---------- */
+let timer = null;
+function startProgress(seconds) {
+  const bar = $("#prog"); bar.classList.add("on");
+  const t0 = Date.now();
+  timer = setInterval(() => {
+    const pct = Math.min(94, 100 * (1 - Math.exp(-(Date.now() - t0) / 1000 / (seconds * 0.6))));
+    $("i", bar).style.width = pct + "%";
+  }, 300);
+}
+function stopProgress() { clearInterval(timer); const bar = $("#prog"); if (bar) $("i", bar).style.width = "100%"; }
+
+async function scan(slot) {
+  const btn = $("#scanBtn");
+  btn.disabled = true; btn.textContent = "Scanning… keep the lid closed";
+  startProgress(SCAN_SECONDS[state.dpi]);
+  try {
+    const r = await fetch(`/api/scan/${state.session}/${slot}`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({dpi: state.dpi})});
+    handleResult(slot, await r.json());
+  } catch (e) { handleResult(slot, {error: "Couldn't reach the scanner: " + e}); }
+  stopProgress();
+}
+
+async function upload(slot, file) {
+  if (!file) return;
+  const fd = new FormData(); fd.append("file", file);
+  const btn = $("#scanBtn"); btn.disabled = true; btn.textContent = "Measuring…";
+  const r = await fetch(`/api/upload/${state.session}/${slot}`, {method: "POST", body: fd});
+  handleResult(slot, await r.json());
+}
+
+function handleResult(slot, d) {
+  if (d.error) {
+    renderPanel();
+    showMsg(d.error, "err");
+    if (d.raw) setThumb(slot, d.raw, "Card not found");
+    return;
+  }
+  state.done[slot] = true; state.data[slot] = d;
+  setThumb(slot, d.overlay, centeringShort(d.centering));
+  renderSteps(); renderPanel();
+  if (state.done.front && state.done.back) buildReport();
+}
+
+function centeringShort(c) {
+  if (!c || c.lr === undefined) return "Centering: not found";
+  return `${Math.round(c.lr)}/${Math.round(100 - c.lr)} · ${Math.round(c.tb)}/${Math.round(100 - c.tb)}`;
+}
+
+function setThumb(slot, src, caption) {
+  const t = document.querySelector(`.thumb[data-slot="${slot}"]`);
+  const tag = $(".tag", t);
+  t.innerHTML = `${tag ? tag.outerHTML : ""}<img src="${esc(src)}" alt="${slot} scan">${caption && slot.indexOf("_rot") < 0 ? `<div class="c">${esc(caption)}</div>` : ""}`;
+  t.onclick = () => { $("#modal img").src = src; $("#modal").classList.add("on"); };
+}
+$("#modal").onclick = () => $("#modal").classList.remove("on");
+
+/* ---------- report ---------- */
+const tone = g => /calibrat/i.test(g) ? "grey" : /10/.test(g) ? "good" : /(^9|Mint 9|8\.5)/.test(g) ? "maybe" : "no";
+
+const SEV_COLOR = {red: "#e32d14", yellow: "#e89d01", green: "#2fb36a"};
+const LOGOS = {TAG: "/static/logos/tag.png", PSA: "/static/logos/psa.svg", CGC: "/static/logos/cgc.svg"};
+// Which corner sits at the left and right end of each edge strip (side strips are rotated so the edge is on top).
+const EDGE_ENDS = {top: ["top-left", "top-right"], bottom: ["bottom-left", "bottom-right"],
+                   left: ["bottom-left", "top-left"], right: ["top-right", "bottom-right"]};
+const REGION_LABEL = r => r.replace("_", " ");
+
+function statusOf(m, kind, key) {
+  if (!m || !m.edges_reliable || !m.closeups) return null;
+  return m.closeups[kind][key].status;
+}
+
+function cardDiagram(m, label) {
+  const c = m && m.centering;
+  if (!c || c.lr === undefined) return `<div class="muted small">Couldn't find the inner border for the ${label}.</div>`;
+  const W = 150, H = 210, w = c.widths_mm, s = 4.2;
+  const L = w.left * s, R = w.right * s, T = w.top * s, B = w.bottom * s;
+  const col = (kind, key) => { const st = statusOf(m, kind, key); return st ? SEV_COLOR[st] : "rgba(0,0,0,.2)"; };
+  const fill = label === "back" ? "#3c5aa6" : "#ffd84d";
+  return `<svg viewBox="-14 -14 ${W + 28} ${H + 28}" width="100%" role="img" aria-label="${label} border and condition map">
+    <rect x="0" y="0" width="${W}" height="${H}" rx="8" fill="${fill}"/>
+    <rect x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" rx="2" fill="#fff" opacity=".85"/>
+    <line x1="10" y1="-5" x2="${W - 10}" y2="-5" stroke="${col("edges", "top")}" stroke-width="3" stroke-linecap="round"/>
+    <line x1="10" y1="${H + 5}" x2="${W - 10}" y2="${H + 5}" stroke="${col("edges", "bottom")}" stroke-width="3" stroke-linecap="round"/>
+    <line x1="-5" y1="10" x2="-5" y2="${H - 10}" stroke="${col("edges", "left")}" stroke-width="3" stroke-linecap="round"/>
+    <line x1="${W + 5}" y1="10" x2="${W + 5}" y2="${H - 10}" stroke="${col("edges", "right")}" stroke-width="3" stroke-linecap="round"/>
+    ${[["top_left", 0, 0], ["top_right", W, 0], ["bottom_left", 0, H], ["bottom_right", W, H]].map(([k, x, y]) => `<circle cx="${x}" cy="${y}" r="6" fill="${col("corners", k)}" stroke="#fff" stroke-width="2"/>`).join("")}
+    <text x="${W / 2}" y="${H / 2 - 6}" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" font-weight="700" fill="#000">${c.lr.toFixed(1)} / ${(100 - c.lr).toFixed(1)}</text>
+    <text x="${W / 2}" y="${H / 2 + 10}" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="rgba(0,0,0,.6)">left / right</text>
+    <text x="${W / 2}" y="${H / 2 + 34}" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" font-weight="700" fill="#000">${c.tb.toFixed(1)} / ${(100 - c.tb).toFixed(1)}</text>
+    <text x="${W / 2}" y="${H / 2 + 50}" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="rgba(0,0,0,.6)">top / bottom</text>
+  </svg>`;
+}
+
+function centerScan(m, label) {
+  const v = m.center_view, c = m.centering;
+  if (!v || !c || c.lr === undefined) return cardDiagram(m, label);
+  const g = v.margin_mm, [cw, ch] = v.card_mm, w = c.widths_mm;
+  const VW = cw + 2 * g, VH = ch + 2 * g;
+  const L = g + w.left, R = g + cw - w.right, T = g + w.top, B = g + ch - w.bottom;
+  const cy = g + ch / 2, cx = g + cw / 2;
+  const lbl = (x, y, text, anchor = "middle") => `<text x="${x}" y="${y}" text-anchor="${anchor}" class="cs-lbl">${text}</text>`;
+  return `<div class="cs" data-zoom="${esc(v.img)}">
+    <img src="${esc(v.img)}" alt="${label} scan with measured borders">
+    <svg viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="none" aria-hidden="true">
+      <rect x="${g}" y="${g}" width="${cw}" height="${ch}" rx="3" class="cs-card"/>
+      <rect x="${L}" y="${T}" width="${R - L}" height="${B - T}" class="cs-inner"/>
+      <line x1="${g}" y1="${cy}" x2="${L}" y2="${cy}" class="cs-dim"/>
+      <line x1="${R}" y1="${cy}" x2="${g + cw}" y2="${cy}" class="cs-dim"/>
+      <line x1="${cx}" y1="${g}" x2="${cx}" y2="${T}" class="cs-dim"/>
+      <line x1="${cx}" y1="${B}" x2="${cx}" y2="${g + ch}" class="cs-dim"/>
+      ${lbl(L + 1.2, cy - 1.2, `${w.left.toFixed(2)} mm · ${c.lr.toFixed(1)}%`, "start")}
+      ${lbl(R - 1.2, cy + 3.6, `${w.right.toFixed(2)} mm · ${(100 - c.lr).toFixed(1)}%`, "end")}
+      ${lbl(cx + 1.2, T + 3.4, `${w.top.toFixed(2)} mm · ${c.tb.toFixed(1)}%`, "start")}
+      ${lbl(cx + 1.2, B - 1.4, `${w.bottom.toFixed(2)} mm · ${(100 - c.tb).toFixed(1)}%`, "start")}
+    </svg>
+  </div>`;
+}
+
+function measureCard(m, label) {
+  if (!m) return `<div class="card"><div class="eyebrow">${label}</div><p class="muted">Not scanned yet.</p></div>`;
+  const c = m.centering || {};
+  const f = m.findings || [];
+  const n = sev => f.filter(x => x.severity === sev).length;
+  return `<div class="card">
+    <div class="eyebrow">${label}</div>
+    <div class="diagram">
+      ${centerScan(m, label.toLowerCase())}
+      <div class="kv">
+        <div><span>Centering, worst side</span><span>${c.worst ? c.worst.toFixed(1) + " / " + (100 - c.worst).toFixed(1) : "—"}</span></div>
+        <div><span>Borders L · R</span><span>${c.widths_mm ? c.widths_mm.left.toFixed(2) + " · " + c.widths_mm.right.toFixed(2) + " mm" : "—"}</span></div>
+        <div><span>Borders T · B</span><span>${c.widths_mm ? c.widths_mm.top.toFixed(2) + " · " + c.widths_mm.bottom.toFixed(2) + " mm" : "—"}</span></div>
+        <div><span>Size</span><span>${m.dims_in ? m.dims_in[0].toFixed(3) + " × " + m.dims_in[1].toFixed(3) + " in" : "—"}</span></div>
+        <div><span>Red findings</span><span style="color:${n("red") ? SEV_COLOR.red : "inherit"}">${m.edges_reliable ? n("red") : "needs a scan"}</span></div>
+        <div><span>Yellow findings</span><span style="color:${n("yellow") ? SEV_COLOR.yellow : "inherit"}">${m.edges_reliable ? n("yellow") : "needs a scan"}</span></div>
+      </div>
+    </div>
+    <div class="legend"><span><i style="background:${SEV_COLOR.green}"></i>clean</span><span><i style="background:${SEV_COLOR.yellow}"></i>worth a look</span><span><i style="background:${SEV_COLOR.red}"></i>likely costs grade</span><span><i style="background:rgba(0,0,0,.2)"></i>not checked</span></div>
+  </div>`;
+}
+
+function verdictFor(est) {
+  const top = ["TAG", "PSA", "CGC"].map(k => est[k].grade);
+  const any10 = top.some(g => /10/.test(g));
+  const all10 = top.every(g => /10/.test(g));
+  const unknownEdges = est.defect_level === "unknown";
+  if (any10 && unknownEdges) return {cls: "unknown", title: "Centering passes for a 10.", body: "This was a photo, not a scan, so corners and edges weren't checked. Scan it on the glass to finish the check.", num: "10?", sub: "centering only"};
+  if (all10) return {cls: "good", title: "This looks like a 10 candidate.", body: "Centering and condition clear the bar at every grader. Worth submitting if the card's value covers the fee.", num: "10", sub: "expected at TAG, PSA and CGC"};
+  if (any10) return {cls: "maybe", title: "A 10 at some graders, not all.", body: "Pick the grader whose standards this card meets. The expected grades below show where it lands.", num: "10", sub: "at " + ["TAG", "PSA", "CGC"].filter(k => /10/.test(est[k].grade)).join(" and ")};
+  if (top.some(g => /(^9|Mint 9)/.test(g))) return {cls: "maybe", title: "Close, but probably a 9.", body: "Something below is holding it back from a 10. Look at the close-ups before paying to submit.", num: "9", sub: "most likely"};
+  return {cls: "no", title: "Probably not a 10.", body: "The issues below would likely cap the grade well under a 10.", num: est.PSA.grade.replace("below ", "<"), sub: "most likely PSA"};
+}
+
+function expectedBox(est) {
+  const row = (name, e) => {
+    const t = tone(e.grade);
+    const sub = [e.could_be ? `could be ${esc(e.could_be)}` : "", e.score_range ? `score ~${e.score_range[0]}–${e.score_range[1]}` : ""].filter(Boolean).join(" · ");
+    const reason = (e.reasons || [])[0];
+    return `<div class="xg-row">
+      <div class="xg-co"><img class="xg-logo xg-logo-${name.toLowerCase()}" src="${LOGOS[name]}" alt="${name}"><span>${esc(e.note || "")}</span></div>
+      <div class="xg-grade"><span class="pill ${t}">${/10/.test(e.grade) ? "10" : "below 10"}</span><b>${esc(e.grade)}</b></div>
+      <div class="xg-sub">${sub || "&nbsp;"}</div>
+      <div class="xg-why">${reason ? esc(reason) : "Nothing measured is holding it back."}</div>
+    </div>`;
+  };
+  return `<div class="card xg">
+    <div class="xg-head"><div class="eyebrow" style="margin:0">Expected grade by company</div>
+      <div class="muted small">${est.counts ? `${est.counts.red} red · ${est.counts.yellow} yellow findings` : ""}</div></div>
+    ${row("TAG", est.TAG)}${row("PSA", est.PSA)}${row("CGC", est.CGC)}
+    <p class="muted small" style="margin:12px 0 0">Beckett isn't listed: it doesn't publish centering limits I could verify. "Could be" allows for a point of centering wobble between scans and counts yellow findings against the card.</p>
+  </div>`;
+}
+
+function inspection(d) {
+  const sides = ["front", "back"].filter(s => d[s] && d[s].closeups);
+  if (!sides.length) return "";
+  state.inspectSide = sides.includes(state.inspectSide) ? state.inspectSide : sides[0];
+  const m = d[state.inspectSide], cu = m.closeups;
+  const tile = (key, v, ends) => `<figure class="cu-tile" data-zoom="${esc(v.img)}"><img src="${esc(v.img)}" alt="${REGION_LABEL(key)} close-up"><figcaption><i style="background:${SEV_COLOR[v.status]}"></i>${REGION_LABEL(key)}${ends ? `<span class="ends"><span>← ${ends[0]} corner</span><span>${ends[1]} corner →</span></span>` : ""}</figcaption></figure>`;
+  const found = cu.findings.length ? cu.findings.map(f => `
+    <div class="finding" data-zoom="${esc(f.img)}">
+      <img src="${esc(f.img)}" alt="${esc(f.kind)}">
+      <div><span class="pill ${f.severity === "red" ? "no" : "maybe"}">${f.severity === "red" ? "likely costs grade" : "worth a look"}</span>
+        <b>${esc(f.kind)}</b>
+        <div class="muted small">${REGION_LABEL(f.region)}${f.region === "surface" ? "" : " " + (f.region.includes("_") ? "corner" : "edge")} · ${f.size_mm} mm long${f.depth_mm ? (/whiten/.test(f.kind) ? ` · reaches ${f.depth_mm.toFixed(2)} mm in` : ` · ${f.depth_mm.toFixed(2)} mm deep`) : ""}</div></div>
+    </div>`).join("") : `<p class="muted">Nothing flagged on the ${state.inspectSide}. Every corner and edge is outlined green.</p>`;
+  return `
+    <div class="tabs">${sides.map(s => `<button class="${s === state.inspectSide ? "on" : ""}" data-side="${s}">${s[0].toUpperCase() + s.slice(1)}</button>`).join("")}</div>
+    <div class="cu-top">
+      <figure class="cu-full" data-zoom="${esc(cu.full)}"><img src="${esc(cu.full)}" alt="${state.inspectSide} with findings boxed"><figcaption>Whole card · every finding boxed</figcaption></figure>
+      <div>
+        <div class="eyebrow">Corners</div>
+        <div class="cu-corners">${["top_left", "top_right", "bottom_left", "bottom_right"].map(k => tile(k, cu.corners[k])).join("")}</div>
+      </div>
+    </div>
+    <div class="eyebrow" style="margin-top:20px">Edges <span class="muted" style="text-transform:none;font-weight:400">· the black band at the top of each strip is just past the card's edge</span></div>
+    <div class="cu-edges">${["top", "bottom", "left", "right"].map(k => tile(k, cu.edges[k], EDGE_ENDS[k])).join("")}</div>
+    <div class="eyebrow" style="margin-top:20px">Findings</div>
+    <div class="findings">${found}</div>
+    <div class="legend"><span><i style="background:${SEV_COLOR.green}"></i>clean</span><span><i style="background:${SEV_COLOR.yellow}"></i>yellow box: worth a look</span><span><i style="background:${SEV_COLOR.red}"></i>red box: likely costs grade</span></div>`;
+}
+
+function wireInspection(d) {
+  document.querySelectorAll("#inspect [data-side]").forEach(b => b.onclick = () => { state.inspectSide = b.dataset.side; $("#inspect").innerHTML = inspection(d); wireInspection(d); });
+  document.querySelectorAll("#inspect [data-zoom]").forEach(el => el.onclick = () => { $("#modal img").src = el.dataset.zoom; $("#modal").classList.add("on"); });
+}
+
+async function buildReport() {
+  const box = $("#results");
+  const d = await (await fetch(`/api/report/${state.session}`)).json();
+  if (d.error) return;
+  const est = d.estimates, v = verdictFor(est);
+  let surface = "";
+  for (const side of ["front", "back"]) {
+    const s = d.surface[side];
+    if (!s) continue;
+    surface += `<div class="card"><div class="eyebrow">${side} surface</div>
+      <p class="muted small" style="margin:0">${s.marks.length ? `${s.marks.length} possible mark${s.marks.length > 1 ? "s" : ""}, also boxed in the close-ups.` : "No dents, scratches or indents stood out."}
+      ${(s.debris || []).length ? `<br>Ignored ${s.debris.length} speck${s.debris.length > 1 ? "s" : ""} of dust or lint (grey circles) that showed up in only one scan. A quick wipe of the card and glass avoids these.` : ""}</p>
+      ${[...s.marks.map(m => ({...m, what: m.strength > 7 ? "Surface mark · likely costs grade" : "Surface mark · worth a look"})),
+         ...(s.debris || []).map(m => ({...m, what: `Dust or lint · only in the ${m.only_in}`}))].map(m => m.pair ? `
+        <figure class="spot" data-zoom="${esc(m.pair)}">
+          <img src="${esc(m.pair)}" alt="${esc(m.what)} close-up in both scans">
+          <figcaption><b>${esc(m.what)}</b> · ${m.length_mm} mm · ${m.x_pct}% across, ${m.y_pct}% down</figcaption>
+        </figure>` : "").join("")}
+      <img class="surface-img" src="${esc(s.heatmap)}" alt="${side} surface differences"></div>`;
+  }
+  box.innerHTML = `
+    <h2 class="section-title">Your estimate</h2>
+    <div class="verdict ${v.cls}">
+      <div><h3>${v.title}</h3><p>${v.body}</p></div>
+      <div class="big-num">${v.num}<small>${v.sub}</small></div>
+    </div>
+    ${expectedBox(est)}
+    <h2 class="section-title" style="margin-top:48px">Close-up inspection</h2>
+    <p class="muted" style="margin:0 0 16px">Every corner and edge at full scan resolution. Click any image to enlarge it.${d.surface_checked ? "" : " Surface marks appear here once you add the 180° scans."}</p>
+    <div class="card" id="inspect">${inspection(d)}</div>
+    <h2 class="section-title" style="margin-top:48px">Centering and size</h2>
+    <div class="measure">${measureCard(d.front, "Front")}${measureCard(d.back, "Back")}</div>
+    ${surface ? `<h2 class="section-title" style="margin-top:48px">Surface <span class="pill grey" style="vertical-align:middle">experimental</span></h2><div class="measure">${surface}</div>` : ""}
+    <p class="fine">This is a pre-screen from a flatbed scan, not a guarantee. Graders use magnification and multi-angle lighting a scanner can't match, so treat a "10 candidate" as "worth the fee", not "certain".</p>`;
+  wireInspection(d);
+  document.querySelectorAll("#results .cs[data-zoom], #results .spot[data-zoom]").forEach(el => el.onclick = () => { $("#modal img").src = el.dataset.zoom; $("#modal").classList.add("on"); });
+  box.classList.add("on");
+}
+
+/* ---------- session ---------- */
+async function newSession() {
+  const r = await fetch("/api/session", {method: "POST"});
+  state.session = (await r.json()).session;
+  state.done = {}; state.data = {}; state.locate = null;
+  $("#sessionLabel").textContent = "Card " + state.session.slice(9, 15);
+  document.querySelectorAll(".thumb").forEach(t => {
+    const tag = $(".tag", t), slot = t.dataset.slot;
+    t.innerHTML = `${tag ? tag.outerHTML : ""}<div class="ph">${slot.includes("rot") ? (slot.startsWith("front") ? "Front" : "Back") + " 180° · optional" : "Not scanned"}</div>`;
+    t.onclick = null;
+  });
+  $("#results").classList.remove("on");
+  go(state.checks.every(Boolean) ? "front" : "prep");
+}
+
+$("#newCard").onclick = newSession;
+checkScanner(); setInterval(checkScanner, 15000);
+newSession();
+</script>
+</body>
+</html>

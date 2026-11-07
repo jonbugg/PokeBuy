@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Grade Check scan guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: letter portrait; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #f6f5f4; font-family: "Inter", -apple-system, sans-serif; color: #000; }
+  .screen-note { max-width: 8.5in; margin: 24px auto 12px; padding: 16px 20px; background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 12px; font-size: 15px; line-height: 1.5; color: rgba(0,0,0,.75); }
+  .screen-note b { color: #000; }
+  .screen-note button { margin-top: 10px; background: #0075de; color: #fff; border: 0; border-radius: 8px; padding: 10px 18px; font: 500 15px Inter, sans-serif; cursor: pointer; }
+  .page-label { max-width: 8.5in; margin: 0 auto 8px; font-size: 13px; color: rgba(0,0,0,.5); font-weight: 600; }
+  .sheet { position: relative; width: 8.5in; height: 11in; margin: 0 auto 32px; background: #fff; overflow: hidden; border: 1px solid rgba(0,0,0,.08); break-after: page; }
+  .sheet:last-of-type { break-after: auto; }
+  @media print {
+    html, body { background: #fff; }
+    .screen-note, .page-label { display: none; }
+    .sheet { margin: 0; border: 0; }
+  }
+  .abs { position: absolute; }
+
+  /* Sheet 1 front. Window 3.5 x 4.5 in at (0.75, 0.75): a 2.5 x 3.5 card has 0.5 in to spare per side. */
+  .corner { left: .25in; top: .25in; width: .45in; height: .45in; border-left: 3px solid #0075de; border-top: 3px solid #0075de; }
+  .corner-label { left: .8in; top: .3in; font-size: 8pt; color: #0075de; font-weight: 600; white-space: nowrap; }
+  .window { left: .75in; top: .75in; width: 3.5in; height: 4.5in; border: 1.5px dashed #000; border-radius: .14in; }
+  .window .lbl { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font-size: 10.5pt; color: rgba(0,0,0,.45); padding: .35in; line-height: 1.45; }
+  .tick { background: #000; }
+  .sheet-tag { display: inline-block; background: #000; color: #fff; font-size: 9pt; font-weight: 700; letter-spacing: .04em; padding: 3pt 8pt; border-radius: 99pt; margin-bottom: 8pt; }
+  .steps { left: 4.6in; top: .75in; width: 3.5in; font-size: 10.5pt; line-height: 1.45; }
+  .steps h1 { font-size: 22pt; letter-spacing: -0.02em; margin: 0 0 4pt; line-height: 1.1; }
+  .steps .sub { color: rgba(0,0,0,.55); margin: 0 0 12pt; }
+  .steps ol { padding-left: 1.2em; margin: 0; }
+  .steps li { margin-bottom: 6pt; }
+  .tip { padding: 8pt 10pt; background: #e6f3fe; border-radius: 6pt; font-size: 9.5pt; color: #00457f; margin-top: 10pt; }
+  .lower { left: .75in; top: 6.1in; width: 7in; font-size: 10.5pt; line-height: 1.5; color: rgba(0,0,0,.65); }
+  .lower h2 { font-size: 13pt; color: #000; margin: 0 0 6pt; }
+  .ruler { left: .75in; top: 9.6in; width: 3in; height: .28in; border-bottom: 1.5px solid #000; }
+  .ruler i { position: absolute; bottom: 0; width: 1.5px; background: #000; }
+  .ruler-label { left: .75in; top: 9.95in; font-size: 8.5pt; color: rgba(0,0,0,.6); width: 4in; }
+
+  /* Sheet 1 back, flipped on the long edge (front x -> 8.5in - x): window area plus 0.4 in. */
+  .back-block { left: 3.85in; top: .35in; width: 4.3in; height: 5.3in; background: #000; border-radius: .08in; }
+  .back-note { left: .6in; top: 2.5in; width: 2.9in; font-size: 10pt; line-height: 1.45; color: rgba(0,0,0,.5); }
+
+  /* Sheet 2: black everywhere, so it covers the window however it's laid down. */
+  .cover { left: .3in; top: .3in; right: .3in; bottom: .3in; background: #000; border-radius: .1in; }
+</style>
+</head>
+<body>
+  <div class="screen-note">
+    <b>Print double-sided (flip on long edge) at 100% / "Actual size"</b>, not "Fit to page", with headers and footers off.
+    This makes two sheets: the <b>frame</b> (sheet 1, black on its back) and the <b>cover</b> (sheet 2, solid black).
+    Check the ruler on sheet 1 measures exactly 3 inches.
+    <br><button onclick="window.print()">Print the guide</button>
+  </div>
+
+  <div class="page-label">Sheet 1 · front</div>
+  <div class="sheet">
+    <div class="abs corner"></div>
+    <div class="abs corner-label">this corner → scanner's arrow corner</div>
+    <div class="abs window"><div class="lbl">✂ Cut out along the dashed line.<br><br>The card goes here, face down,<br>edges roughly on the little ticks.</div></div>
+    <div id="ticks"></div>
+
+    <div class="abs steps">
+      <span class="sheet-tag">SHEET 1 · FRAME</span>
+      <h1>Grade Check<br>scan guide</h1>
+      <p class="sub">Reusable. Puts every card in the same spot, on black.</p>
+      <ol>
+        <li>Cut out the window on the dashed line.</li>
+        <li>Lay this sheet on the glass, <b>this side up</b>, blue corner in the scanner's arrow corner. Leave it there.</li>
+        <li>Drop the card into the window, <b>face down</b>.</li>
+        <li>Lay <b>sheet 2</b> on top, <b>black side down</b>.</li>
+        <li>Close the lid gently. First time: press <b>Find my card</b> in Grade Check.</li>
+      </ol>
+      <div class="tip">Back of the card: flip it inside the window. 180° scans: turn it upside down in place. Sheet 2 just lifts off and goes back on.</div>
+    </div>
+
+    <div class="abs lower">
+      <h2>Why black?</h2>
+      The scanner looks up through the glass. With black behind the card and around it, the card's edges stand out
+      sharply, so whitening, nicks and soft corners show up. Keep both black sides clean: dust or scuffs on the black can look like defects.
+    </div>
+
+    <div class="abs ruler" id="ruler"></div>
+    <div class="abs ruler-label">Scale check: this ruler should measure exactly 3 inches.</div>
+  </div>
+
+  <div class="page-label">Sheet 1 · back (faces the glass)</div>
+  <div class="sheet">
+    <div class="abs back-block"></div>
+    <div class="abs back-note">Back of sheet 1. This black block surrounds the window on the glass side, so the scanner sees black right up to the card.</div>
+  </div>
+
+  <div class="page-label">Sheet 2 · cover (black side down on the card)</div>
+  <div class="sheet">
+    <div class="abs cover"></div>
+  </div>
+
+<script>
+  // Card edges when centred in the window (in): left 1.25, right 3.75, top 1.25, bottom 4.75.
+  const ticks = document.getElementById("ticks");
+  const tick = (l, t, w, h) => { const d = document.createElement("div"); d.className = "abs tick"; Object.assign(d.style, {left: l + "in", top: t + "in", width: w + "in", height: h + "in"}); ticks.appendChild(d); };
+  for (const x of [1.25, 3.75]) { tick(x - .01, .5, .02, .2); tick(x - .01, 5.3, .02, .2); }
+  for (const y of [1.25, 4.75]) { tick(.5, y - .01, .2, .02); tick(4.3, y - .01, .2, .02); }
+  const r = document.getElementById("ruler");
+  for (let i = 0; i <= 24; i++) {
+    const t = document.createElement("i");
+    t.style.left = `calc(${i / 8}in - 0.75px)`;
+    t.style.height = i % 8 === 0 ? ".28in" : i % 4 === 0 ? ".18in" : ".1in";
+    r.appendChild(t);
+  }
+</script>
+</body>
+</html>

@@ -19,3 +19,7 @@ flask>=3.0.0
 
 # Testing (optional)
 pytest>=7.4.3
+
+# Grade Check
+opencv-python-headless>=4.9
+pillow>=10.0
