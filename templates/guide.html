@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Grade Check scan guide</title>
+<title>Grade Check scan guide{% if tone == "grey" %} (grey){% endif %}</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   @page { size: letter portrait; margin: 0; }
@@ -41,11 +41,11 @@
   .ruler-label { left: .75in; top: 9.95in; font-size: 8.5pt; color: rgba(0,0,0,.6); width: 4in; }
 
   /* Sheet 1 back, flipped on the long edge (front x -> 8.5in - x): window area plus 0.4 in. */
-  .back-block { left: 3.85in; top: .35in; width: 4.3in; height: 5.3in; background: #000; border-radius: .08in; }
+  .back-block { left: 3.85in; top: .35in; width: 4.3in; height: 5.3in; background: {{ block }}; border-radius: .08in; }
   .back-note { left: .6in; top: 2.5in; width: 2.9in; font-size: 10pt; line-height: 1.45; color: rgba(0,0,0,.5); }
 
   /* Sheet 2: black everywhere, so it covers the window however it's laid down. */
-  .cover { left: .3in; top: .3in; right: .3in; bottom: .3in; background: #000; border-radius: .1in; }
+  .cover { left: .3in; top: .3in; right: .3in; bottom: .3in; background: {{ block }}; border-radius: .1in; }
 </style>
 </head>
 <body>
@@ -64,23 +64,27 @@
     <div id="ticks"></div>
 
     <div class="abs steps">
-      <span class="sheet-tag">SHEET 1 · FRAME</span>
-      <h1>Grade Check<br>scan guide</h1>
-      <p class="sub">Reusable. Puts every card in the same spot, on black.</p>
+      <span class="sheet-tag">SHEET 1 · FRAME{% if tone == "grey" %} · GREY{% endif %}</span>
+      <h1>Grade Check<br>scan guide</h1>{% if tone == "grey" %}<p class="sub" style="margin:2pt 0 6pt;color:#000;font-weight:600">Grey version, for black-bordered cards.</p>{% endif %}
+      <p class="sub">Reusable. Puts every card in the same spot, on {{ tone }}.</p>
       <ol>
         <li>Cut out the window on the dashed line.</li>
         <li>Lay this sheet on the glass, <b>this side up</b>, blue corner in the scanner's arrow corner. Leave it there.</li>
         <li>Drop the card into the window, <b>face down</b>.</li>
-        <li>Lay <b>sheet 2</b> on top, <b>black side down</b>.</li>
+        <li>Lay <b>sheet 2</b> on top, <b>{{ tone }} side down</b>.</li>
         <li>Close the lid gently. First time: press <b>Find my card</b> in Grade Check.</li>
       </ol>
       <div class="tip">Back of the card: flip it inside the window. 180° scans: turn it upside down in place. Sheet 2 just lifts off and goes back on.</div>
     </div>
 
     <div class="abs lower">
-      <h2>Why black?</h2>
+      {% if tone == "grey" %}<h2>Why grey?</h2>
+      Black-bordered cards disappear against black. Mid-grey sits between a black border and white edge wear, so both
+      stand out. Use this guide for black-bordered cards and the black guide for everything else. Keep the grey sides clean:
+      dust or scuffs can look like defects.{% else %}<h2>Why black?</h2>
       The scanner looks up through the glass. With black behind the card and around it, the card's edges stand out
       sharply, so whitening, nicks and soft corners show up. Keep both black sides clean: dust or scuffs on the black can look like defects.
+      For black-bordered cards, print the grey version of this guide.{% endif %}
     </div>
 
     <div class="abs ruler" id="ruler"></div>
@@ -90,10 +94,10 @@
   <div class="page-label">Sheet 1 · back (faces the glass)</div>
   <div class="sheet">
     <div class="abs back-block"></div>
-    <div class="abs back-note">Back of sheet 1. This black block surrounds the window on the glass side, so the scanner sees black right up to the card.</div>
+    <div class="abs back-note">Back of sheet 1. This {{ tone }} block surrounds the window on the glass side, so the scanner sees {{ tone }} right up to the card.</div>
   </div>
 
-  <div class="page-label">Sheet 2 · cover (black side down on the card)</div>
+  <div class="page-label">Sheet 2 · cover ({{ tone }} side down on the card)</div>
   <div class="sheet">
     <div class="abs cover"></div>
   </div>

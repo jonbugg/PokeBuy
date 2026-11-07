@@ -79,6 +79,17 @@ def compare(canon_a, canon_b_rotated):
     margin = int(1.0 / mmpp)
     inner = np.zeros(strength_map.shape, dtype=bool)
     inner[margin:-margin, margin:-margin] = True
+
+    # Holo foil and silver ink reflect differently when the light comes from the other side, so whole
+    # patches of them differ between the two scans, often with a colour shift too. A dent or scratch is a
+    # narrow mark on otherwise matching print. Damp places where differences are spread over the
+    # surrounding few millimetres, or where the colour itself changed.
+    sd = float(np.median(np.abs(diff[inner]))) * 1.48 + 1e-3
+    busy = cv2.GaussianBlur((np.abs(diff) > 3 * sd).astype(np.float32), (0, 0), 70 * k)  # ~1.5 mm
+    lab_a = cv2.cvtColor(canon_a, cv2.COLOR_BGR2LAB).astype(np.float32)
+    lab_b = cv2.cvtColor(b_aligned, cv2.COLOR_BGR2LAB).astype(np.float32)
+    hue_shift = cv2.GaussianBlur(np.hypot(lab_a[..., 1] - lab_b[..., 1], lab_a[..., 2] - lab_b[..., 2]), (0, 0), 15 * k)
+    strength_map /= 1 + 12 * busy + np.clip(hue_shift - 6, 0, None) / 4
     typical = float(np.median(strength_map[inner])) or 1.0
     strength_map /= typical
 
@@ -94,8 +105,10 @@ def compare(canon_a, canon_b_rotated):
         vals = raw[region]
         peak_up, peak_down = float(vals.max()), float(-vals.min())
         # Lint/dust: a strong bright peak in one scan, much bigger than any dark dip beside it.
-        in_b = peak_up > 80 and peak_up > 2 * peak_down
-        in_a = peak_down > 80 and peak_down > 2 * peak_up
+        # A dark speck on light print (dust in the first pass) is much fainter than lint on a dark border,
+        # but just as one-sided, so the one-sidedness matters more than the size of the peak.
+        in_b = (peak_up > 80 and peak_up > 2 * peak_down) or (peak_up > 30 and peak_up > 3 * peak_down)
+        in_a = (peak_down > 80 and peak_down > 2 * peak_up) or (peak_down > 30 and peak_down > 3 * peak_up)
         entry = {
             "x_pct": round(100 * cents[i][0] / strength_map.shape[1], 1),
             "y_pct": round(100 * cents[i][1] / strength_map.shape[0], 1),
@@ -103,6 +116,14 @@ def compare(canon_a, canon_b_rotated):
             "kind": "line" if max(w, h) > 4 * min(w, h) else "spot",
             "strength": round(float(strength_map[region].max()), 1),
         }
+        # Glare: a near-white highlight in one scan only (silver ink or foil catching the light from one
+        # side). Real damage doesn't turn white in one pass and stay dark in the other.
+        ma, mb = float(ga[region].max()), float(gb[region].max())
+        glare = max(ma, mb) > 225 and min(ma, mb) < max(ma, mb) - 45
+        if glare and not (in_a or in_b):
+            entry["only_in"] = ("180° scan" if mb > ma else "first scan") + " (glare)"
+            debris.append(entry)
+            continue
         if in_a or in_b:
             # Something sitting on the card or glass for one pass. A dent or scratch shades one side
             # light and the other dark by similar amounts instead.

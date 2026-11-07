@@ -3,6 +3,7 @@
 
 import io
 import json
+import re
 import threading
 import time
 import uuid
@@ -13,7 +14,7 @@ import numpy as np
 from flask import Flask, abort, jsonify, render_template, request, send_from_directory
 from PIL import Image
 
-from src.grading import closeups, locate, measure, standards, surface
+from src.grading import cards, closeups, fees, locate, market, measure, standards, surface, tag_compare
 from src.grading.scanner import DEFAULT_REGION, PLATEN_REGION, PREVIEW_DPI, Scanner
 
 ROOT = Path(__file__).parent
@@ -43,8 +44,13 @@ def _session_dir(sid):
 
 
 def _measurement_json(m):
+    art = float(getattr(m, "print_at_edge", 0.0))
+    if m.edges_reliable and art > 0.1:
+        m.warnings.append(f"Artwork reaches this card's edge along about {round(art * 100)}% of it, so edge and corner "
+                          "findings are less certain. Check them in the zoom viewer, or add the 180° scan.")
     return {"centering": m.centering, "edges": m.edges, "corners": m.corners,
-            "warnings": m.warnings, "dims_in": m.dims_in, "edges_reliable": m.edges_reliable}
+            "warnings": m.warnings, "dims_in": m.dims_in, "edges_reliable": m.edges_reliable,
+            "dark_card": bool(getattr(m, "dark_card", False)), "art_at_edge": round(art, 3)}
 
 
 def _closeup_urls(sid, rendered):
@@ -60,11 +66,68 @@ def _closeup_urls(sid, rendered):
     }
 
 
+class WrongSide(Exception):
+    pass
+
+
+def _small(canon):
+    v = cv2.resize(cv2.cvtColor(canon, cv2.COLOR_BGR2GRAY), (25, 35), interpolation=cv2.INTER_AREA).astype(np.float32).ravel()
+    return (v - v.mean()) / (v.std() + 1e-6)
+
+
+def _likeness(a, b):
+    """How alike two straightened scans look, either way up (-1..1)."""
+    sa = _small(a)
+    return max(float(np.dot(sa, _small(b))) / len(sa), float(np.dot(sa, _small(cv2.rotate(b, cv2.ROTATE_180)))) / len(sa))
+
+
+def _check_side(d, slot, canon):
+    """Refuse a scan that shows the other side of the card (e.g. the back left face-down for a front scan)."""
+    side = slot.split("_")[0]
+    other = "back" if side == "front" else "front"
+    load = lambda names: [cv2.imread(str(d / f"{n}_canon.png")) for n in names if (d / f"{n}_canon.png").exists()]
+    same = load([n for n in (side, f"{side}_rot") if n != slot])
+    opp = load([other, f"{other}_rot"])
+    if not opp:
+        return
+    like_opp = max(_likeness(canon, x) for x in opp)
+    like_same = max((_likeness(canon, x) for x in same), default=None)
+    if like_opp > 0.8 and (like_same is None or like_opp > like_same + 0.1):
+        raise WrongSide(f"This looks like the card's {other}, not its {side}. Flip the card over and scan again; "
+                        f"nothing was saved.")
+
+
+def _upside_down(d, slot, canon):
+    """True when this scan is the same way up as its 180° partner (or the opposite way up from its
+    first-scan partner), i.e. the card went on the glass the wrong way round for this slot."""
+    side = slot.split("_")[0]
+    partner = f"{side}_rot" if slot == side else side
+    f = d / f"{partner}_canon.png"
+    if not f.exists():
+        return False
+    ref = cv2.imread(str(f))
+    sa = _small(canon)
+    same_way = float(np.dot(sa, _small(ref))) / len(sa)
+    turned = float(np.dot(sa, _small(cv2.rotate(ref, cv2.ROTATE_180)))) / len(sa)
+    return same_way > turned + 0.2  # partners should match only once one is turned 180°
+
+
 def _process(sid, slot, raw: bytes, src_ppi):
     d = _session_dir(sid)
-    (d / f"{slot}_raw.jpg").write_bytes(raw)
     img = measure.load(raw)
     m = measure.measure_image(img, src_ppi=src_ppi)
+    _check_side(d, slot, m.canon)
+    if _upside_down(d, slot, m.canon):
+        # Same way up as this side's other scan. The 180° pair only works when the card was physically
+        # turned under the scanner's light, so turning the image afterwards won't do: say so instead.
+        side = slot.split("_")[0]
+        partner = f"{side} 180°" if slot == side else side
+        raise WrongSide(f"This scan is the same way up as the {partner} scan already saved. If it's meant to be "
+                        f"the {partner} scan, scan it into that step; otherwise turn the card 180° and scan again. "
+                        f"Nothing was saved.")
+    for old in d.glob(f"{slot}_cu_*.jpg"):  # close-ups from an earlier pass of this slot
+        old.unlink()
+    (d / f"{slot}_raw.jpg").write_bytes(raw)
     cv2.imwrite(str(d / f"{slot}_canon.png"), m.canon)
     cv2.imwrite(str(d / f"{slot}_overlay.jpg"), measure.overlay(m), [cv2.IMWRITE_JPEG_QUALITY, 88])
     data = _measurement_json(m)
@@ -124,12 +187,93 @@ def _meta(d):
 
 @app.route("/api/meta/<sid>", methods=["POST"])
 def save_meta(sid):
+    """Merge edits into a card's saved details: name, identified card, sale values, actual grade result."""
     d = _session_dir(sid)
     meta = _meta(d)
-    name = str((request.json or {}).get("name", ""))[:120].strip()
-    meta["name"] = name
+    body = request.json or {}
+    if "name" in body:
+        meta["name"] = str(body["name"])[:120].strip()
+    if "card" in body and (body["card"] is None or isinstance(body["card"], dict)):
+        meta["card"] = body["card"]
+        meta.pop("market", None)  # eBay prices belonged to the previous card
+        if body["card"] and not meta.get("name"):
+            c = body["card"]
+            total = f"/{c['set_total']}" if c.get("set_total") and str(c.get("number", "")).isdigit() else ""
+            meta["name"] = f"{c.get('name', '')} · {c.get('set', '')} {c.get('number', '')}{total}".strip()
+    if isinstance(body.get("values"), dict):
+        before = meta.get("values") or {}
+        meta["values"] = {k: (None if v in ("", None) else float(v)) for k, v in body["values"].items()
+                          if k in ("raw", "psa10", "tag10", "cgc10", "g9", "g8", "shipping")}
+        # A value the person changed is theirs now: price refreshes leave it alone.
+        meta["auto_fields"] = [k for k in meta.get("auto_fields", [])
+                               if meta["values"].get(k) is not None and before.get(k) == meta["values"].get(k)]
+    if "actual" in body:
+        a = body["actual"]
+        meta["actual"] = None if not a else {
+            "company": str(a.get("company", ""))[:10], "grade": str(a.get("grade", ""))[:20],
+            "score": int(a["score"]) if str(a.get("score", "")).isdigit() else None,
+            "cert": str(a.get("cert", ""))[:20], "recorded_at": time.time()}
     (d / "meta.json").write_text(json.dumps(meta))
     return jsonify(meta)
+
+
+@app.route("/api/market/<sid>", methods=["POST"])
+def market_prices(sid):
+    """Look up graded asking prices on eBay for the identified card and fill the empty value fields."""
+    d = _session_dir(sid)
+    meta = _meta(d)
+    card = meta.get("card")
+    if not card:
+        return jsonify({"error": "Identify the card first."}), 400
+    body = request.json or {}
+    try:
+        data = market.graded_prices(card, refresh=bool(body.get("refresh")))
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 502
+    values = dict(meta.get("values") or {})
+    if values.get("raw") is None and card.get("market"):
+        values["raw"] = card["market"]
+    auto = set(meta.get("auto_fields") or [])
+    for field, info in data["fields"].items():
+        # Fill empty boxes, and update ones this lookup filled before; never overwrite a typed value.
+        if info.get("value") is not None and (body.get("overwrite") or values.get(field) is None or field in auto):
+            values[field] = round(info["value"])
+            auto.add(field)
+    meta["auto_fields"] = sorted(auto)
+    meta["values"], meta["market"] = values, data
+    (d / "meta.json").write_text(json.dumps(meta))
+    return jsonify(meta)
+
+
+@app.route("/api/market-status")
+def market_status():
+    return jsonify({"listings": market.available(), "sold": market.sold_available()})
+
+
+@app.route("/api/fees")
+def fee_table():
+    return jsonify(fees.all_fees())
+
+
+@app.route("/api/identify/<sid>", methods=["POST"])
+def identify_card(sid):
+    d = _session_dir(sid)
+    canon = d / "front_canon.png"
+    if not canon.exists():
+        return jsonify({"error": "Scan the front first."}), 400
+    try:
+        return jsonify(cards.identify(cv2.imread(str(canon))))
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 502
+
+
+@app.route("/api/cards")
+def card_search():
+    q = request.args.get("q", "")[:80]
+    try:
+        return jsonify({"candidates": cards.search(q)})
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 502
 
 
 @app.route("/library")
@@ -150,14 +294,50 @@ def library():
         front = r.get("front") or {}
         thumb = f"/scans/{d.name}/front_center.jpg" if (d / "front_center.jpg").exists() else (
             f"/scans/{d.name}/back_center.jpg" if (d / "back_center.jpg").exists() else None)
+        missing = [side for side in ("front", "back") if not r.get(side)]
         cards.append({
             "id": d.name, "name": meta.get("name") or "", "graded_at": meta.get("graded_at"),
+            "missing": missing, "card_id": (meta.get("card") or {}).get("id"), "fp": _fingerprint(d),
             "thumb": thumb,
             "grades": {k: {"grade": est[k]["grade"], "score_range": est[k].get("score_range")} for k in ("TAG", "PSA", "CGC") if k in est},
             "counts": est.get("counts"), "centering": (front.get("centering") or {}).get("worst"),
             "dims": front.get("dims_in"), "surface_checked": r.get("surface_checked", False),
+            "card": meta.get("card"), "values": meta.get("values"), "actual": meta.get("actual"),
+            "odds": {k: est[k].get("odds") for k in ("TAG", "PSA", "CGC") if k in est},
         })
-    return jsonify(cards)
+    # The same card scanned more than once (a rescan, or another copy): show the newest, with the
+    # earlier scans listed under it.
+    groups = []
+    for c in cards:  # newest first
+        home = next((g for g in groups if _same_card(g, c)), None)
+        if home:
+            home["earlier"].append({k: c[k] for k in ("id", "name", "graded_at", "missing", "grades", "thumb")})
+        else:
+            c["earlier"] = []
+            groups.append(c)
+    for g in groups:
+        g.pop("fp", None)
+    return jsonify(groups)
+
+
+@app.route("/api/library.csv")
+def library_csv():
+    import csv as _csv
+    import io as _io
+    rows = library().get_json()
+    buf = _io.StringIO()
+    w = _csv.writer(buf)
+    w.writerow(["id", "name", "checked", "set", "number", "raw_value", "TAG_est", "PSA_est", "CGC_est",
+                "red", "yellow", "centering_worst", "actual_company", "actual_grade", "actual_score", "cert"])
+    for c in rows:
+        card, act, g = c.get("card") or {}, c.get("actual") or {}, c.get("grades") or {}
+        w.writerow([c["id"], c["name"], time.strftime("%Y-%m-%d", time.localtime(c["graded_at"] or 0)),
+                    card.get("set", ""), card.get("number", ""), (c.get("values") or {}).get("raw") or card.get("market") or "",
+                    g.get("TAG", {}).get("grade", ""), g.get("PSA", {}).get("grade", ""), g.get("CGC", {}).get("grade", ""),
+                    (c.get("counts") or {}).get("red", ""), (c.get("counts") or {}).get("yellow", ""), c.get("centering") or "",
+                    act.get("company", ""), act.get("grade", ""), act.get("score") or "", act.get("cert", "")])
+    return app.response_class(buf.getvalue(), mimetype="text/csv",
+                              headers={"Content-Disposition": "attachment; filename=grade-check-library.csv"})
 
 
 @app.route("/api/card/<sid>", methods=["DELETE"])
@@ -169,9 +349,13 @@ def delete_card(sid):
     return jsonify({"ok": True})
 
 
+GUIDE_GREY = "#8c8c8c"  # mid-grey: well clear of black borders below and white edge wear above
+
+
 @app.route("/guide")
 def guide():
-    return render_template("guide.html")
+    tone = "grey" if request.args.get("tone") == "grey" else "black"
+    return render_template("guide.html", tone=tone, block=GUIDE_GREY if tone == "grey" else "#000")
 
 
 def _locked_scan(**kw):
@@ -238,8 +422,61 @@ def _measure_response(sid, slot, raw, dpi):
         d = _session_dir(sid)
         (d / f"{slot}_raw.jpg").write_bytes(raw)
         return jsonify({"error": str(e), "raw": f"/scans/{sid}/{slot}_raw.jpg"}), 422
+    except WrongSide as e:
+        return jsonify({"error": str(e), "wrong_side": True}), 409
     data["overlay"] = f"/scans/{sid}/{slot}_overlay.jpg?t={int(time.time())}"
     return jsonify(data)
+
+
+def _auto_identify(d):
+    """Name the card from its front scan the first time a report is built, when the match is clear."""
+    meta = _meta(d)
+    canon = d / "front_canon.png"
+    if meta.get("card") or meta.get("identify_tried") or not canon.exists():
+        return
+    meta["identify_tried"] = True
+    try:
+        res = cards.identify(cv2.imread(str(canon)))
+    except Exception:  # lookup service down: the "Identify from scan" button is still there
+        res = {"candidates": []}
+    cands = res.get("candidates") or []
+    words = " ".join(res.get("read", {}).get("name_words", []))
+    top = cands[0] if cands else None
+    named = top and any(t in words for t in re.findall(r"[a-zé]{4,}", top["name"].lower()))
+    if top and (len(cands) == 1 or named or top.get("match", 0) >= 0.85):
+        meta["card"] = top
+        if not meta.get("name"):
+            meta["name"] = f"{top['name']} · {top['set']} {top['number']}" + (f"/{top['set_total']}" if top.get("set_total") and str(top["number"]).isdigit() else "")
+        values = dict(meta.get("values") or {})
+        if values.get("raw") is None and top.get("market"):
+            values["raw"] = top["market"]
+        meta["values"] = values
+    (d / "meta.json").write_text(json.dumps(meta))
+
+
+def _fingerprint(d):
+    """A tiny normalised greyscale of the front (or back) scan, to spot the same card scanned twice."""
+    f = d / "fingerprint.npy"
+    if f.exists():
+        return np.load(f)
+    for side in ("front", "back"):
+        img = cv2.imread(str(d / f"{side}_canon.png"), cv2.IMREAD_GRAYSCALE)
+        if img is not None:
+            v = cv2.resize(img, (25, 35), interpolation=cv2.INTER_AREA).astype(np.float32).ravel()
+            v = (v - v.mean()) / (v.std() + 1e-6)
+            fp = np.concatenate([[0.0 if side == "front" else 1.0], v])
+            np.save(f, fp)
+            return fp
+    return None
+
+
+def _same_card(a, b):
+    if a["card_id"] and b["card_id"]:
+        return a["card_id"] == b["card_id"]
+    fa, fb = a["fp"], b["fp"]
+    if fa is None or fb is None or fa[0] != fb[0]:
+        return False
+    return float(np.dot(fa[1:], fb[1:]) / (len(fa) - 1)) > 0.9
 
 
 @app.route("/api/report/<sid>")
@@ -265,6 +502,7 @@ def report(sid):
         surf[side] = res
         surface_by_side[side] = closeups.surface_findings(res["marks"], canon.shape)
 
+    _auto_identify(d)
     t = int(time.time())
     for side, data in (("front", front), ("back", back)):
         if not data:
@@ -293,11 +531,28 @@ def report(sid):
     surface_found = [f for found in surface_by_side.values() for f in found]
     est = standards.estimate_all(front, back, surface_found)
     out = {"front": front, "back": back, "surface": surf, "estimates": est,
-           "surface_checked": bool(surf), "meta": _meta(d)}
+           "surface_checked": bool(surf), "meta": _meta(d),
+           "surface_findings": [dict(f, side=side) for side, fs in surface_by_side.items() for f in fs]}
     if not (d / "meta.json").exists():
         (d / "meta.json").write_text(json.dumps(out["meta"]))
     (d / "report.json").write_text(json.dumps(out))  # snapshot for the library
     return jsonify(out)
+
+
+@app.route("/api/tag-compare/<sid>")
+def tag_comparison(sid):
+    """Your scans against TAG-graded copies of the same card (when copies are saved for it)."""
+    d = _session_dir(sid)
+    snap = d / "report.json"
+    card_id = (_meta(d).get("card") or {}).get("id")
+    if not snap.exists() or not tag_compare.available(card_id):
+        return jsonify({"available": False, "card_id": card_id})
+    cache = d / "tagcmp.json"
+    if cache.exists() and cache.stat().st_mtime >= snap.stat().st_mtime:
+        return jsonify(json.loads(cache.read_text()))
+    res = dict(tag_compare.build(d, card_id, json.loads(snap.read_text())), available=True)
+    cache.write_text(json.dumps(res))
+    return jsonify(res)
 
 
 @app.route("/scans/<sid>/<path:name>")

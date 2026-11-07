@@ -55,6 +55,90 @@ def _defect_area(m, values_mm, trigger_mm, floor_mm, min_len_mm=0.15):
     return area
 
 
+def _backdrop_like(m):
+    """Map (view coordinates) of pixels that look like the plain backdrop: its colour, neutral, and smooth.
+    Printed silver foil can match the grey backdrop's colour but is textured; paper backdrop is smooth."""
+    cached = getattr(m, "_backdrop_map", None)
+    if cached is not None:
+        return cached
+    lab = cv2.cvtColor(m.canon_view, cv2.COLOR_BGR2LAB).astype(np.float32)
+    L = lab[..., 0]
+    chroma = np.hypot(lab[..., 1] - 128, lab[..., 2] - 128)
+    k = (0, 0)
+    mean = cv2.GaussianBlur(L, k, 2)
+    std = np.sqrt(np.clip(cv2.GaussianBlur(L * L, k, 2) - mean * mean, 0, None))
+    bg = getattr(m, "bg_light", float(np.median(L[:m.view_pad, :])))
+    m._backdrop_map = (np.abs(mean - bg) < 22) & (chroma < 10) & (std < 14)
+    return m._backdrop_map
+
+
+def _edge_depths(m, side, pts):
+    """For outline points along a straight edge: how far (mm) plain backdrop reaches in past the card's
+    ideal straight edge. That's missing material: a chip or nick."""
+    bmap = _backdrop_like(m)
+    p = m.view_pad
+    H, W = bmap.shape
+    maxd = int(round(m.px(0.6)))
+    out = np.zeros(len(pts))
+    for i, (x, y) in enumerate(pts):
+        xi = int(np.clip(round(x) + p, 0, W - 1))
+        yi = int(np.clip(round(y) + p, 0, H - 1))
+        if side == "top":
+            line = bmap[p + 1:p + 1 + maxd, xi]
+        elif side == "bottom":
+            line = bmap[p + m.ch - 2:p + m.ch - 2 - maxd:-1, xi]
+        elif side == "left":
+            line = bmap[yi, p + 1:p + 1 + maxd]
+        else:
+            line = bmap[yi, p + m.cw - 2:p + m.cw - 2 - maxd:-1]
+        out[i] = len(line) if line.all() else int(np.argmin(line))
+    return out * m.mmpp
+
+
+def _corner_gap_shows_backdrop(m, pts, name, r):
+    """Per corner outline point: is the gap between it and the ideal rounded corner plain backdrop?"""
+    lab = getattr(m, "_lab_view_cache", None)
+    if lab is None:
+        lab = m._lab_view_cache = cv2.cvtColor(m.canon_view, cv2.COLOR_BGR2LAB).astype(np.float32)
+    bg = getattr(m, "bg_light", None)
+    if bg is None:
+        return np.ones(len(pts), bool)
+    cx = r if "left" in name else m.cw - 1 - r
+    cy = r if "top" in name else m.ch - 1 - r
+    v = pts - np.array([cx, cy])
+    dist = np.linalg.norm(v, axis=1)
+    out = np.ones(len(pts), bool)
+    refs = getattr(m, "_border_ref", None) or {}
+    dark = bool(refs) and float(np.median([float(x[0]) for x in refs.values()])) < 60
+    reach, tol = m.px(0.35), m.px(0.2)
+    for i in range(len(pts)):
+        if dist[i] >= r - 1:  # on or outside the ideal arc: nothing missing here
+            continue
+        u = v[i] / (dist[i] + 1e-9)
+        if dark:
+            # Dark border: holo shine on the corner can look just like the grey guide. The scanner draws a
+            # thin bright line along the card's real cut edge; if that line sits out at the ideal corner,
+            # the card is all there and the "gap" is only printed shine. The line is 1-2 px wide, so look
+            # at the brightest pixel nearby rather than one sample.
+            lmax = getattr(m, "_lmax_view_cache", None)
+            if lmax is None:
+                lmax = m._lmax_view_cache = cv2.dilate(lab[..., 0], np.ones((3, 3), np.uint8))
+            t = np.arange(max(dist[i] + tol, r - reach), r + reach, 1.0)
+            if len(t):
+                q = np.array([cx, cy]) + t[:, None] * u + m.view_pad
+                xs, ys = np.clip(q[:, 0].astype(int), 0, lab.shape[1] - 1), np.clip(q[:, 1].astype(int), 0, lab.shape[0] - 1)
+                if float(lmax[ys, xs].max()) > bg + 40:
+                    out[i] = False
+                    continue
+        t = np.linspace(dist[i] + 1, r, max(2, int(r - dist[i])))
+        q = np.array([cx, cy]) + t[:, None] * u + m.view_pad
+        xs, ys = np.clip(q[:, 0].astype(int), 0, lab.shape[1] - 1), np.clip(q[:, 1].astype(int), 0, lab.shape[0] - 1)
+        g = lab[ys, xs]
+        chroma = np.hypot(g[:, 1] - 128, g[:, 2] - 128)
+        out[i] = abs(float(g[:, 0].mean()) - bg) < 22 and float(chroma.mean()) < 10 and float(g[:, 0].std()) < 16
+    return out
+
+
 def subscores(m: Measurement):
     if not m.edges_reliable or getattr(m, "_outline", None) is None:
         return None
@@ -68,7 +152,7 @@ def subscores(m: Measurement):
         along = pts[idx, 0] if side in ("top", "bottom") else pts[idx, 1]
         idx = idx[np.argsort(along)]
         extra = (rim[idx] - typical[side]) * m.mmpp
-        dent = np.clip(sd[idx] - _rolling_median(sd[idx], int(0.3 * m.ppi)), 0, None) * m.mmpp
+        dent = _edge_depths(m, side, pts[idx])
         out["edges"][side] = {"fray": _score(FRAY_PER_MM2 * _defect_area(m, extra, 0.06, 0.04)),
                               "fill": _score(FILL_PER_MM2 * _defect_area(m, dent, 0.06, 0.04))}
     for name in CORNER_NAMES:
@@ -78,6 +162,9 @@ def subscores(m: Measurement):
         side = "top" if name.startswith("top") else "bottom"
         extra = (rim[idx] - typical[side]) * m.mmpp
         dev = sd[idx] * m.mmpp
+        r_px = getattr(m, "_radius_px", None)
+        if r_px is not None:
+            dev = np.where((dev > 0) & ~_corner_gap_shows_backdrop(m, pts[idx], name, r_px), 0.0, dev)
         shape = float(np.abs(dev).max())
         out["corners"][name] = {"fray": _score(FRAY_PER_MM2 * _defect_area(m, extra, 0.06, 0.04)),
                                 "fill": _score(FILL_PER_MM2 * _defect_area(m, dev, 0.08, 0.06)),
@@ -99,8 +186,7 @@ def build_findings(m: Measurement):
         along = pts[idx, 0] if side in ("top", "bottom") else pts[idx, 1]
         idx = idx[np.argsort(along)]
         extra_mm = (rim[idx] - typical[side]) * m.mmpp
-        dev = sd[idx]
-        dent_mm = np.clip(dev - _rolling_median(dev, int(0.3 * m.ppi)), 0, None) * m.mmpp
+        dent_mm = _edge_depths(m, side, pts[idx])
 
         def runs(flags, min_mm):
             return _runs(flags, min_len=max(2, int(round(m.px(min_mm)))))
@@ -123,6 +209,10 @@ def build_findings(m: Measurement):
         if not len(idx):
             continue
         dev_mm = sd[idx] * m.mmpp
+        r_px = getattr(m, "_radius_px", None)
+        if r_px is not None:
+            real = _corner_gap_shows_backdrop(m, pts[idx], name, r_px)
+            dev_mm = np.where((dev_mm > 0) & ~real, 0.0, dev_mm)
         worst = float(np.abs(dev_mm).max())
         if worst > CORNER_YELLOW_MM:
             sev = "red" if worst > CORNER_RED_MM else "yellow"

@@ -66,24 +66,46 @@ def load(path_or_bytes) -> np.ndarray:
 
 # ---------- finding and straightening the card ----------
 
-def _card_mask(img, scanned=True):
+def window_backdrop(lab, edge_bg):
+    """The backdrop right around the card when it differs from the scan's edge, e.g. the grey cover seen
+    through the black frame's window: the most common neutral colour that isn't the edge colour."""
+    neutral = (np.hypot(lab[..., 1] - 128, lab[..., 2] - 128) < 6) & (np.abs(lab[..., 0] - edge_bg[0]) > 30)
+    if neutral.mean() < 0.1:
+        return None
+    vals = lab[..., 0][neutral]
+    hist, edges = np.histogram(vals, bins=64, range=(0, 256))
+    i = int(np.argmax(hist))
+    near = neutral & (np.abs(lab[..., 0] - (edges[i] + edges[i + 1]) / 2) < 12)
+    return np.median(lab[near], axis=0)
+
+
+def _card_mask(img, scanned=True, bg=None):
     lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB).astype(np.float32)
     h, w = lab.shape[:2]
-    b = max(4, int(min(h, w) * 0.02))
-    frame = np.concatenate([lab[:b].reshape(-1, 3), lab[-b:].reshape(-1, 3),
-                            lab[:, :b].reshape(-1, 3), lab[:, -b:].reshape(-1, 3)])
-    dark = frame[:, 0] < 110
-    # A frame that's mostly black (scan guide) but catches some white paper at a corner: trust the black.
-    bg = np.median(frame[dark], axis=0) if dark.mean() > 0.4 else np.median(frame, axis=0)
+    if bg is None:
+        b = max(4, int(min(h, w) * 0.02))
+        frame = np.concatenate([lab[:b].reshape(-1, 3), lab[-b:].reshape(-1, 3),
+                                lab[:, :b].reshape(-1, 3), lab[:, -b:].reshape(-1, 3)])
+        dark = frame[:, 0] < 110
+        # A frame that's mostly black (scan guide) but catches some white paper at a corner: trust the black.
+        bg = np.median(frame[dark], axis=0) if dark.mean() > 0.4 else np.median(frame, axis=0)
     # Card = anything clearly more colourful than the background, or clearly lighter/darker.
     # Fixed rules rather than Otsu: Otsu splits on the card's own artwork when it has both bright and
     # dark areas (a dark-blue back with a bright Poké Ball), and the scan guide's two sheets are
     # slightly different blacks that must both count as background.
     chroma_dist = np.hypot(lab[..., 1] - bg[1], lab[..., 2] - bg[2])
-    # On a black background nothing on the card is darker than the background, and the guide's cover
-    # sheet can be a slightly deeper black than the frame, so only count lighter pixels there.
-    light_dist = (lab[..., 0] - bg[0]) if bg[0] < 110 else np.abs(lab[..., 0] - bg[0])
-    m = ((chroma_dist > 10) | (light_dist > 28)).astype(np.uint8) * 255
+    # On the guide's printed black (L ~65-75) a card is either lighter/more colourful, or - for
+    # black-bordered cards - a much deeper black (L ~15-30). The guide's two sheets differ by only a few
+    # levels and faint shadows along the card's edge by a little more, so "darker" needs a wide margin.
+    if bg[0] < 110:
+        m = (chroma_dist > 10) | (lab[..., 0] - bg[0] > 28)
+    elif bg[0] < 190:
+        # Grey guide: the card's shadow beside its edge is darker than the grey, so "darker" needs a wide
+        # margin. A black border (L ~20-45) still clears it easily against the grey (~150).
+        m = (chroma_dist > 10) | (lab[..., 0] - bg[0] > 28) | (bg[0] - lab[..., 0] > 60)
+    else:
+        m = (chroma_dist > 10) | (np.abs(lab[..., 0] - bg[0]) > 28)
+    m = m.astype(np.uint8) * 255
     if not scanned:
         # Photos (e.g. TAG slab shots) have reflections that pass the fixed rules; Otsu copes better there.
         dist8 = np.clip(np.linalg.norm(lab - bg, axis=2) * 2, 0, 255).astype(np.uint8)
@@ -91,7 +113,7 @@ def _card_mask(img, scanned=True):
     k = max(3, int(min(h, w) * 0.004)) | 1
     m = cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((k, k), np.uint8))
     m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((k * 3, k * 3), np.uint8))
-    return m, bg[0] < 80  # OpenCV 8-bit L runs 0..255
+    return m, float(bg[0])  # backdrop lightness, OpenCV 8-bit L (0..255)
 
 
 def _find_card_contour(mask, src_ppi=None):
@@ -151,8 +173,35 @@ def _side_lines(pts):
         if sel.sum() < 20:
             raise CardNotFound("Card edges are unclear.")
         vx, vy, x0, y0 = cv2.fitLine(pts[sel].astype(np.float32), cv2.DIST_HUBER, 0, 0.01, 0.01).ravel()
-        lines[name] = (np.array([x0, y0]), np.array([vx, vy]))
-    return lines
+        lines[name] = (np.array([x0, y0]), np.array([vx, vy]), pts[sel], L)
+    return _square_up(lines)
+
+
+def _square_up(lines):
+    """Repair a side whose fit was pulled off by artwork, using the opposite side's angle.
+
+    Fitting each side on its own lets artwork that matches the backdrop (a silver swoosh along the top
+    of a black-bordered card on the grey guide) tilt that side by a degree or more, which skews the whole
+    straightened image. Opposite sides of a card are parallel, and the scanner's own slight skew (about
+    0.35 degrees between its across and along directions on the ENVY) affects both equally, so top must match
+    bottom and left must match right. When a pair disagrees, the side whose points hug its line less
+    is redrawn at its partner's angle, placed at the median of its own edge points.
+    """
+    info = {}
+    for name, (p, v, sel, L) in lines.items():
+        n = np.array([-v[1], v[0]])
+        inl = float((np.abs((sel - p) @ n) < 0.002 * L).mean())  # share of points hugging the line
+        info[name] = (np.arctan2(v[1], v[0]), inl)
+    out = {name: (p, v) for name, (p, v, sel, L) in lines.items()}
+    for a_name, b_name in (("top", "bottom"), ("left", "right")):
+        diff = (info[a_name][0] - info[b_name][0] + np.pi / 2) % np.pi - np.pi / 2
+        if abs(diff) < np.deg2rad(0.3):
+            continue
+        bad, good = (a_name, b_name) if info[a_name][1] < info[b_name][1] else (b_name, a_name)
+        d = lines[good][1] / np.linalg.norm(lines[good][1])
+        n = np.array([-d[1], d[0]])
+        out[bad] = (n * float(np.median(lines[bad][2] @ n)), d)
+    return out
 
 
 def _intersect(l1, l2):
@@ -162,9 +211,101 @@ def _intersect(l1, l2):
     return p + t[0] * r
 
 
+def _trace_dark_card(img, ppi):
+    """Outline of a dark (e.g. black-bordered) card on the guide's black backdrop.
+
+    Brightness alone can't separate a black border from the backdrop and the shadow beside the card,
+    but every card shows a thin bright line where the scanner catches its cut edge. Find the card
+    roughly from that line, then at many points around it look across the edge (±3 mm) for the
+    brightest pixel: inside that band is the dark border, outside is backdrop/shadow, so the peak is
+    the edge itself.
+    """
+    L = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)[..., 0].astype(np.float32)
+    rim = cv2.morphologyEx((L > 105).astype(np.uint8) * 255, cv2.MORPH_CLOSE, np.ones((15, 15), np.uint8))
+    contours, _ = cv2.findContours(rim, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+    rough = None
+    for c in contours:
+        (cx, cy), (rw, rh), ang = cv2.minAreaRect(c)
+        if 2.3 < min(rw, rh) / ppi < 2.7 and 3.3 < max(rw, rh) / ppi < 3.7:
+            if rough is None or rw * rh > rough[1][0] * rough[1][1]:
+                rough = ((cx, cy), (rw, rh), ang)
+    if rough is None:
+        raise CardNotFound("Couldn't find a card-shaped object. Check the card is fully inside the scan area.")
+    (cx, cy), (rw, rh), ang = rough
+    if rw > rh:  # make the long side the local y axis
+        rw, rh, ang = rh, rw, ang + 90
+    th = np.deg2rad(ang)
+    ux, vy = np.array([np.cos(th), np.sin(th)]), np.array([-np.sin(th), np.cos(th)])
+    hw, hh, r = rw / 2, rh / 2, 3.0 / 25.4 * ppi
+    # sample the ideal rounded rectangle every ~0.2 mm, with outward normals
+    step = 0.2 / 25.4 * ppi
+    pts, normals = [], []
+    straight = [((-hw + r, -hh), (hw - r, -hh), (0, -1)), ((hw, -hh + r), (hw, hh - r), (1, 0)),
+                ((hw - r, hh), (-hw + r, hh), (0, 1)), ((-hw, hh - r), (-hw, -hh + r), (-1, 0))]
+    centres = [(hw - r, -hh + r, -np.pi / 2, 0), (hw - r, hh - r, 0, np.pi / 2), (-hw + r, hh - r, np.pi / 2, np.pi), (-hw + r, -hh + r, np.pi, 1.5 * np.pi)]
+    for (a, b, n), (ccx, ccy, t0, t1) in zip(straight, centres):
+        length = np.hypot(b[0] - a[0], b[1] - a[1])
+        for t in np.linspace(0, 1, max(2, int(length / step)), endpoint=False):
+            pts.append((a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)); normals.append(n)
+        for t in np.linspace(t0, t1, max(2, int(r * (t1 - t0) / step)), endpoint=False):
+            pts.append((ccx + r * np.cos(t), ccy + r * np.sin(t))); normals.append((np.cos(t), np.sin(t)))
+    pts, normals = np.array(pts), np.array(normals)
+    to_img = lambda p: np.array([cx, cy]) + p[..., :1] * ux + p[..., 1:2] * vy
+    search = np.linspace(-3.0, 3.0, int(6.0 / 25.4 * ppi)) / 25.4 * ppi  # outward offsets in px
+    sample = pts[:, None, :] + normals[:, None, :] * search[None, :, None]
+    xy = to_img(sample).astype(np.float32)
+    prof = cv2.remap(L, xy[..., 0], xy[..., 1], cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+    prof = cv2.GaussianBlur(prof, (1, 5), 0)[:, ::-1]  # now ordered outside -> inside
+    after = max(4, int(0.5 / 25.4 * ppi))  # the card's dark border must follow the edge line
+    n_s = prof.shape[1]
+    off = np.full(len(prof), np.nan)
+    for i, row in enumerate(prof):
+        bright = np.where(row > 95)[0]
+        for j in bright:
+            if j + after < n_s and row[j + 2:j + after].mean() < 60:
+                k = j + int(np.argmax(row[j:j + 4]))  # the line's peak
+                off[i] = search[::-1][k]
+                break
+    ok = ~np.isnan(off)
+    if ok.mean() < 0.6:
+        raise CardNotFound("Couldn't trace this card's edge. Try the scan again.")
+    idx = np.arange(len(off))
+    off = np.interp(idx, idx[ok], off[ok], period=len(off))
+    # drop points that jump away from their neighbours (sparkle in a holo border), then fill and smooth
+    win = max(5, int(1.0 / 0.2))
+    local = np.median(np.stack([np.roll(off, k) for k in range(-win, win + 1)]), axis=0)
+    good = np.abs(off - local) < 0.25 / 25.4 * ppi
+    off = np.interp(idx, idx[good], off[good], period=len(off))
+    off = np.median(np.stack([np.roll(off, k) for k in (-2, -1, 0, 1, 2)]), axis=0)
+    edge = to_img(pts + normals * off[:, None])
+    return np.round(edge).astype(np.int32).reshape(-1, 1, 2)
+
+
 def find_and_straighten(img, src_ppi=None):
-    mask, dark_bg = _card_mask(img, scanned=bool(src_ppi))
-    contour = _find_card_contour(mask, src_ppi)
+    mask, bg_light = _card_mask(img, scanned=bool(src_ppi))
+    dark_bg = bg_light < 80
+    traced = False
+    try:
+        contour = _find_card_contour(mask, src_ppi)
+    except CardNotFound:
+        # Mixed guide (e.g. black frame with the grey cover in the window): retry against the colour
+        # actually around the card.
+        alt = window_backdrop(cv2.cvtColor(img, cv2.COLOR_BGR2LAB).astype(np.float32), [bg_light]) if src_ppi else None
+        contour = None
+        if alt is not None:
+            alt_mask, alt_light = _card_mask(img, scanned=True, bg=alt)
+            try:
+                contour = _find_card_contour(alt_mask, src_ppi)
+                mask, bg_light, dark_bg = alt_mask, alt_light, alt_light < 80
+            except CardNotFound:
+                contour = None
+        if contour is None:
+            if not (src_ppi and dark_bg):
+                raise
+            contour = _trace_dark_card(img, src_ppi)  # black-bordered card on the black guide
+            traced = True
+            mask = np.zeros(mask.shape, np.uint8)
+            cv2.drawContours(mask, [contour], -1, 255, cv2.FILLED)
     pts = contour.reshape(-1, 2).astype(np.float64)
     lines = _side_lines(pts)
     quad = np.array([
@@ -185,8 +326,14 @@ def find_and_straighten(img, src_ppi=None):
     canon = cv2.warpPerspective(img, M, (cw, ch), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
     # Card mask in canonical space, with a margin so we can see the true edge outline.
     M_pad = cv2.getPerspectiveTransform(quad, dst + pad)
-    cmask = cv2.warpPerspective(_solid_mask(mask, contour), M_pad, (cw + 2 * pad, ch + 2 * pad), flags=cv2.INTER_LINEAR)
-    m = Measurement(canon=canon, mask=cmask, corners_src=quad, background_dark=bool(dark_bg), ppi=ppi)
+    # A card is convex: inward notches in the detected outline come from artwork that matches the
+    # backdrop (e.g. silver foil on the grey guide). Use the hull for geometry; real edge chips are found
+    # directly in the image instead (closeups._edge_depths), and corner wear still pulls the hull inward.
+    cmask = cv2.warpPerspective(_solid_mask(mask, cv2.convexHull(contour)), M_pad, (cw + 2 * pad, ch + 2 * pad), flags=cv2.INTER_LINEAR)
+    # "background_dark" really means "a proper backdrop": the black or grey guide, not white paper or the lid.
+    m = Measurement(canon=canon, mask=cmask, corners_src=quad, background_dark=bool(bg_light < 190), ppi=ppi)
+    m.bg_light = bg_light
+    m.dark_card = traced
     vp = int(VIEW_MARGIN_IN * ppi)
     M_view = cv2.getPerspectiveTransform(quad, dst + vp)
     m.canon_view = cv2.warpPerspective(img, M_view, (cw + 2 * vp, ch + 2 * vp), flags=cv2.INTER_CUBIC,
@@ -327,29 +474,77 @@ def _classify(m, pts, r):
     return labels
 
 
-def _rim_widths(m, lab, pts, refs, labels):
-    """For each outline point, how many px inward until the colour settles to the border colour."""
+def _rim_widths(m, lab, pts, refs, labels, centre_offset=0):
+    """For each outline point, how many px of pale (whitened) material sit just inside the edge.
+
+    NaN where the pale area carries on deep into the card: that's printed artwork reaching the edge
+    (e.g. silver foil stripes), not wear."""
     n = len(pts)
     k = max(6, int(round(m.px(0.25))))
     samples_n = int(round(m.px(RIM_DEPTH_MM)))
+    deep_a, deep_b = int(round(m.px(0.9))), int(round(m.px(1.3)))
     tang = pts[(np.arange(n) + k) % n] - pts[(np.arange(n) - k) % n]
     tang /= np.linalg.norm(tang, axis=1, keepdims=True) + 1e-9
     normal = np.stack([-tang[:, 1], tang[:, 0]], axis=1)
-    centre = np.array([m.cw / 2, m.ch / 2])
+    centre = np.array([m.cw / 2, m.ch / 2]) + centre_offset
     normal[np.sum(normal * (centre - pts), axis=1) < 0] *= -1
-    t = np.arange(samples_n, dtype=np.float32)
+    t = np.arange(deep_b, dtype=np.float32)
     sx = (pts[:, 0:1] + normal[:, 0:1] * t).astype(np.float32)
     sy = (pts[:, 1:2] + normal[:, 1:2] * t).astype(np.float32)
     samples = cv2.remap(lab, sx, sy, cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)  # n x T x 3
     side_of = {"top_left": "top", "top_right": "top", "bottom_left": "bottom", "bottom_right": "bottom"}
     ref = np.array([refs[side_of.get(l, l)] for l in labels], dtype=np.float32)
+    near = samples[:, :samples_n]
     # Count only pale pixels (lighter and less colourful than the border): that's whitening.
     # Dark specks or print detail near the edge change the colour too, but aren't wear.
     ref_chroma = np.hypot(ref[:, 1] - 128, ref[:, 2] - 128)[:, None]
-    chroma = np.hypot(samples[..., 1] - 128, samples[..., 2] - 128)
-    lighter = samples[..., 0] - ref[:, None, 0]
+    chroma = np.hypot(near[..., 1] - 128, near[..., 2] - 128)
+    lighter = near[..., 0] - ref[:, None, 0]
     pale = np.where(ref_chroma > 20, (lighter > 12) & (chroma < ref_chroma * 0.7), lighter > 25)
-    return pale.sum(axis=1).astype(np.float32)
+    bg_light = getattr(m, "bg_light", 0.0)
+    dark_border = (ref[:, 0] < bg_light - 40) & (ref_chroma[:, 0] < 20)
+    if dark_border.any():
+        # Dark border on a lighter backdrop (black card on the grey guide): the blend from backdrop to
+        # border is lighter than the border but isn't wear. Whitening is near-white, so it must also be
+        # lighter than the backdrop.
+        pale[dark_border] &= near[dark_border][..., 0] > bg_light + 10
+    rim = pale.sum(axis=1).astype(np.float32)
+    deep = samples[:, deep_a:deep_b]
+    deep_off = np.linalg.norm(deep - ref[:, None, :], axis=2).mean(axis=1) > 22
+    rim[deep_off & (rim > 0)] = np.nan  # artwork reaching the edge, not whitening
+    return rim
+
+
+def _artwork_at_edge(m, pts, refs):
+    """Outline points whose pale pixels belong to a pale shape that reaches more than 0.8 mm into the
+    card: printed artwork (silver stripes, white panels) touching the edge, not edge wear. Whitening hugs
+    the edge; artwork connects to something deeper."""
+    lab = cv2.cvtColor(m.canon, cv2.COLOR_BGR2LAB).astype(np.float32)
+    ref = np.median(np.array(list(refs.values()), dtype=np.float32), axis=0)
+    ref_chroma = float(np.hypot(ref[1] - 128, ref[2] - 128))
+    chroma = np.hypot(lab[..., 1] - 128, lab[..., 2] - 128)
+    lighter = lab[..., 0] - ref[0]
+    pale = (lighter > 12) & (chroma < ref_chroma * 0.7) if ref_chroma > 20 else (lighter > 25)
+    inside = (m.mask[m.pad:m.pad + m.ch, m.pad:m.pad + m.cw] > 127).astype(np.uint8)
+    # The image border is the card's edge too: without a zero frame, a card that fills the straightened
+    # image has no edge for the distance to count from.
+    depth = cv2.distanceTransform(cv2.copyMakeBorder(inside, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0),
+                                  cv2.DIST_L2, 5)[1:-1, 1:-1]  # px from the card's edge
+    band = pale & (depth < m.px(2.0)) & (inside > 0)
+    n, comp = cv2.connectedComponents(band.astype(np.uint8), connectivity=8)
+    if n <= 1:
+        return np.zeros(len(pts), bool)
+    deepest = np.zeros(n)
+    np.maximum.at(deepest, comp.ravel(), depth.ravel())
+    art = deepest > m.px(0.8)
+    art[0] = False
+    # Any artwork within ~0.35 mm of the point counts, in every direction: a thin diagonal stripe that
+    # meets the edge at a slant sits beside the point, not straight in from it.
+    near = max(3, int(round(m.px(0.35))))
+    art_px = cv2.dilate(art[comp].astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * near + 1, 2 * near + 1)))
+    xi = np.clip(np.round(pts[:, 0]).astype(int), 0, m.cw - 1)
+    yi = np.clip(np.round(pts[:, 1]).astype(int), 0, m.ch - 1)
+    return art_px[yi, xi] > 0
 
 
 def _whitening_runs(m, rim_px, typical):
@@ -366,7 +561,23 @@ def measure_edges_corners(m: Measurement):
     if len(refs) < 4:
         med = np.median(lab[int(0.1 * m.ppi):int(0.12 * m.ppi), :].reshape(-1, 3), axis=0)
         refs = {s: refs.get(s, med) for s in ("top", "bottom", "left", "right")}
-    rim = _rim_widths(m, lab, pts, refs, labels)
+    # Sample from the view with real background around the card: outline points can sit a little past the
+    # ideal straight edge, where the plain straightened image has no real pixels.
+    if m.canon_view is not None:
+        lab_view = cv2.cvtColor(m.canon_view, cv2.COLOR_BGR2LAB).astype(np.float32)
+        rim = _rim_widths(m, lab_view, pts + m.view_pad, refs, labels, centre_offset=m.view_pad)
+    else:
+        rim = _rim_widths(m, lab, pts, refs, labels)
+    # Points where artwork reaches the edge (NaN) get their edge's typical rim, so they never read as wear.
+    side_of = {"top_left": "top", "top_right": "top", "bottom_left": "bottom", "bottom_right": "bottom"}
+    typ0 = {}
+    for s_ in ("top", "bottom", "left", "right"):
+        vals = rim[labels == s_]
+        typ0[s_] = float(np.nanmedian(vals)) if np.any(~np.isnan(vals)) else 0.0
+    rim[_artwork_at_edge(m, pts, refs) & (rim > 0)] = np.nan
+    nan_idx = np.where(np.isnan(rim))[0]
+    rim[nan_idx] = [typ0[side_of.get(labels[i], labels[i])] for i in nan_idx]
+    m.print_at_edge = len(nan_idx) / max(1, len(rim))
 
     m.edges, m.corners = {}, {}
     side_typical = {}
@@ -400,6 +611,7 @@ def measure_edges_corners(m: Measurement):
             "whitening_pct": round(100 * float(white.mean()), 1) if sel.any() else 0.0,
         }
     m.corners["_radius_mm"] = round(r * m.mmpp, 3)
+    m._radius_px = r
     m._outline = (pts, labels, rim, side_typical)
     m._sd = sd
     return m.edges, m.corners
@@ -462,8 +674,12 @@ def overlay(m: Measurement) -> np.ndarray:
 
 def measure_image(img, src_ppi=None) -> Measurement:
     m = find_and_straighten(img, src_ppi=src_ppi)
-    m.edges_reliable = bool(src_ppi and src_ppi >= 500)
-    if not m.edges_reliable:
+    m.edges_reliable = bool(src_ppi and src_ppi >= 500) and not getattr(m, "dark_card", False)
+    if getattr(m, "dark_card", False):
+        m.warnings.append("Black-bordered card: size and centering are measured, but corners and edges can't be "
+                          "judged against the black guide, so they aren't scored. Rescan it on the grey guide for "
+                          "corner and edge checks.")
+    elif not m.edges_reliable:
         m.warnings.append("Not a 600+ dpi scan: centering only. Corners and edges need a scanner image.")
     elif not m.background_dark:
         m.warnings.append("Light background detected. Put black paper behind the card for accurate edge and corner checks.")

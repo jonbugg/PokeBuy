@@ -148,7 +148,20 @@
   .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
   .surface-img { width: 100%; border-radius: 8px; margin-top: 12px; border: 1px solid var(--hair); }
 
+  /* TAG comparison */
+  .tc-verdict { border-radius: 12px; padding: 14px 16px; margin: 14px 0; background: var(--hair-2); }
+  .tc-verdict.good { background: var(--mint); } .tc-verdict.maybe { background: var(--butter); } .tc-verdict.no { background: var(--rose); }
+  .tc-verdict span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-60); }
+  .tc-verdict b { font-size: 22px; }
+  .tc-verdict ul { margin: 8px 0 0; padding-left: 18px; font-size: 13px; line-height: 1.5; }
+  .tc-table tr.tc-you td { background: var(--sky-tint); }
+  .tc-h { margin: 22px 0 8px; font-size: 14px; }
+  .tc-fig { margin: 0 0 14px; }
+  .tc-fig img { max-width: 100%; border-radius: 8px; border: 1px solid var(--hair); display: block; }
+  .tc-fig figcaption { font-size: 12px; color: var(--ink-60); margin-top: 4px; }
   /* expected grades */
+  .xg-pending { background: var(--butter); color: #6b4700; border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; font-size: 13px; line-height: 1.45; }
+  .xg-partial .xg-grade b { color: var(--ink-60); }
   .xg { margin-top: 16px; }
   .xg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid var(--hair); }
   .xg-row { display: grid; grid-template-columns: 150px 220px 170px 1fr; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--hair-2); }
@@ -167,6 +180,77 @@
   .lib-link { font-size: 14px; font-weight: 500; color: var(--ink-60); text-decoration: none; padding: 6px 12px; border-radius: 8px; }
   .lib-link:hover { background: var(--white); color: var(--ink); box-shadow: 0 0 0 1px var(--hair); }
 
+  .xg-odds { grid-column: 1 / -1; margin-top: -4px; }
+  .odds-bar { display: flex; height: 8px; border-radius: 9999px; overflow: hidden; background: var(--hair-2); }
+  .odds-bar span { display: block; height: 100%; }
+  .odds-key { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--ink-60); margin-top: 6px; }
+  .odds-key i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .odds-key b { color: var(--ink); font-weight: 600; }
+  .roi-card { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; }
+  .roi-card img { width: 92px; border-radius: 6px; box-shadow: 0 1px 6px rgba(0,0,0,.15); }
+  .roi-find input { font: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--hair); min-width: 220px; }
+  .cands { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
+  .cand { display: flex; flex-direction: column; gap: 3px; align-items: flex-start; text-align: left; border: 1px solid var(--hair); background: var(--white); border-radius: 10px; padding: 8px; font-size: 12px; color: var(--ink-60); cursor: pointer; }
+  .cand:hover { border-color: var(--blue); }
+  .cand img { width: 100%; border-radius: 5px; }
+  .cand b { color: var(--ink); font-size: 13px; }
+  .roi-values { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px 14px; margin: 6px 0 16px; }
+  .roi-in { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--ink-60); }
+  .roi-in input { font: inherit; font-size: 15px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--hair); font-variant-numeric: tabular-nums; }
+  .roi-in small a { color: var(--blue); }
+  .sold-cta { background: var(--sky-tint); border-radius: 10px; padding: 12px 14px; margin: 0 0 14px; }
+  .sold-cta code { background: var(--white); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+  .sold { border: 1px solid var(--hair); border-radius: 12px; padding: 14px 16px; margin: 0 0 16px; background: var(--white); }
+  .sold-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; margin-bottom: 12px; }
+  .sold-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+  .sold-tab { font: inherit; font-size: 12px; border: 1px solid var(--hair); background: var(--paper); border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+  .sold-tab span { color: var(--ink-40); margin-left: 2px; }
+  .sold-tab.on { background: var(--ink); color: var(--white); border-color: var(--ink); }
+  .sold-tab.on span { color: rgba(255,255,255,.6); }
+  .sold-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 10px; }
+  .sold-stats div { background: var(--paper); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; }
+  .sold-stats span { font-size: 11px; color: var(--ink-60); text-transform: uppercase; letter-spacing: .04em; }
+  .sold-stats b { font-size: 20px; }
+  .sold-stats small { color: var(--ink-60); font-size: 12px; }
+  .sold-chart { width: 100%; height: auto; display: block; }
+  .sold-chart text { font-size: 10px; fill: var(--ink-40); font-family: var(--sans); }
+  .sold-chart .grid { stroke: var(--hair); }
+  .sold-chart circle.b { fill: var(--blue); fill-opacity: .8; }
+  .sold-chart circle.a { fill: var(--saffron); fill-opacity: .85; }
+  .sold-chart circle.o { fill: none; stroke: var(--ink-20); stroke-width: 1.5; }
+  .sold-chart .avg { stroke: var(--mint-ink); stroke-width: 2; stroke-dasharray: 5 4; }
+  .sold-chart .avgt { fill: var(--mint-ink); font-weight: 600; }
+  .sold-key { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--ink-60); margin: 2px 0 4px; }
+  .sold-key i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+  .sold-key i.b { background: var(--blue); } .sold-key i.a { background: var(--saffron); } .sold-key i.o { border: 1.5px solid var(--ink-20); }
+  .dig-table.sold-table { margin-top: 10px; }
+  .dig-table.sold-table td { vertical-align: top; }
+  .dig-table.sold-table td a { color: var(--ink-90); text-decoration: none; }
+  .dig-table.sold-table td a:hover { color: var(--blue); text-decoration: underline; }
+  .dig-table.sold-table tr.out td { color: var(--ink-40); text-decoration: line-through; }
+  .dig-table.sold-table tr.more { display: none; }
+  .dig-table.sold-table.all tr.more { display: table-row; }
+  .sold-last b, .roi-in small b { color: var(--ink-90); }
+  .roi-in small .use-ask { color: var(--blue); font: inherit; padding: 0; background: none; border: 0; cursor: pointer; text-decoration: underline; }
+  .roi-verdict { padding: 12px 16px; border-radius: 10px; font-size: 15px; margin-bottom: 4px; }
+  .roi-verdict.good { background: var(--mint); color: #134d2c; }
+  .roi-verdict.no { background: var(--butter); color: #6b4700; }
+  .dig-table.roi-table td { text-transform: none; font-variant-numeric: tabular-nums; }
+  .roi-table tr.best td { background: #f2fbf5; font-weight: 600; }
+  .roi-table td.pos { color: var(--mint-ink); font-weight: 600; } .roi-table td.neg { color: var(--vermillion); }
+  .actual { margin-top: 12px; font-size: 13px; }
+  .actual summary { cursor: pointer; color: var(--blue); font-weight: 500; }
+  .actual input, .actual select { font: inherit; font-size: 13px; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--hair); }
+  .actual.done { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  @media print {
+    body { background: #fff; }
+    .bar, .hero, .steps, .work, .no-print, .ann-toggle, .modal, .zoom, .roi-find, .actual details { display: none !important; }
+    .results { margin-top: 0; }
+    .dig { border: 0; padding: 0; }
+    .dig-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; break-after: avoid; }
+    .dt, .finding, .surf-card, .xg-row { break-inside: avoid; }
+    input { border: 0 !important; }
+  }
   /* ---------- TAG DIG-style report ---------- */
   .dig { background: var(--white); border: 1px solid var(--hair); border-radius: 12px; padding: 28px clamp(16px, 3vw, 40px) 36px; color: #2b2b2b; }
   .dig h3, .dig h4, .dig h5 { text-transform: uppercase; letter-spacing: .04em; color: #2b2b2b; }
@@ -418,7 +502,7 @@ function platenSVG({flipped = false, rotated = false} = {}) {
 
 /* ---------- step panel ---------- */
 const PREP = [
-  `<a href="/guide" target="_blank" rel="noopener">Print the scan guide</a> (two sheets) and cut out sheet 1's window. One time only.`,
+  `<a href="/guide" target="_blank" rel="noopener">Print the scan guide</a> (two sheets) and cut out sheet 1's window. One time only. For black-bordered cards, use the <a href="/guide?tone=grey" target="_blank" rel="noopener">grey guide</a> instead.`,
   "Lay sheet 1 on the glass, printed side up, blue corner in the scanner's arrow corner.",
   "Drop the card into the window face down, lined up with the little ticks.",
   "Lay sheet 2 on top, black side down, then close the lid gently.",
@@ -650,13 +734,27 @@ function centerScan(m, label) {
 }
 
 function verdictFor(est) {
+  if ((est.missing || []).length) return {cls: "unknown", text: est.missing.includes("back")
+    ? "Front only · scan the back before trusting any grade"
+    : "Back only · scan the front before trusting any grade"};
   const top = ["TAG", "PSA", "CGC"].map(k => est[k].grade);
   const any10 = top.some(g => /10/.test(g)), all10 = top.every(g => /10/.test(g));
-  if (any10 && est.defect_level === "unknown") return {cls: "unknown", text: "Centering passes for a 10 · corners and edges need a scan"};
+  if (any10 && est.defect_level === "unknown") return {cls: "unknown", text: est.unknown_why
+    ? "Centering passes for a 10 · black border: corners and edges not scored"
+    : "Centering passes for a 10 · corners and edges need a scan"};
   if (all10) return {cls: "good", text: "10 candidate at TAG, PSA and CGC"};
   if (any10) return {cls: "maybe", text: "10 at " + ["TAG", "PSA", "CGC"].filter(k => /10/.test(est[k].grade)).join(" and ") + " only"};
   if (top.some(g => /(^9|Mint 9)/.test(g))) return {cls: "maybe", text: "Close, but probably a 9"};
   return {cls: "no", text: "Probably not a 10"};
+}
+
+const ODDS_COLORS = ["#1f7a45", "#2fb36a", "#e8b100", "#e89d01", "#e36a14", "#e32d14", "#9b2a1a"];
+function oddsBar(odds) {
+  if (!odds || !odds.length) return "";
+  const col = i => ODDS_COLORS[Math.min(i, ODDS_COLORS.length - 1)];
+  const segs = odds.map((o, i) => `<span style="width:${(o.p * 100).toFixed(1)}%;background:${col(i)}" title="${esc(o.grade)}: ${Math.round(o.p * 100)}%"></span>`).join("");
+  const labels = odds.map((o, i) => o.p >= 0.05 ? `<span><i style="background:${col(i)}"></i>${esc(o.grade)} <b>${Math.round(o.p * 100)}%</b></span>` : "").join("");
+  return `<div class="odds"><div class="odds-bar">${segs}</div><div class="odds-key">${labels}</div></div>`;
 }
 
 function expectedBox(est) {
@@ -665,13 +763,259 @@ function expectedBox(est) {
     const reason = (e.reasons || [])[0];
     return `<div class="xg-row">
       <div class="xg-co"><img class="xg-logo xg-logo-${name.toLowerCase()}" src="${LOGOS[name]}" alt="${name}"><span>${esc(e.note || "")}</span></div>
-      <div class="xg-grade"><span class="pill ${tone(e.grade)}">${/10/.test(e.grade) ? "10" : "below 10"}</span><b>${esc(e.grade)}</b></div>
+      <div class="xg-grade"><span class="pill ${(est.missing || []).length ? "" : tone(e.grade)}">${(est.missing || []).length ? "at best" : /10/.test(e.grade) ? "10" : "below 10"}</span><b>${esc(e.grade)}</b></div>
       <div class="xg-sub">${sub || "&nbsp;"}</div>
       <div class="xg-why">${reason ? esc(reason) : "Nothing measured is holding it back."}</div>
+      <div class="xg-odds">${oddsBar(e.odds)}</div>
     </div>`;
   };
+  const miss = est.missing || [];
+  if (miss.length) return `<div class="xg"><div class="xg-pending"><b>No grade yet.</b> Grades appear once both sides are scanned: the ${esc(miss.join(" and "))}'s centering, corners and edges count as much as what's been scanned so far.</div></div>`;
   return `<div class="xg">${row("TAG", est.TAG)}${row("PSA", est.PSA)}${row("CGC", est.CGC)}
-    <p class="dig-note">Beckett isn't listed: it doesn't publish centering limits I could verify. "Could be" allows for a point of centering wobble between scans and counts yellow findings against the card.</p></div>`;
+    <p class="dig-note">Odds re-run the estimate thousands of times, allowing for the centering wobble measured between scans (about ±0.6 points front, ±0.8 back) and for each borderline finding counting or not with a grader. Beckett isn't listed: it doesn't publish centering limits I could verify.</p></div>`;
+}
+
+/* ---------- is it worth grading? ---------- */
+const VALUE_FIELDS = [
+  ["raw", "Raw (ungraded)", ""], ["psa10", "PSA 10", "PSA 10"], ["tag10", "TAG 10", "TAG 10"],
+  ["cgc10", "CGC 10", "CGC 10"], ["g9", "Any 9", "PSA 9"], ["g8", "Any 8–8.5", "PSA 8"],
+];
+const money = v => v == null || isNaN(v) ? "—" : (v < 0 ? "−$" : "$") + Math.abs(v).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
+
+function valueFor(company, grade, v) {
+  const raw = v.raw ?? null;
+  if (/10/.test(grade)) return company === "PSA" ? v.psa10 : company === "TAG" ? (v.tag10 ?? v.psa10) : (v.cgc10 ?? v.psa10);
+  if (/(^9|Mint 9)/.test(grade)) return v.g9 ?? raw;
+  if (/8/.test(grade)) return v.g8 ?? raw;
+  return raw;
+}
+
+function tierFor(company, declared) {
+  const t = (state.fees && state.fees[company] && state.fees[company].tiers) || [];
+  const fit = t.filter(x => x[4] <= 1 || company === "TAG").find(x => x[2] >= (declared || 0)) || t[t.length - 1];
+  return fit ? {name: fit[0], fee: fit[1], max: fit[2], turnaround: fit[3], min: fit[4]} : null;
+}
+
+function roiRows(est, v) {
+  return ["TAG", "PSA", "CGC"].map(co => {
+    const odds = est[co].odds || [];
+    const top = Math.max(...odds.map(o => valueFor(co, o.grade, v) ?? 0), 0);
+    const tier = tierFor(co, top);
+    let ev = 0, known = true;
+    for (const o of odds) { const val = valueFor(co, o.grade, v); if (val == null) known = false; ev += o.p * (val ?? 0); }
+    const cost = (tier ? tier.fee : 0) + (v.shipping || 0);
+    const p10 = odds.filter(o => /10/.test(o.grade)).reduce((a, o) => a + o.p, 0);
+    return {co, tier, ev: known ? ev : null, cost, gain: known && v.raw != null ? ev - cost - v.raw : null, p10};
+  });
+}
+
+function roiSection(d) {
+  const meta = d.meta || {}, card = meta.card, v = Object.assign({shipping: 0}, meta.values || {});
+  if (card && v.raw == null && card.market) v.raw = card.market;
+  state.roiValues = v;
+  const q = card ? `${card.name} ${card.number}` : (meta.name || "");
+  const mk = card && meta.market && meta.market.fields ? meta.market : null;
+  const ask = (k) => {
+    const f = mk && mk.fields[k];
+    if (!f) return "";
+    const use = f.value != null && v[k] != null && Math.round(v[k]) !== Math.round(f.value)
+      ? ` <button class="btn-text use-ask" data-k="${k}" data-v="${Math.round(f.value)}" title="Put ${money(f.value)} in this box">use</button>` : "";
+    const sd = f.sold;
+    if (sd && sd.n90) {
+      const last = sd.last ? `<span class="sold-last" title="${esc(sd.last.title)}">Last sale <b>${money(sd.last.price)}</b> ${fmtDay(sd.last.t)}</span>` : "";
+      const avg = sd.avg30 != null ? `30-day avg <b>${money(sd.avg30)}</b> <span class="muted">(${sd.n30} sold)</span>`
+        : `<span class="muted">none sold in 30 days · 90-day median ${money(sd.median90)}</span>`;
+      return `${last}<br>${avg}${use}<br>`;
+    }
+    if (sd) return `<span class="muted">no sales in ${mk.sold_days || 90} days</span>${f.n ? ` · ask ~${money(f.estimate)}` : ""}${use}<br>`;
+    if (!f.n) return `<span class="muted">no eBay listings</span> · `;
+    return `<span title="${f.n} Buy It Now listings: ${money(f.low)} lowest, ${money(f.median)} middle, ${money(f.high)} highest. Estimate = lower quartile of asking prices.">eBay ask ~${money(f.estimate)} <span class="muted">(${f.n})</span></span>${use} · `;
+  };
+  const look = (label) => label ? `<a href="https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(q + " " + label)}&LH_Sold=1&LH_Complete=1" target="_blank" rel="noopener">eBay sold</a>` : (card && card.tcgplayer_url ? `<a href="${esc(card.tcgplayer_url)}" target="_blank" rel="noopener">TCGplayer</a>` : "");
+  const cardBlock = card ? `<div class="roi-card">
+      <img src="${esc(card.image)}" alt="${esc(card.name)}">
+      <div><b>${esc(card.name)}</b><div class="muted small">${esc(card.set)} · ${esc(card.number)}${/^\d+$/.test(card.number) && card.set_total ? "/" + esc(card.set_total) : ""}${card.rarity ? " · " + esc(card.rarity) : ""}</div>
+        <div class="small">TCGplayer market ${card.market ? money(card.market) : "n/a"}</div>
+        <div class="small">${mk ? `eBay prices checked ${new Date(mk.fetched_at * 1000).toLocaleString(undefined, {month: "short", day: "numeric", hour: "numeric", minute: "2-digit"})}` : `<span class="muted">Getting eBay prices…</span>`}</div>
+        <div class="actions" style="gap:12px"><button class="btn btn-text" id="roiChange" style="padding:4px 0">Not this card?</button>
+        ${mk ? `<button class="btn btn-text" id="roiEbay" style="padding:4px 0">Refresh eBay prices</button>` : ""}</div><div id="roiEbayMsg" class="small"></div></div></div>`
+    : `<div class="roi-find"><p class="muted small" style="margin:0 0 8px">Identify the card to pull its market price.</p>
+        <div class="actions"><button class="btn btn-ghost" id="roiIdentify">Identify from scan</button>
+        <input id="roiQuery" placeholder="or search: Charizard SWSH133" value="${esc(meta.name || "")}"><button class="btn btn-text" id="roiSearch">Search</button></div>
+        <div id="roiCands"></div></div>`;
+  const inputs = VALUE_FIELDS.map(([k, label, lookLabel]) => `<label class="roi-in"><span>${label}</span>
+      <input type="number" min="0" step="1" data-val="${k}" value="${v[k] ?? ""}" placeholder="$">
+      <small>${ask(k)}${q ? look(lookLabel) : ""}</small></label>`).join("")
+    + `<label class="roi-in"><span>Shipping &amp; extras / card</span><input type="number" min="0" step="1" data-val="shipping" value="${v.shipping ?? 0}"><small>&nbsp;</small></label>`;
+  return `<div class="roi">${cardBlock}
+    <div class="roi-values">${inputs}</div>
+    ${mk ? soldHistory(mk) : ""}
+    <div id="roiResult">${roiResult(d.estimates, v)}</div>
+    <p class="dig-note">Expected sale value = each grade's chance (from the odds above) × what that grade sells for. Fees are each company's cheapest tier that covers the graded value, read from their sites on Nov 7, 2026. ${mk && mk.sold_enabled && !mk.sold_error
+      ? "Graded values fill in with the 30-day average of real eBay sales of this exact card, grader and grade (CompsAPI; the 90-day median when nothing sold in 30 days). Sales far from the rest (wrong card, empty slab) are greyed out and left out of the averages."
+      : "Graded values fill in from current eBay Buy It Now listings for this exact card, grader and grade (the lower quartile of asking prices, since cards usually sell a little below the asking price). Check the \"eBay sold\" links before sending."} Anything you type is saved with this card and isn't overwritten.</p>
+  </div>`;
+}
+
+const fmtDay = t => new Date(t * 1000).toLocaleDateString(undefined, {month: "short", day: "numeric"});
+
+function soldHistory(mk) {
+  if (!mk.sold_enabled) return `<div class="sold-cta"><b>See every sold copy, last sale and 30-day average</b>
+    <p class="small" style="margin:4px 0 0">Your eBay keys only show cards for sale, not sold ones. A free <a href="https://compsapi.com" target="_blank" rel="noopener">CompsAPI</a> key (100 lookups a month, about 20 cards) reads eBay's completed sales by grader and grade, TAG included. Sign up there, then add a line to <code>PokeBuy/.env</code>: <code>COMPSAPI_API_KEY=your-key</code>, and press Refresh eBay prices.</p></div>`;
+  if (mk.sold_error) return `<div class="sold-cta"><span class="err small">${esc(mk.sold_error)}</span></div>`;
+  const tabs = VALUE_FIELDS.filter(([k]) => mk.fields[k] && mk.fields[k].sold);
+  if (!tabs.length) return "";
+  const pick = tabs.find(([k]) => k === state.soldTab && mk.fields[k].sold.n90) || tabs.find(([k]) => mk.fields[k].sold.n90) || tabs[0];
+  state.market = mk;
+  return `<div class="sold"><div class="sold-head"><b>Sold history</b><span class="muted small">latest eBay sales of this card, by grade</span>
+      <div class="sold-tabs">${tabs.map(([k]) => `<button class="sold-tab ${k === pick[0] ? "on" : ""}" data-k="${k}">${esc(mk.fields[k].label)} <span>${mk.fields[k].sold.n90}</span></button>`).join("")}</div></div>
+    <div id="soldBody">${soldBody(mk.fields[pick[0]])}</div></div>`;
+}
+
+function soldBody(f) {
+  const sd = f.sold;
+  if (!sd || !sd.n90) return `<p class="muted small">No ${esc(f.label)} sales of this card in the last 90 days.</p>`;
+  const W = 640, H = 170, L = 46, R = 10, T = 12, B = 24, now = Date.now() / 1000;
+  // Span the dates the sales actually cover (a popular card's latest sales may all be from the last week).
+  const oldest = Math.min(...sd.sales.map(x => x.t)), days = Math.max(7, Math.ceil((now - oldest) / 86400) + 1), span = days * 86400;
+  const ok = sd.sales.filter(x => !x.outlier), ps = ok.map(x => x.price);
+  let lo = Math.min(...ps), hi = Math.max(...ps); const pad = Math.max((hi - lo) * 0.15, hi * 0.05, 1); lo = Math.max(0, lo - pad); hi += pad;
+  const X = t => L + (W - L - R) * Math.min(1, Math.max(0, 1 - (now - t) / span)), Y = p => T + (H - T - B) * (1 - (Math.min(hi, Math.max(lo, p)) - lo) / (hi - lo));
+  const ticks = [lo + (hi - lo) * 0.1, (lo + hi) / 2, hi - (hi - lo) * 0.1];
+  const dots = sd.sales.map(x => `<circle cx="${X(x.t).toFixed(1)}" cy="${Y(x.price).toFixed(1)}" r="${x === sd.sales.find(y => !y.outlier) ? 5.5 : 4}" class="${x.outlier ? "o" : x.format === "Auction" ? "a" : "b"}"><title>${fmtDay(x.t)} · ${money(x.price)} · ${x.format}${x.outlier ? " (left out: far from other sales)" : ""}\n${esc(x.title)}</title></circle>`).join("");
+  const a0 = X(now - Math.min(30, days) * 86400);
+  const avg = sd.avg30 != null ? `<line x1="${a0}" x2="${X(now)}" y1="${Y(sd.avg30)}" y2="${Y(sd.avg30)}" class="avg"/><text x="${a0 + 2}" y="${Y(sd.avg30) - 5}" class="avgt">30-day avg ${money(sd.avg30)}</text>` : "";
+  const chart = `<svg viewBox="0 0 ${W} ${H}" class="sold-chart" role="img" aria-label="${esc(f.label)} sales, last 90 days">
+    ${ticks.map(p => `<line x1="${L}" x2="${W - R}" y1="${Y(p)}" y2="${Y(p)}" class="grid"/><text x="${L - 6}" y="${Y(p) + 4}" text-anchor="end">${money(p)}</text>`).join("")}
+    ${[days, Math.round(days * 2 / 3), Math.round(days / 3), 0].map((dd, i) => `<text x="${X(now - dd * 86400)}" y="${H - 6}" text-anchor="${i === 0 ? "start" : dd === 0 ? "end" : "middle"}">${dd ? fmtDay(now - dd * 86400) : "today"}</text>`).join("")}
+    ${avg}${dots}</svg>
+    <div class="sold-key small"><span><i class="b"></i>Buy It Now</span><span><i class="a"></i>Auction</span><span><i class="o"></i>Left out</span><span class="muted">Big dot = last sale</span></div>`;
+  const stats = `<div class="sold-stats">
+    <div><span>Last sale</span><b>${sd.last ? money(sd.last.price) : "—"}</b><small>${sd.last ? fmtDay(sd.last.t) + " · " + sd.last.format : ""}</small></div>
+    <div><span>30-day average</span><b>${sd.avg30 != null ? money(sd.avg30) : "—"}</b><small>${sd.n30} sold${sd.median30 != null ? " · median " + money(sd.median30) : ""}</small></div>
+    <div><span>Median, all shown</span><b>${money(sd.median90)}</b><small>${sd.n90} sold since ${fmtDay(Math.min(...sd.sales.map(x => x.t)))}</small></div>
+    <div><span>Listed now</span><b>${f.n ? "~" + money(f.estimate) : "—"}</b><small>${f.n ? f.n + " Buy It Now" : "none"}</small></div></div>`;
+  const rows = sd.sales.map((x, i) => `<tr class="${x.outlier ? "out" : ""} ${i >= 12 ? "more" : ""}"><td>${fmtDay(x.t)}</td><td class="num">${money(x.price)}</td><td>${x.format}</td><td>${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>` : esc(x.title)}</td></tr>`).join("");
+  return `${stats}${chart}<table class="dig-table sold-table"><thead><tr><th>Sold</th><th>Price</th><th>Type</th><th>Listing</th></tr></thead><tbody>${rows}</tbody></table>
+    ${sd.sales.length > 12 ? `<button class="btn btn-text sold-more">Show all ${sd.sales.length} sales</button>` : ""}`;
+}
+
+function roiResult(est, v) {
+  if ((est.missing || []).length) return `<p class="muted small">Whether grading pays shows once both sides are scanned and graded.</p>`;
+  if (v.raw == null) return `<p class="muted small">Enter the raw value (or identify the card) to see whether grading pays.</p>`;
+  const rows = roiRows(est, v);
+  const best = rows.filter(r => r.gain != null).sort((a, b) => b.gain - a.gain)[0];
+  const verdict = !best ? "Fill in graded values to compare." : best.gain > 0
+    ? `Best bet: <b>${best.co}</b>, about <b>${money(best.gain)}</b> more than selling it raw, on average.`
+    : `Grading probably isn't worth it: even the best option (${best.co}) averages ${money(best.gain)} vs selling raw.`;
+  return `<div class="roi-verdict ${best && best.gain > 0 ? "good" : "no"}">${verdict}</div>
+    <table class="dig-table roi-table"><thead><tr><th>Grader</th><th>Tier &amp; fee</th><th>Chance of a 10</th><th>Expected sale</th><th>Fee + shipping</th><th>Gain vs raw</th></tr></thead>
+    <tbody>${rows.map(r => `<tr class="${best && r.co === best.co && r.gain > 0 ? "best" : ""}"><td><img class="xg-logo xg-logo-${r.co.toLowerCase()}" src="${LOGOS[r.co]}" alt="${r.co}" style="height:18px"></td>
+      <td>${r.tier ? `${esc(r.tier.name)} · ${money(r.tier.fee)}${r.tier.min > 1 ? ` <span class="muted">(${r.tier.min}-card min)</span>` : ""}` : "—"}</td>
+      <td>${Math.round(r.p10 * 100)}%</td><td>${money(r.ev)}</td><td>${money(r.cost)}</td>
+      <td class="${r.gain == null ? "" : r.gain > 0 ? "pos" : "neg"}">${r.gain == null ? "needs values" : money(r.gain)}</td></tr>`).join("")}</tbody></table>`;
+}
+
+let roiSaveTimer = null;
+function wireRoi(d) {
+  const box = $("#roi");
+  if (!box) return;
+  box.querySelectorAll("[data-val]").forEach(inp => inp.oninput = () => {
+    const k = inp.dataset.val; state.roiValues[k] = inp.value === "" ? null : Number(inp.value);
+    $("#roiResult").innerHTML = roiResult(d.estimates, state.roiValues);
+    clearTimeout(roiSaveTimer);
+    roiSaveTimer = setTimeout(() => fetch(`/api/meta/${state.session}`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({values: state.roiValues})}), 500);
+  });
+  const showCands = (res) => {
+    const c = $("#roiCands");
+    if (res.error) { c.innerHTML = `<p class="err small">${esc(res.error)}</p>`; return; }
+    const list = res.candidates || [];
+    const read = res.read ? `<p class="muted small">Read from the scan: ${res.read.numbers.map(n => Array.isArray(n) ? n.join("/") : n).join(", ") || "no number"}${res.read.name_words.length ? " · " + esc(res.read.name_words.join(" ")) : ""}</p>` : "";
+    c.innerHTML = read + (list.length ? `<div class="cands">${list.map((x, i) => `<button class="cand" data-i="${i}"><img src="${esc(x.image)}" alt=""><b>${esc(x.name)}</b><span>${esc(x.set)} ${esc(x.number)}${/^\d+$/.test(x.number) && x.set_total ? "/" + esc(x.set_total) : ""}</span><span>${x.market ? money(x.market) : ""}</span></button>`).join("")}</div>` : `<p class="muted small">No matches. Try a name plus number, e.g. "Pikachu 160/159".</p>`);
+    c.querySelectorAll(".cand").forEach(b => b.onclick = async () => {
+      const card = list[+b.dataset.i];
+      const body = {card, values: Object.assign({}, state.roiValues, {raw: state.roiValues.raw ?? card.market ?? null})};
+      if (!(d.meta && d.meta.name)) body.name = `${card.name} · ${card.set} ${card.number}${/^\d+$/.test(card.number) && card.set_total ? "/" + card.set_total : ""}`;
+      await fetch(`/api/meta/${state.session}`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+      buildReport();
+    });
+  };
+  if ($("#roiIdentify")) $("#roiIdentify").onclick = async () => {
+    $("#roiCands").innerHTML = `<p class="muted small">Reading the card number from the scan…</p>`;
+    showCands(await (await fetch(`/api/identify/${state.session}`, {method: "POST"})).json());
+  };
+  if ($("#roiSearch")) $("#roiSearch").onclick = async () => {
+    $("#roiCands").innerHTML = `<p class="muted small">Searching…</p>`;
+    showCands(await (await fetch(`/api/cards?q=${encodeURIComponent($("#roiQuery").value)}`)).json());
+  };
+  const meta = d.meta || {};
+  const fetchMarket = async (refresh) => {
+    const msg = $("#roiEbayMsg");
+    if (msg) msg.innerHTML = `<span class="muted">Checking eBay listings…</span>`;
+    const r = await fetch(`/api/market/${state.session}`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({refresh: !!refresh})});
+    const res = await r.json();
+    if (!r.ok) { if ($("#roiEbayMsg")) $("#roiEbayMsg").innerHTML = `<span class="err">${esc(res.error || "eBay lookup failed")}</span>`; return; }
+    buildReport();
+  };
+  state.marketTried = state.marketTried || {};
+  if (meta.card && !meta.market && !state.marketTried[state.session]) { state.marketTried[state.session] = true; fetchMarket(false); }
+  if ($("#roiEbay")) $("#roiEbay").onclick = () => fetchMarket(true);
+  if (meta.card && meta.market && !meta.market.sold_enabled && !state.marketTried["sold-" + state.session])
+    fetch("/api/market-status").then(r => r.json()).then(st => { if (st.sold) { state.marketTried["sold-" + state.session] = true; fetchMarket(true); } });
+  const wireSold = () => {
+    const more = box.querySelector(".sold-more");
+    if (more) more.onclick = () => { box.querySelector(".sold-table").classList.add("all"); more.remove(); };
+  };
+  box.querySelectorAll(".sold-tab").forEach(b => b.onclick = () => {
+    state.soldTab = b.dataset.k;
+    box.querySelectorAll(".sold-tab").forEach(x => x.classList.toggle("on", x === b));
+    $("#soldBody").innerHTML = soldBody(state.market.fields[b.dataset.k]);
+    wireSold();
+  });
+  wireSold();
+  box.querySelectorAll(".use-ask").forEach(b => b.onclick = (e) => {
+    e.preventDefault();
+    const inp = box.querySelector(`[data-val="${b.dataset.k}"]`);
+    inp.value = b.dataset.v; inp.oninput(); b.remove();
+  });
+  if ($("#roiChange")) $("#roiChange").onclick = async () => {
+    await fetch(`/api/meta/${state.session}`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({card: null})});
+    buildReport();
+  };
+}
+
+/* ---------- actual grade, when the card comes back ---------- */
+function actualSection(d) {
+  const a = (d.meta || {}).actual;
+  if (a) {
+    const pred = d.estimates[a.company] ? d.estimates[a.company].grade : null;
+    const num = s => (String(s).match(/\d+(\.\d)?/) || [""])[0];
+    const match = pred && num(pred) === num(a.grade) && (/pristine/i.test(pred) === /pristine/i.test(a.grade) || a.company !== "TAG" && a.company !== "CGC");
+    return `<div class="actual done"><b>Graded: ${esc(a.company)} ${esc(a.grade)}${a.score ? ` (${a.score})` : ""}</b>${a.cert ? ` · cert ${esc(a.cert)}` : ""}
+      ${pred ? `<span class="pill ${match ? "good" : "maybe"}">${match ? "matched the estimate" : `estimate was ${esc(pred)}`}</span>` : ""}
+      <button class="btn btn-text" id="actualEdit">Edit</button></div>`;
+  }
+  return `<details class="actual"><summary>Got it graded? Record the result</summary>
+    <div class="actions" style="margin-top:10px">
+      <select id="actCo"><option>TAG</option><option>PSA</option><option>CGC</option><option>BGS</option><option>Other</option></select>
+      <input id="actGrade" placeholder="Grade, e.g. Gem Mint 10" style="width:170px">
+      <input id="actScore" placeholder="TAG score" style="width:100px" inputmode="numeric">
+      <input id="actCert" placeholder="Cert #" style="width:120px">
+      <button class="btn btn-ghost" id="actSave">Save result</button></div>
+    <p class="dig-note">Recording real results lets the library show how often the estimates were right.</p></details>`;
+}
+
+function wireActual() {
+  if ($("#actSave")) $("#actSave").onclick = async () => {
+    const actual = {company: $("#actCo").value, grade: $("#actGrade").value, score: $("#actScore").value, cert: $("#actCert").value};
+    if (!actual.grade.trim()) return;
+    await fetch(`/api/meta/${state.session}`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({actual})});
+    buildReport();
+  };
+  if ($("#actualEdit")) $("#actualEdit").onclick = async () => {
+    await fetch(`/api/meta/${state.session}`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({actual: null})});
+    buildReport();
+  };
 }
 
 /* ---------- TAG DIG-style report ---------- */
@@ -847,7 +1191,8 @@ function digReport(d) {
   const est = d.estimates, counts = digCounts(d), v = verdictFor(est);
   const tag = est.TAG;
   const meta = d.meta || {};
-  const scoreText = tag.score_range ? `${tag.score_range[0]}–${tag.score_range[1]}` : "—";
+  const partial = (est.missing || []).length > 0;
+  const scoreText = partial ? "—" : tag.score_range ? `${tag.score_range[0]}–${tag.score_range[1]}` : "—";
   const gradeNum = (tag.grade.match(/\d+(\.\d)?/) || ["—"])[0];
   const gradeWord = tag.grade.replace(/\s*\d+(\.\d)?\s*/, "").toUpperCase() || "";
   const graded = meta.graded_at ? new Date(meta.graded_at * 1000).toLocaleDateString(undefined, {year: "numeric", month: "short", day: "numeric"}) : "";
@@ -857,15 +1202,20 @@ function digReport(d) {
         <input class="dig-name" id="cardName" value="${esc(meta.name || "")}" placeholder="Name this card (e.g. Pikachu · Crown Zenith 160/159)" aria-label="Card name">
         <div class="dig-meta">Grade Check DIG-style report${graded ? " · checked " + graded : ""} · ID ${esc(state.session.slice(-6).toUpperCase())}</div>
         <div class="dig-verdict ${v.cls}">${esc(v.text)}</div>
+        ${actualSection(d)}
       </div>
       <div class="dig-score">
         <div><div class="dig-score-box">${scoreText}</div><div class="dig-score-lbl">Est. TAG score</div></div>
-        <div><div class="dig-grade">${gradeNum}</div><div class="dig-score-lbl">${esc(gradeWord)}</div></div>
+        <div><div class="dig-grade">${partial ? "—" : gradeNum}</div><div class="dig-score-lbl">${partial ? "waiting for the " + esc(est.missing.join(" and ")) : esc(gradeWord)}</div></div>
       </div>
     </header>
     ${summaryRow(d, counts)}
     <div class="dig-bar">Expected grade by company</div>
     ${expectedBox(est)}
+    <div class="dig-bar">Compared with TAG-graded copies of this card</div>
+    <div id="tagcmp"><p class="muted small" style="padding:14px 0">Lining your scans up against TAG-graded copies…</p></div>
+    <div class="dig-bar">Is it worth grading?</div>
+    <div id="roi">${roiSection(d)}</div>
     <div class="dig-bar">Defects identified of notable grade significance</div>
     <div class="dig-centered">${ICONS.pin}<h3>DINGS</h3><p>Snapshot of defects with a notable impact on the grade.</p></div>
     ${dingsList(d)}
@@ -883,6 +1233,8 @@ function digReport(d) {
     ${sideHeading("B", "Back edges")}${detailTiles(d, "back", "edges")}${COLOR_KEY}
     ${d.surface_checked ? `<div class="dig-bar">Surface <span class="dig-tag">experimental</span></div><div class="measure">${surfaceCards(d)}</div>` : ""}
     <p class="fine">This is a pre-screen from a flatbed scan, not a guarantee. Graders use magnification and multi-angle lighting a scanner can't match, so treat a "10 candidate" as "worth the fee", not "certain".</p>
+    <div class="actions no-print" style="margin-top:14px"><button class="btn btn-ghost" onclick="window.print()">Print / save as PDF</button>
+      <a class="btn btn-text" href="/library">Open library</a></div>
   </article>`;
 }
 
@@ -1016,12 +1368,50 @@ function wireReport() {
 
 async function buildReport() {
   const box = $("#results");
+  if (!state.fees) { try { state.fees = await (await fetch("/api/fees")).json(); } catch (e) { state.fees = null; } }
   const d = await (await fetch(`/api/report/${state.session}`)).json();
   if (d.error) return;
   state.report = d;
   box.innerHTML = digReport(d);
   wireReport();
+  wireRoi(d);
+  wireActual();
   box.classList.add("on");
+  loadTagCompare();
+}
+
+/* ---------- TAG-graded copies of the same card ---------- */
+async function loadTagCompare() {
+  const el = $("#tagcmp");
+  if (!el) return;
+  let t;
+  try { t = await (await fetch(`/api/tag-compare/${state.session}`)).json(); } catch (e) { t = {available: false}; }
+  if (!t.available) {
+    el.innerHTML = `<p class="muted small" style="padding:12px 0">No TAG-graded copies of this card are saved yet${t.card_id ? "" : " (identify the card first)"}. Ask Claude to pull them from TAG's pop report and they'll appear here.</p>`;
+    return;
+  }
+  const pct = v => v ? `${v.toFixed(1)}/${(100 - v).toFixed(1)}` : "—";
+  const pair = c => c ? `${pct(c[0])} · ${pct(c[1])}` : "—";
+  const y = t.yours;
+  const tone = g => /^10/.test(g) ? "good" : /^9/.test(g) ? "maybe" : "no";
+  const gname = g => ({"10P": "Pristine 10", "10": "Gem Mint 10", "9": "Mint 9", "8.5": "NM-MT+ 8.5", "8": "NM-MT 8"})[g] || "TAG " + g;
+  const verdict = t.missing.length
+    ? `<div class="tc-verdict pending">Scan the ${esc(t.missing.join(" and "))} to compare the whole card.</div>`
+    : `<div class="tc-verdict ${tone(t.call || "")}"><div><span>Against TAG's own grades of this card</span><b>${t.call ? esc(gname(t.call)) : "below the copies saved"}</b></div>
+        <ul>${t.lines.map(l => `<li>${esc(l)}</li>`).join("")}</ul></div>`;
+  const rows = t.copies.map(r => `<tr><td><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.cert)}</a></td>
+      <td><span class="pill ${tone(r.grade)}">${esc(r.grade === "10P" ? "10 Pristine" : r.grade)}</span>${r.score ? ` <span class="muted">${r.score}</span>` : ""}</td>
+      <td>${pct(r.front && Math.max(...r.front))}</td><td>${pct(r.back && Math.max(...r.back))}</td>
+      <td>${r.corners + r.edges + r.surface ? `${r.corners + r.edges + r.surface}: ${r.spots.map(s => `${esc(s.side)} ${esc(s.kind.toLowerCase())}`).join(", ") || "corner/edge/surface"}` : "none"}</td></tr>`).join("");
+  const mine = `<tr class="tc-you"><td><b>Your card</b></td><td>—</td><td>${y.front ? pct(Math.max(...y.front)) : "—"}</td><td>${y.back ? pct(Math.max(...y.back)) : "—"}</td>
+      <td>${t.counted.red} clear${t.counted.yellow ? `, ${t.counted.yellow} borderline` : ""}</td></tr>`;
+  const imgs = (list, cap) => list.map(s => `<figure class="tc-fig"><img src="${esc(s.img)}" alt="" loading="lazy"><figcaption>${cap(s)}</figcaption></figure>`).join("");
+  el.innerHTML = `${verdict}
+    <table class="dig-table tc-table"><thead><tr><th>TAG cert</th><th>Grade · score</th><th>Front centering (worst axis)</th><th>Back centering (worst axis)</th><th>DINGS TAG counted</th></tr></thead>
+      <tbody>${mine}${rows}</tbody></table>
+    ${t.your_spots.length ? `<h4 class="tc-h">Your remaining findings, next to the same spot on TAG 10s</h4>${imgs(t.your_spots, s => `${esc(s.side)} · ${esc(s.kind)} · ${s.severity === "red" ? "clear" : "borderline"}`)}` : ""}
+    ${t.tag_spots.length ? `<h4 class="tc-h">What TAG counted against its lower grades, and the same spot on your card</h4>${imgs(t.tag_spots, s => `TAG ${esc(s.grade)} ${esc(s.cert)} · ${esc(s.side)} ${esc(s.kind.toLowerCase())}`)}` : ""}
+    <p class="dig-note">Copies and DINGS are from TAG's public DIG reports for this exact card (cert links above). Centering compares your worst axis on each side with the worst TAG still gave each grade. Crops are the same physical spot on each card, all at your scan's resolution; red circles mark the spot.</p>`;
 }
 
 /* ---------- session ---------- */

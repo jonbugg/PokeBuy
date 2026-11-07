@@ -52,3 +52,10 @@ htmlcov/
 
 # Grade Check scans
 data/scans/
+
+# Grade Check price lookups (local caches)
+data/card_cache.json
+data/ebay_cache.json
+
+# TAG report photos and their straightened copies (large; re-downloadable from each ladder.json)
+data/tag_compare/*/*/

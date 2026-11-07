@@ -1,4 +1,4 @@
-"""Find the card (and the printed guide's black window, if used) in a low-res preview of the whole glass."""
+"""Find the card (and the printed guide's black or grey block, if used) in a low-res preview of the whole glass."""
 
 import cv2
 import numpy as np
@@ -15,7 +15,7 @@ def locate(preview_bgr, dpi):
     warnings = []
     annotated = preview_bgr.copy()
 
-    window = _find_black_window(gray, per_in)
+    window = _find_guide_block(gray, per_in)
     if window is not None:
         x, y, ww, wh = window
         inside = preview_bgr[y:y + wh, x:x + ww]
@@ -49,11 +49,11 @@ def locate(preview_bgr, dpi):
                    card_units=_to_units((cx, cy, cw, ch), per_in))
 
 
-def _find_black_window(gray, per_in):
-    dark = (gray < 70).astype(np.uint8) * 255
-    dark = cv2.morphologyEx(dark, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
-    # The card inside the window is not dark; fill holes so the window is one solid blob.
-    contours, _ = cv2.findContours(dark, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+def _find_guide_block(gray, per_in):
+    """The guide's printed block (black or grey) around the window: anything clearly darker than white paper."""
+    block = (gray < 190).astype(np.uint8) * 255
+    block = cv2.morphologyEx(block, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+    contours, _ = cv2.findContours(block, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     best = None
     for c in contours:
         x, y, ww, wh = cv2.boundingRect(c)
@@ -66,15 +66,34 @@ def _find_black_window(gray, per_in):
 
 
 def _find_card(bgr, per_in, dark_bg):
+    found = _find_card_with(bgr, per_in, dark_bg, None)
+    if found is None and dark_bg:
+        # Mixed guide (black frame, grey cover in the window): try the colour actually around the card.
+        from .measure import window_backdrop
+        lab = cv2.cvtColor(bgr, cv2.COLOR_BGR2LAB).astype(np.float32)
+        b = max(2, int(0.05 * per_in))
+        strip = np.concatenate([lab[:b].reshape(-1, 3), lab[-b:].reshape(-1, 3), lab[:, :b].reshape(-1, 3), lab[:, -b:].reshape(-1, 3)])
+        printed = strip[strip[:, 0] < 190]  # the crop's edge can catch white paper beyond the frame
+        edge = np.median(printed if len(printed) else strip, axis=0)
+        alt = window_backdrop(lab, edge)
+        if alt is not None:
+            found = _find_card_with(bgr, per_in, dark_bg, alt)
+    return found
+
+
+def _find_card_with(bgr, per_in, dark_bg, bg_override):
     lab = cv2.cvtColor(bgr, cv2.COLOR_BGR2LAB).astype(np.float32)
     hh, ww = lab.shape[:2]
     b = max(2, int(0.05 * per_in))
     frame = np.concatenate([lab[:b].reshape(-1, 3), lab[-b:].reshape(-1, 3),
                             lab[:, :b].reshape(-1, 3), lab[:, -b:].reshape(-1, 3)])
-    if dark_bg:
-        # The crop's edge can straddle the black block and the white paper beyond it; use only the black.
-        dark = lab[..., 0] < 110
-        bg = np.median(lab[dark], axis=0) if dark.mean() > 0.1 else np.median(frame, axis=0)
+    if bg_override is not None:
+        bg = bg_override
+    elif dark_bg:
+        # Inside the guide's block. Its edge can straddle the block and the white paper beyond it, so take
+        # the backdrop colour from the non-white pixels along the crop's edge (black or grey guide).
+        printed = frame[frame[:, 0] < 190]
+        bg = np.median(printed, axis=0) if len(printed) > 0.3 * len(frame) else np.median(frame, axis=0)
     else:
         bg = np.median(frame, axis=0)
     dist = np.linalg.norm(lab - bg, axis=2)

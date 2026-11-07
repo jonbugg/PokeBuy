@@ -52,6 +52,17 @@
   .meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-60); margin-top: auto; padding-top: 6px; border-top: 1px solid var(--hair-2); }
   .del { border: 0; background: none; color: var(--ink-40); font: inherit; font-size: 12px; cursor: pointer; padding: 0; }
   .del:hover { color: var(--vermillion); }
+  .actual { font-size: 12px; border-radius: 8px; padding: 5px 8px; background: var(--hair-2); color: var(--ink-60); }
+  .actual.hit { background: var(--mint); color: var(--mint-ink); }
+  .actual.miss { background: var(--butter); color: #6b4700; }
+  .pending { font-size: 12px; border-radius: 8px; padding: 8px 10px; background: var(--butter); color: #6b4700; line-height: 1.4; }
+  .pending b { color: #4d3300; }
+  .pending small { display: block; color: rgba(107,71,0,.75); margin-top: 3px; }
+  .earlier { font-size: 12px; color: var(--ink-60); display: flex; flex-direction: column; gap: 3px; }
+  .earlier .row { display: flex; gap: 8px; align-items: baseline; }
+  .earlier .open { color: var(--blue); cursor: pointer; }
+  .earlier .open:hover { text-decoration: underline; }
+  a.stat:hover { border-color: var(--ink-20); }
   .empty { background: var(--white); border: 1px dashed var(--ink-20); border-radius: 12px; padding: 40px; text-align: center; color: var(--ink-60); }
   .empty a { color: var(--blue); font-weight: 500; }
 </style>
@@ -82,6 +93,14 @@ const tone = g => /10/.test(g) ? "good" : /(^9|Mint 9|8\.5)/.test(g) ? "maybe" :
 const short = g => g.replace("Gem Mint", "GM").replace("Pristine", "Pristine").replace("below ", "<");
 let cards = [];
 
+const money = v => "$" + Math.round(v).toLocaleString();
+const rawValue = c => (c.values && c.values.raw) || (c.card && c.card.market) || null;
+const num = s => (String(s).match(/\d+(\.\d)?/) || [""])[0];
+function matches(pred, actual, company) {
+  if (num(pred) !== num(actual)) return false;
+  return !(company === "TAG" || company === "CGC") || /pristine/i.test(pred) === /pristine/i.test(actual);
+}
+
 function render() {
   const q = document.getElementById("q").value.trim().toLowerCase();
   const sort = document.getElementById("sort").value;
@@ -90,33 +109,56 @@ function render() {
   if (sort === "grade") list.sort((a, b) => tagHi(b) - tagHi(a));
   else if (sort === "name") list.sort((a, b) => (a.name || "~").localeCompare(b.name || "~"));
   else list.sort((a, b) => (b.graded_at || 0) - (a.graded_at || 0));
-  const tens = cards.filter(c => ["TAG", "PSA", "CGC"].every(k => c.grades[k] && /10/.test(c.grades[k].grade))).length;
+  const tens = cards.filter(c => !(c.missing || []).length && ["TAG", "PSA", "CGC"].every(k => c.grades[k] && /10/.test(c.grades[k].grade))).length;
+  const graded = cards.filter(c => c.actual && c.grades[c.actual.company]);
+  const hits = graded.filter(c => matches(c.grades[c.actual.company].grade, c.actual.grade, c.actual.company)).length;
+  const rawTotal = cards.reduce((a, c) => a + (rawValue(c) || 0), 0);
   document.getElementById("stats").innerHTML = cards.length ? `
     <div class="stat"><b>${cards.length}</b>cards checked</div>
-    <div class="stat"><b>${tens}</b>10 candidates everywhere</div>` : "";
+    <div class="stat"><b>${tens}</b>10 candidates everywhere</div>
+    ${rawTotal ? `<div class="stat"><b>${money(rawTotal)}</b>raw value (TCGplayer)</div>` : ""}
+    <div class="stat"><b>${graded.length ? Math.round(100 * hits / graded.length) + "%" : "—"}</b>${graded.length ? `estimates right (${hits} of ${graded.length} graded)` : "record graded results to track accuracy"}</div>
+    <a class="stat" href="/api/library.csv"><b>CSV</b>export library</a>` : "";
   const grid = document.getElementById("grid");
   if (!cards.length) { grid.innerHTML = `<div class="empty">No cards yet. <a href="/">Check your first card</a> and its report will be saved here.</div>`; return; }
   if (!list.length) { grid.innerHTML = `<div class="empty">No cards match "${esc(q)}".</div>`; return; }
   grid.innerHTML = list.map(c => {
     const date = c.graded_at ? new Date(c.graded_at * 1000).toLocaleDateString(undefined, {year: "numeric", month: "short", day: "numeric"}) : "";
-    const grades = ["TAG", "PSA", "CGC"].map(k => c.grades[k] ? `<div class="g ${tone(c.grades[k].grade)}"><img src="${LOGOS[k]}" alt="${k}"><b>${esc(short(c.grades[k].grade))}</b></div>` : "").join("");
+    const missing = c.missing || [];
+    const ceiling = ["TAG", "PSA", "CGC"].filter(k => c.grades[k]).map(k => `${k} ${short(c.grades[k].grade)}`).join(" · ");
+    const grades = missing.length
+      ? `<div class="pending"><b>${missing.includes("back") ? "Back not scanned yet" : "Front not scanned yet"}</b>: no grade until both sides are in.${ceiling ? `<small>Best case from the ${missing.includes("back") ? "front" : "back"} alone: ${esc(ceiling)}</small>` : ""}</div>`
+      : `<div class="grades">${["TAG", "PSA", "CGC"].map(k => c.grades[k] ? `<div class="g ${tone(c.grades[k].grade)}"><img src="${LOGOS[k]}" alt="${k}"><b>${esc(short(c.grades[k].grade))}</b></div>` : "").join("")}</div>`;
+    const when = t => t ? new Date(t * 1000).toLocaleString(undefined, {month: "short", day: "numeric", hour: "numeric", minute: "2-digit"}) : "";
+    const earlier = (c.earlier || []).length ? `<div class="earlier"><span>Also scanned ${c.earlier.length === 1 ? "once more" : c.earlier.length + " more times"}:</span>${c.earlier.map(e => `<div class="row"><span class="open" data-open="${esc(e.id)}">${esc(when(e.graded_at))}</span>${(e.missing || []).length ? `<span>${e.missing.includes("back") ? "front only" : "back only"}</span>` : ""}<button class="del" data-del="${esc(e.id)}" title="Move this earlier scan out of the library">remove</button></div>`).join("")}</div>` : "";
     const counts = c.counts ? `${c.counts.red} red · ${c.counts.yellow} yellow` : "";
+    const a = c.actual;
+    const actual = a ? `<div class="actual ${c.grades[a.company] ? (matches(c.grades[a.company].grade, a.grade, a.company) ? "hit" : "miss") : ""}">Graded <b>${esc(a.company)} ${esc(a.grade)}</b>${a.score ? ` (${a.score})` : ""}${c.grades[a.company] ? (matches(c.grades[a.company].grade, a.grade, a.company) ? " · matched" : ` · est. ${esc(c.grades[a.company].grade)}`) : ""}</div>` : "";
+    const sub = c.card ? `<div class="date">${esc(c.card.set)} ${esc(c.card.number)}${/^\d+$/.test(c.card.number) && c.card.set_total ? "/" + esc(c.card.set_total) : ""}${rawValue(c) ? ` · raw ${money(rawValue(c))}` : ""}</div>` : "";
     return `<a class="card" href="/?card=${encodeURIComponent(c.id)}">
       <div class="thumb">${c.thumb ? `<img src="${esc(c.thumb)}" alt="${esc(c.name || "card")} scan" loading="lazy">` : `<span class="ph">No image</span>`}</div>
       <div class="body">
         <div class="name ${c.name ? "" : "untitled"}">${esc(c.name || "Untitled card")}</div>
         <div class="date">Checked ${esc(date)}${c.centering ? ` · centering ${c.centering.toFixed(1)}/${(100 - c.centering).toFixed(1)}` : ""}</div>
-        <div class="grades">${grades}</div>
+        ${sub}
+        ${grades}
+        ${actual}
+        ${earlier}
         <div class="meta"><span>${esc(counts)}${c.surface_checked ? " · surface ✓" : ""}</span>
           <button class="del" data-del="${esc(c.id)}" title="Move this card out of the library">Remove</button></div>
       </div></a>`;
   }).join("");
+  grid.querySelectorAll("[data-open]").forEach(b => b.onclick = e => {
+    e.preventDefault(); e.stopPropagation();
+    location.href = `/?card=${encodeURIComponent(b.dataset.open)}`;
+  });
   grid.querySelectorAll("[data-del]").forEach(b => b.onclick = async e => {
     e.preventDefault(); e.stopPropagation();
-    const c = cards.find(x => x.id === b.dataset.del);
-    if (!confirm(`Remove "${c.name || "Untitled card"}" from the library? Its files are moved aside to data/scans/.deleted, not erased.`)) return;
+    const c = cards.find(x => x.id === b.dataset.del) || cards.flatMap(x => x.earlier || []).find(x => x.id === b.dataset.del);
+    const label = c.name || "Untitled card";
+    if (!confirm(`Remove this scan of "${label}" from the library? Its files are moved aside to data/scans/.deleted, not erased.`)) return;
     await fetch(`/api/card/${encodeURIComponent(c.id)}`, {method: "DELETE"});
-    cards = cards.filter(x => x.id !== c.id); render();
+    cards = await (await fetch("/api/library")).json(); render();
   });
 }
 
