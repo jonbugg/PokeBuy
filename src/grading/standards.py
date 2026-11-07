@@ -44,9 +44,12 @@ def defect_level(front, back, extra_findings=()):
     if not usable:
         return "unknown", {"red": 0, "yellow": 0}
     findings = [f for m in usable for f in m.get("findings", [])] + list(extra_findings)
-    red = sum(f["severity"] == "red" for f in findings)
-    yellow = sum(f["severity"] == "yellow" for f in findings)
-    return _level(red, yellow), {"red": red, "yellow": yellow}
+    # A yellow that the 180° scan didn't see at the same spot is most likely dust: list it, don't count it.
+    dust = [f for f in findings if f.get("cleared") or (f["severity"] == "yellow" and f.get("both") is False)]
+    counted = [f for f in findings if f not in dust]
+    red = sum(f["severity"] == "red" for f in counted)
+    yellow = sum(f["severity"] == "yellow" for f in counted)
+    return _level(red, yellow), {"red": red, "yellow": yellow, "likely_dust": len(dust)}
 
 
 def _level(red, yellow):

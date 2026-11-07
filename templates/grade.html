@@ -99,6 +99,7 @@
   .thumb { border: 1px solid var(--hair); border-radius: 10px; background: var(--paper); aspect-ratio: 5/7; display: grid; place-items: center; overflow: hidden; position: relative; cursor: pointer; transition: border-color .2s ease; }
   .thumb:hover { border-color: var(--ink-20); }
   .thumb img { width: 100%; height: 100%; object-fit: contain; }
+  .thumb:has(img) { background: #1d1d1d; }
   .thumb .ph { color: var(--ink-40); font-size: 13px; text-align: center; padding: 8px; }
   .thumb .tag { position: absolute; left: 8px; top: 8px; background: rgba(255,255,255,.92); border-radius: 9999px; padding: 2px 10px; font-size: 12px; font-weight: 500; color: var(--ink-90); }
   .thumb .c { position: absolute; left: 8px; right: 8px; bottom: 8px; background: rgba(255,255,255,.92); border-radius: 8px; padding: 4px 8px; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--ink-90); text-align: center; }
@@ -162,6 +163,79 @@
   .xg-sub { font-size: 13px; color: var(--ink-60); font-variant-numeric: tabular-nums; }
   .xg-why { font-size: 13px; color: var(--ink-60); }
 
+
+  .lib-link { font-size: 14px; font-weight: 500; color: var(--ink-60); text-decoration: none; padding: 6px 12px; border-radius: 8px; }
+  .lib-link:hover { background: var(--white); color: var(--ink); box-shadow: 0 0 0 1px var(--hair); }
+
+  /* ---------- TAG DIG-style report ---------- */
+  .dig { background: var(--white); border: 1px solid var(--hair); border-radius: 12px; padding: 28px clamp(16px, 3vw, 40px) 36px; color: #2b2b2b; }
+  .dig h3, .dig h4, .dig h5 { text-transform: uppercase; letter-spacing: .04em; color: #2b2b2b; }
+  .dig-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap; padding-bottom: 22px; }
+  .dig-title { flex: 1 1 320px; min-width: 0; }
+  .dig-name { width: 100%; font: 700 26px/1.2 var(--sans); text-transform: uppercase; letter-spacing: .02em; color: #2b2b2b; border: 0; border-bottom: 1px dashed transparent; padding: 2px 0; background: transparent; }
+  .dig-name:hover, .dig-name:focus { border-bottom-color: var(--ink-20); outline: none; }
+  .dig-name::placeholder { color: var(--ink-20); text-transform: none; font-weight: 600; font-size: 20px; }
+  .dig-meta { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-60); margin-top: 6px; }
+  .dig-verdict { display: inline-block; margin-top: 12px; font-size: 13px; font-weight: 600; padding: 4px 12px; border-radius: 9999px; }
+  .dig-verdict.good { background: var(--mint); color: var(--mint-ink); }
+  .dig-verdict.maybe { background: var(--butter); color: #8a5a00; }
+  .dig-verdict.no { background: var(--rose); color: var(--vermillion); }
+  .dig-verdict.unknown { background: var(--sky-tint); color: var(--blue); }
+  .dig-score { display: flex; gap: 22px; align-items: flex-start; text-align: center; }
+  .dig-score-box { background: #2f2f2f; color: #fff; font-weight: 700; font-size: 30px; letter-spacing: -0.01em; border-radius: 8px; padding: 4px 14px; font-variant-numeric: tabular-nums; }
+  .dig-grade { font-weight: 700; font-size: 42px; line-height: 1; color: #2b2b2b; padding-top: 2px; }
+  .dig-score-lbl { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-top: 6px; color: #2b2b2b; }
+  .dig-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; text-align: center; padding: 18px 0 8px; border-top: 1px solid var(--hair); }
+  @media (max-width: 760px) { .dig-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 22px; } }
+  .dig-summary svg { width: 30px; height: 30px; color: #2b2b2b; }
+  .dig-summary h4 { margin: 4px 0 4px; font-size: 15px; }
+  .dig-summary div div { font-size: 13px; color: #2b2b2b; font-variant-numeric: tabular-nums; }
+  .dig-summary span { color: var(--ink-60); }
+  .dig-bar { background: #333; color: #fff; text-align: center; font-weight: 700; font-size: 15px; letter-spacing: .1em; text-transform: uppercase; border-radius: 6px; padding: 12px 16px; margin: 32px 0 18px; }
+  .dig-tag { font-size: 10px; letter-spacing: .06em; background: rgba(255,255,255,.18); padding: 2px 8px; border-radius: 9999px; vertical-align: middle; margin-left: 8px; }
+  .dig-centered { text-align: center; padding-bottom: 14px; border-bottom: 1px solid var(--hair); margin-bottom: 16px; }
+  .dig-centered svg { width: 34px; height: 34px; color: #2b2b2b; }
+  .dig-centered h3 { margin: 4px 0; font-size: 20px; }
+  .dig-centered p { margin: 0; font-size: 13px; letter-spacing: .03em; color: #2b2b2b; }
+  .dig-empty { text-align: center; color: var(--ink-60); margin: 8px 0; }
+  .dig-note { font-size: 12px; color: var(--ink-60); margin: 12px 0 0; }
+  .dig .xg-row { grid-template-columns: 150px 220px 170px 1fr; }
+  .dm-grid { display: grid; grid-template-columns: 1fr minmax(240px, 1.2fr) 1fr; grid-template-rows: auto auto auto; gap: 10px 18px; align-items: center; }
+  @media (max-width: 760px) { .dm-grid { grid-template-columns: 1fr 1fr; } .dm-center { grid-column: 1 / -1; order: -1; } }
+  .dm-block { font-size: 12px; }
+  .dm-title { font-weight: 700; text-transform: uppercase; font-size: 14px; letter-spacing: .03em; margin-bottom: 6px; color: #2b2b2b; }
+  .dm-l .dm-title { } .dm-r { text-align: right; } .dm-c { text-align: center; }
+  .dm-sides { display: inline-grid; grid-template-columns: auto auto; gap: 18px; text-align: left; }
+  .dm-side { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: #2b2b2b; margin-bottom: 2px; }
+  .dm-center { grid-row: 2; grid-column: 2; }
+  .dm-svg { width: 100%; max-width: 330px; display: block; margin: 0 auto; }
+  .dm-svg .dm-c { font: 600 11px Inter, sans-serif; fill: #222; text-anchor: middle; paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+  .dm-svg .dm-logo { font: 800 11px Inter, sans-serif; fill: #222; text-anchor: middle; letter-spacing: .06em; }
+  .sc { display: grid; grid-template-columns: 44px auto; gap: 6px; font-size: 12px; font-variant-numeric: tabular-nums; color: #2b2b2b; }
+  .sc span { color: var(--ink-60); }
+  .sc b { font-weight: 600; text-align: right; min-width: 34px; }
+  .sc b.s-y { color: #b07300; } .sc b.s-r { color: var(--vermillion); }
+  .dig-table { width: 100%; border-collapse: collapse; margin-top: 22px; font-size: 13px; }
+  .dig-table th { background: #e3eaea; font-weight: 600; padding: 12px; border: 1px solid #fff; color: #2b2b2b; }
+  .dig-table td { padding: 10px 12px; border-bottom: 1px solid var(--hair); text-transform: capitalize; }
+  .dig-table td.empty { text-align: center; color: var(--ink-60); padding: 22px; text-transform: none; }
+  .dig-sub { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 26px 0 8px; }
+  .dig-sub h3 { margin: 0; font-size: 20px; }
+  .dig-badge { width: 30px; height: 34px; border: 2.5px dashed #2b2b2b; display: grid; place-items: center; font-weight: 800; font-size: 15px; color: #2b2b2b; }
+  .ann-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #2b2b2b; margin: 0 0 14px; cursor: pointer; }
+  .ann-toggle input { width: 16px; height: 16px; accent-color: #2b2b2b; }
+  .dt-corners { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+  @media (max-width: 760px) { .dt-corners { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .dt-edges { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 26px; }
+  @media (max-width: 760px) { .dt-edges { grid-template-columns: 1fr; } }
+  .dt { margin: 0; text-align: center; cursor: zoom-in; }
+  .dt img { width: 100%; display: block; border-radius: 4px; box-shadow: 0 1px 6px rgba(0,0,0,.12); }
+  .dt figcaption { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
+  .dt h5 { margin: 0 0 6px; font-size: 13px; }
+  .dt .sc { grid-template-columns: 52px 44px; }
+  .dt-ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-40); margin-top: 4px; }
+  .surf-card { border: 1px solid var(--hair); border-radius: 10px; padding: 16px; }
+  .surf-card h5 { margin: 0 0 10px; font-size: 13px; }
   /* centering on the real scan */
   .cs { position: relative; cursor: zoom-in; }
   .cs img { width: 100%; display: block; border-radius: 6px; }
@@ -177,6 +251,9 @@
   .spot figcaption b { color: var(--ink); font-weight: 600; }
 
   /* close-up inspection */
+  .side-block + .side-block { margin-top: 16px; }
+  .side-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .side-head h3 { margin: 0; font-size: 22px; letter-spacing: -0.01em; color: var(--ink); }
   .tabs { display: inline-flex; background: var(--hair-2); border-radius: 9999px; padding: 3px; gap: 2px; margin-bottom: 16px; }
   .tabs button { border: 0; background: transparent; border-radius: 9999px; padding: 6px 16px; font-size: 14px; font-weight: 500; color: var(--ink-60); }
   .tabs button.on { background: var(--white); color: var(--ink); box-shadow: 0 0 0 1px var(--hair); }
@@ -196,6 +273,37 @@
   .finding b { display: block; margin: 4px 0 2px; font-size: 14px; text-transform: capitalize; }
   .fine { font-family: var(--serif); font-size: 16px; color: var(--ink-60); margin-top: 28px; max-width: 720px; }
   .modal { position: fixed; inset: 0; background: rgba(246,245,244,.92); display: none; place-items: center; z-index: 10; padding: 16px; }
+  .zoom { position: fixed; inset: 0; z-index: 20; background: #111; display: none; flex-direction: column; color: #fff; }
+  .zoom.on { display: flex; }
+  .zoom-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; background: #1b1b1b; border-bottom: 1px solid #2a2a2a; flex-wrap: wrap; }
+  .zoom-head b { text-transform: capitalize; font-size: 15px; }
+  .zoom-hint { font-size: 12px; color: rgba(255,255,255,.55); margin-top: 2px; }
+  .zoom-tools { display: flex; align-items: center; gap: 6px; }
+  .zoom-tools button { background: #2b2b2b; color: #fff; border: 1px solid #3a3a3a; border-radius: 8px; min-width: 36px; height: 34px; padding: 0 12px; font-size: 15px; }
+  .zoom-tools button:hover { background: #363636; }
+  .zoom-tools .zoom-close { background: #fff; color: #111; border-color: #fff; font-weight: 600; }
+  #zoomPct { min-width: 54px; text-align: center; font-size: 13px; color: rgba(255,255,255,.75); font-variant-numeric: tabular-nums; }
+  .zoom-panes { flex: 1; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; min-height: 0; background: #2a2a2a; }
+  .zoom-panes.rows { grid-auto-flow: row; grid-auto-rows: 1fr; }
+  @media (max-width: 760px) { .zoom-panes { grid-auto-flow: row; grid-auto-rows: 1fr; } }
+  .zp { position: relative; overflow: hidden; background: #0c0c0c; cursor: grab; touch-action: none; }
+  .zp.dragging { cursor: grabbing; }
+  .zp img { position: absolute; left: 0; top: 0; transform-origin: 0 0; max-width: none; user-select: none; -webkit-user-drag: none; }
+  .zp.px img { image-rendering: pixelated; }
+  .zp-label { position: absolute; left: 10px; top: 10px; z-index: 2; background: rgba(0,0,0,.7); padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
+  .zp-box { position: absolute; z-index: 1; border: 2px solid #ffc400; border-radius: 2px; pointer-events: none; box-shadow: 0 0 0 1px rgba(0,0,0,.6); }
+  .pill.cleared { background: #e6f0fd; color: #1c63c4; }
+  .finding.is-cleared { border-color: #b9d3f7; background: #f6f9fe; }
+  .finding.is-cleared b { text-decoration: line-through; text-decoration-color: rgba(28,99,196,.5); color: var(--ink-60); }
+  .both.clr { background: #e6f0fd; color: #1c63c4; margin: 6px 0 0; }
+  .finding .both { display: inline-block; margin-top: 6px; margin-left: 0; }
+  .zp-box.cleared { border-color: #2f80ed; }
+  .zp-box.red { border-color: #e32d14; }
+  .legend.key { margin-top: 14px; }
+  .both { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 9999px; margin-left: 4px; }
+  .both.yes { background: var(--mint); color: var(--mint-ink); }
+  .both.no { background: var(--sky-tint); color: var(--blue); }
+  [data-rect]:not([data-rect=""]) { cursor: zoom-in; }
   .modal.on { display: grid; }
   .modal img { max-width: min(560px, 100%); max-height: 90vh; border-radius: 12px; border: 1px solid var(--hair); background: var(--white); }
 </style>
@@ -203,8 +311,11 @@
 <body>
 <main>
   <div class="bar">
-    <div class="brand"><div class="logo">10</div>Grade Check</div>
-    <div class="status"><span class="dot" id="dot"></span><span id="statusText">Looking for your scanner…</span></div>
+    <a class="brand" href="/" style="text-decoration:none"><div class="logo">10</div>Grade Check</a>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a class="lib-link" href="/library">Library</a>
+      <div class="status"><span class="dot" id="dot"></span><span id="statusText">Looking for your scanner…</span></div>
+    </div>
   </div>
 
   <section class="hero">
@@ -236,6 +347,19 @@
   <section class="results" id="results"></section>
 </main>
 <div class="modal" id="modal"><img alt="Enlarged scan"></div>
+<div class="zoom" id="zoom" role="dialog" aria-modal="true" aria-labelledby="zoomTitle">
+  <div class="zoom-head">
+    <div><b id="zoomTitle"></b><div class="zoom-hint">Scroll or pinch to zoom · drag to move · both views stay locked together</div></div>
+    <div class="zoom-tools">
+      <button data-z="out" aria-label="Zoom out">−</button>
+      <span id="zoomPct">100%</span>
+      <button data-z="in" aria-label="Zoom in">+</button>
+      <button data-z="fit">Fit</button>
+      <button data-z="close" class="zoom-close" aria-label="Close">Close</button>
+    </div>
+  </div>
+  <div class="zoom-panes" id="zoomPanes"></div>
+</div>
 
 <script>
 const STEPS = [
@@ -438,7 +562,7 @@ function handleResult(slot, d) {
     return;
   }
   state.done[slot] = true; state.data[slot] = d;
-  setThumb(slot, d.overlay, centeringShort(d.centering));
+  setThumb(slot, (d.center_view && d.center_view.img) || d.overlay, centeringShort(d.centering));
   renderSteps(); renderPanel();
   if (state.done.front && state.done.back) buildReport();
 }
@@ -459,7 +583,13 @@ $("#modal").onclick = () => $("#modal").classList.remove("on");
 /* ---------- report ---------- */
 const tone = g => /calibrat/i.test(g) ? "grey" : /10/.test(g) ? "good" : /(^9|Mint 9|8\.5)/.test(g) ? "maybe" : "no";
 
-const SEV_COLOR = {red: "#e32d14", yellow: "#e89d01", green: "#2fb36a"};
+const SEV_COLOR = {red: "#e32d14", yellow: "#e89d01", green: "#2fb36a", cleared: "#2f80ed"};
+const COLOR_KEY = `<div class="legend key">
+  <span><i style="background:${SEV_COLOR.green}"></i>clean</span>
+  <span><i style="background:${SEV_COLOR.yellow}"></i>yellow · worth a look (counts)</span>
+  <span><i style="background:${SEV_COLOR.red}"></i>red · likely costs grade (counts)</span>
+  <span><i style="background:${SEV_COLOR.cleared}"></i>blue · cleared by the 180° scan, likely dust (not counted)</span>
+</div>`;
 const LOGOS = {TAG: "/static/logos/tag.png", PSA: "/static/logos/psa.svg", CGC: "/static/logos/cgc.svg"};
 // Which corner sits at the left and right end of each edge strip (side strips are rotated so the edge is on top).
 const EDGE_ENDS = {top: ["top-left", "top-right"], bottom: ["bottom-left", "bottom-right"],
@@ -501,7 +631,8 @@ function centerScan(m, label) {
   const L = g + w.left, R = g + cw - w.right, T = g + w.top, B = g + ch - w.bottom;
   const cy = g + ch / 2, cx = g + cw / 2;
   const lbl = (x, y, text, anchor = "middle") => `<text x="${x}" y="${y}" text-anchor="${anchor}" class="cs-lbl">${text}</text>`;
-  return `<div class="cs" data-zoom="${esc(v.img)}">
+  const vs = m.closeups && m.closeups.view_size;
+  return `<div class="cs" data-zoom="${esc(v.img)}" data-side="${label}" data-full="1" data-title="${label} · whole card" data-rect="${vs ? `0,0,${vs[0]},${vs[1]}` : ""}">
     <img src="${esc(v.img)}" alt="${label} scan with measured borders">
     <svg viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="none" aria-hidden="true">
       <rect x="${g}" y="${g}" width="${cw}" height="${ch}" rx="3" class="cs-card"/>
@@ -518,130 +649,378 @@ function centerScan(m, label) {
   </div>`;
 }
 
-function measureCard(m, label) {
-  if (!m) return `<div class="card"><div class="eyebrow">${label}</div><p class="muted">Not scanned yet.</p></div>`;
-  const c = m.centering || {};
-  const f = m.findings || [];
-  const n = sev => f.filter(x => x.severity === sev).length;
-  return `<div class="card">
-    <div class="eyebrow">${label}</div>
-    <div class="diagram">
-      ${centerScan(m, label.toLowerCase())}
-      <div class="kv">
-        <div><span>Centering, worst side</span><span>${c.worst ? c.worst.toFixed(1) + " / " + (100 - c.worst).toFixed(1) : "—"}</span></div>
-        <div><span>Borders L · R</span><span>${c.widths_mm ? c.widths_mm.left.toFixed(2) + " · " + c.widths_mm.right.toFixed(2) + " mm" : "—"}</span></div>
-        <div><span>Borders T · B</span><span>${c.widths_mm ? c.widths_mm.top.toFixed(2) + " · " + c.widths_mm.bottom.toFixed(2) + " mm" : "—"}</span></div>
-        <div><span>Size</span><span>${m.dims_in ? m.dims_in[0].toFixed(3) + " × " + m.dims_in[1].toFixed(3) + " in" : "—"}</span></div>
-        <div><span>Red findings</span><span style="color:${n("red") ? SEV_COLOR.red : "inherit"}">${m.edges_reliable ? n("red") : "needs a scan"}</span></div>
-        <div><span>Yellow findings</span><span style="color:${n("yellow") ? SEV_COLOR.yellow : "inherit"}">${m.edges_reliable ? n("yellow") : "needs a scan"}</span></div>
-      </div>
-    </div>
-    <div class="legend"><span><i style="background:${SEV_COLOR.green}"></i>clean</span><span><i style="background:${SEV_COLOR.yellow}"></i>worth a look</span><span><i style="background:${SEV_COLOR.red}"></i>likely costs grade</span><span><i style="background:rgba(0,0,0,.2)"></i>not checked</span></div>
-  </div>`;
-}
-
 function verdictFor(est) {
   const top = ["TAG", "PSA", "CGC"].map(k => est[k].grade);
-  const any10 = top.some(g => /10/.test(g));
-  const all10 = top.every(g => /10/.test(g));
-  const unknownEdges = est.defect_level === "unknown";
-  if (any10 && unknownEdges) return {cls: "unknown", title: "Centering passes for a 10.", body: "This was a photo, not a scan, so corners and edges weren't checked. Scan it on the glass to finish the check.", num: "10?", sub: "centering only"};
-  if (all10) return {cls: "good", title: "This looks like a 10 candidate.", body: "Centering and condition clear the bar at every grader. Worth submitting if the card's value covers the fee.", num: "10", sub: "expected at TAG, PSA and CGC"};
-  if (any10) return {cls: "maybe", title: "A 10 at some graders, not all.", body: "Pick the grader whose standards this card meets. The expected grades below show where it lands.", num: "10", sub: "at " + ["TAG", "PSA", "CGC"].filter(k => /10/.test(est[k].grade)).join(" and ")};
-  if (top.some(g => /(^9|Mint 9)/.test(g))) return {cls: "maybe", title: "Close, but probably a 9.", body: "Something below is holding it back from a 10. Look at the close-ups before paying to submit.", num: "9", sub: "most likely"};
-  return {cls: "no", title: "Probably not a 10.", body: "The issues below would likely cap the grade well under a 10.", num: est.PSA.grade.replace("below ", "<"), sub: "most likely PSA"};
+  const any10 = top.some(g => /10/.test(g)), all10 = top.every(g => /10/.test(g));
+  if (any10 && est.defect_level === "unknown") return {cls: "unknown", text: "Centering passes for a 10 · corners and edges need a scan"};
+  if (all10) return {cls: "good", text: "10 candidate at TAG, PSA and CGC"};
+  if (any10) return {cls: "maybe", text: "10 at " + ["TAG", "PSA", "CGC"].filter(k => /10/.test(est[k].grade)).join(" and ") + " only"};
+  if (top.some(g => /(^9|Mint 9)/.test(g))) return {cls: "maybe", text: "Close, but probably a 9"};
+  return {cls: "no", text: "Probably not a 10"};
 }
 
 function expectedBox(est) {
   const row = (name, e) => {
-    const t = tone(e.grade);
     const sub = [e.could_be ? `could be ${esc(e.could_be)}` : "", e.score_range ? `score ~${e.score_range[0]}–${e.score_range[1]}` : ""].filter(Boolean).join(" · ");
     const reason = (e.reasons || [])[0];
     return `<div class="xg-row">
       <div class="xg-co"><img class="xg-logo xg-logo-${name.toLowerCase()}" src="${LOGOS[name]}" alt="${name}"><span>${esc(e.note || "")}</span></div>
-      <div class="xg-grade"><span class="pill ${t}">${/10/.test(e.grade) ? "10" : "below 10"}</span><b>${esc(e.grade)}</b></div>
+      <div class="xg-grade"><span class="pill ${tone(e.grade)}">${/10/.test(e.grade) ? "10" : "below 10"}</span><b>${esc(e.grade)}</b></div>
       <div class="xg-sub">${sub || "&nbsp;"}</div>
       <div class="xg-why">${reason ? esc(reason) : "Nothing measured is holding it back."}</div>
     </div>`;
   };
-  return `<div class="card xg">
-    <div class="xg-head"><div class="eyebrow" style="margin:0">Expected grade by company</div>
-      <div class="muted small">${est.counts ? `${est.counts.red} red · ${est.counts.yellow} yellow findings` : ""}</div></div>
-    ${row("TAG", est.TAG)}${row("PSA", est.PSA)}${row("CGC", est.CGC)}
-    <p class="muted small" style="margin:12px 0 0">Beckett isn't listed: it doesn't publish centering limits I could verify. "Could be" allows for a point of centering wobble between scans and counts yellow findings against the card.</p>
+  return `<div class="xg">${row("TAG", est.TAG)}${row("PSA", est.PSA)}${row("CGC", est.CGC)}
+    <p class="dig-note">Beckett isn't listed: it doesn't publish centering limits I could verify. "Could be" allows for a point of centering wobble between scans and counts yellow findings against the card.</p></div>`;
+}
+
+/* ---------- TAG DIG-style report ---------- */
+const ICONS = {
+  corners: `<svg viewBox="0 0 32 32"><path d="M6 14V6h8M18 6h8v8M26 18v8h-8M14 26H6v-8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 2"/></svg>`,
+  edges: `<svg viewBox="0 0 32 32"><rect x="8" y="4" width="16" height="24" rx="2" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8 8h16" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 2"/></svg>`,
+  centering: `<svg viewBox="0 0 32 32"><path d="M6 8h20M9 13h14M6 18h20M9 23h14" stroke="currentColor" stroke-width="2.2"/></svg>`,
+  surface: `<svg viewBox="0 0 32 32"><rect x="5" y="7" width="22" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8 22l6-7 4 4 3-3 4 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
+  dims: `<svg viewBox="0 0 32 32"><rect x="4" y="11" width="24" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M9 11v4M14 11v5M19 11v4M24 11v5" stroke="currentColor" stroke-width="2"/></svg>`,
+  pin: `<svg viewBox="0 0 32 32"><path d="M16 29s-9-9-9-16a9 9 0 0 1 18 0c0 7-9 16-9 16z" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="16" cy="13" r="3.2" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>`,
+};
+const CORNER_TITLE = {top_left: "Top left", top_right: "Top right", bottom_left: "Bottom left", bottom_right: "Bottom right"};
+const isCorner = r => r.includes("_");
+
+function digCounts(d) {
+  const out = {};
+  for (const side of ["front", "back"]) {
+    const m = d[side];
+    const f = ((m && m.findings) || []).filter(x => !(x.severity === "yellow" && x.both === false));  // likely dust
+    out[side] = {
+      corners: m && m.edges_reliable ? f.filter(x => isCorner(x.region)).length : null,
+      edges: m && m.edges_reliable ? f.filter(x => !isCorner(x.region) && x.region !== "surface").length : null,
+      surface: d.surface && d.surface[side] ? d.surface[side].marks.length : null,
+    };
+  }
+  return out;
+}
+
+function centerTag(c) {
+  if (!c || c.lr === undefined) return "—";
+  const r = v => Math.round(v);
+  return `${r(c.lr)}L/${r(100 - c.lr)}R ${r(c.tb)}T/${r(100 - c.tb)}B`;
+}
+
+function summaryRow(d, counts) {
+  const dings = (n) => n === null ? `<span class="muted">not checked</span>` : `<b>${n}</b> DING${n === 1 ? "" : "S"}`;
+  const fb = (fv, bv) => `<div><span>F:</span> ${fv}</div><div><span>B:</span> ${bv}</div>`;
+  const dims = (d.front && d.front.dims_in) || (d.back && d.back.dims_in);
+  return `<div class="dig-summary">
+    <div>${ICONS.corners}<h4>Corners</h4>${fb(dings(counts.front.corners), dings(counts.back.corners))}</div>
+    <div>${ICONS.edges}<h4>Edges</h4>${fb(dings(counts.front.edges), dings(counts.back.edges))}</div>
+    <div>${ICONS.centering}<h4>Centering</h4>${fb(`<b>${centerTag(d.front && d.front.centering)}</b>`, `<b>${centerTag(d.back && d.back.centering)}</b>`)}</div>
+    <div>${ICONS.surface}<h4>Surface</h4>${fb(dings(counts.front.surface), dings(counts.back.surface))}</div>
+    <div>${ICONS.dims}<h4>Dimensions</h4>${dims ? `<div><span>H:</span> <b>${dims[1].toFixed(3)}"</b></div><div><span>W:</span> <b>${dims[0].toFixed(3)}"</b></div>` : "<div>—</div>"}</div>
   </div>`;
 }
 
-function inspection(d) {
-  const sides = ["front", "back"].filter(s => d[s] && d[s].closeups);
-  if (!sides.length) return "";
-  state.inspectSide = sides.includes(state.inspectSide) ? state.inspectSide : sides[0];
-  const m = d[state.inspectSide], cu = m.closeups;
-  const tile = (key, v, ends) => `<figure class="cu-tile" data-zoom="${esc(v.img)}"><img src="${esc(v.img)}" alt="${REGION_LABEL(key)} close-up"><figcaption><i style="background:${SEV_COLOR[v.status]}"></i>${REGION_LABEL(key)}${ends ? `<span class="ends"><span>← ${ends[0]} corner</span><span>${ends[1]} corner →</span></span>` : ""}</figcaption></figure>`;
-  const found = cu.findings.length ? cu.findings.map(f => `
-    <div class="finding" data-zoom="${esc(f.img)}">
-      <img src="${esc(f.img)}" alt="${esc(f.kind)}">
-      <div><span class="pill ${f.severity === "red" ? "no" : "maybe"}">${f.severity === "red" ? "likely costs grade" : "worth a look"}</span>
-        <b>${esc(f.kind)}</b>
-        <div class="muted small">${REGION_LABEL(f.region)}${f.region === "surface" ? "" : " " + (f.region.includes("_") ? "corner" : "edge")} · ${f.size_mm} mm long${f.depth_mm ? (/whiten/.test(f.kind) ? ` · reaches ${f.depth_mm.toFixed(2)} mm in` : ` · ${f.depth_mm.toFixed(2)} mm deep`) : ""}</div></div>
-    </div>`).join("") : `<p class="muted">Nothing flagged on the ${state.inspectSide}. Every corner and edge is outlined green.</p>`;
-  return `
-    <div class="tabs">${sides.map(s => `<button class="${s === state.inspectSide ? "on" : ""}" data-side="${s}">${s[0].toUpperCase() + s.slice(1)}</button>`).join("")}</div>
-    <div class="cu-top">
-      <figure class="cu-full" data-zoom="${esc(cu.full)}"><img src="${esc(cu.full)}" alt="${state.inspectSide} with findings boxed"><figcaption>Whole card · every finding boxed</figcaption></figure>
-      <div>
-        <div class="eyebrow">Corners</div>
-        <div class="cu-corners">${["top_left", "top_right", "bottom_left", "bottom_right"].map(k => tile(k, cu.corners[k])).join("")}</div>
-      </div>
-    </div>
-    <div class="eyebrow" style="margin-top:20px">Edges <span class="muted" style="text-transform:none;font-weight:400">· the black band at the top of each strip is just past the card's edge</span></div>
-    <div class="cu-edges">${["top", "bottom", "left", "right"].map(k => tile(k, cu.edges[k], EDGE_ENDS[k])).join("")}</div>
-    <div class="eyebrow" style="margin-top:20px">Findings</div>
-    <div class="findings">${found}</div>
-    <div class="legend"><span><i style="background:${SEV_COLOR.green}"></i>clean</span><span><i style="background:${SEV_COLOR.yellow}"></i>yellow box: worth a look</span><span><i style="background:${SEV_COLOR.red}"></i>red box: likely costs grade</span></div>`;
+function scoreLines(s, withAngle = true) {
+  if (!s) return `<div class="sc muted">not checked</div>`;
+  const line = (k, v) => `<div class="sc"><span>${k}:</span><b class="${v >= 998 ? "" : v >= 985 ? "s-y" : "s-r"}">${v}</b></div>`;
+  return line("Fray", s.fray) + line("Fill", s.fill) + (withAngle && s.angle !== undefined ? line("Angle", s.angle) : "");
 }
 
-function wireInspection(d) {
-  document.querySelectorAll("#inspect [data-side]").forEach(b => b.onclick = () => { state.inspectSide = b.dataset.side; $("#inspect").innerHTML = inspection(d); wireInspection(d); });
-  document.querySelectorAll("#inspect [data-zoom]").forEach(el => el.onclick = () => { $("#modal img").src = el.dataset.zoom; $("#modal").classList.add("on"); });
+function dingsMap(d) {
+  const sc = (side, kind, key) => d[side] && d[side].subscores ? d[side].subscores[kind][key] : null;
+  const block = (title, kind, key, align) => `<div class="dm-block dm-${align}">
+      <div class="dm-title">${title}</div>
+      <div class="dm-sides">
+        <div><div class="dm-side">Front</div>${scoreLines(sc("front", kind, key), kind === "corners")}</div>
+        <div><div class="dm-side">Back</div>${scoreLines(sc("back", kind, key), false)}</div>
+      </div></div>`;
+  const c = d.front && d.front.centering, dims = d.front && d.front.dims_in;
+  const W = 250, H = 350, g = 30;
+  const svg = `<svg viewBox="0 0 ${W + 2 * g} ${H + 2 * g}" class="dm-svg" aria-label="Card diagram with centering">
+    <rect x="${g}" y="${g}" width="${W}" height="${H}" fill="none" stroke="#222" stroke-width="1.6"/>
+    ${c && c.widths_mm ? (() => { const k = W / 63.5; const L = g + c.widths_mm.left * k, R = g + W - c.widths_mm.right * k, T = g + c.widths_mm.top * k, B = g + H - c.widths_mm.bottom * k;
+      return `<rect x="${L}" y="${T}" width="${R - L}" height="${B - T}" fill="none" stroke="#222" stroke-width="1" stroke-dasharray="4 3"/>
+        <path d="M${L} ${T}L${R} ${B}M${R} ${T}L${L} ${B}" stroke="#222" stroke-width=".8" stroke-dasharray="4 3"/>
+        <text x="${(L + g) / 2 + 2}" y="${g + H / 2}" class="dm-c" transform="rotate(-90 ${(L + g) / 2 + 2} ${g + H / 2})">C ${c.lr.toFixed(2)}</text>
+        <text x="${(R + g + W) / 2 + 2}" y="${g + H / 2}" class="dm-c" transform="rotate(-90 ${(R + g + W) / 2 + 2} ${g + H / 2})">C ${(100 - c.lr).toFixed(2)}</text>
+        <text x="${g + W / 2}" y="${(T + g) / 2 + 4}" class="dm-c">C ${c.tb.toFixed(2)}</text>
+        <text x="${g + W / 2}" y="${(B + g + H) / 2 + 4}" class="dm-c">C ${(100 - c.tb).toFixed(2)}</text>`; })() : ""}
+    <path d="M${g + W / 2} ${g - 18}V${g + H + 18}M${g - 18} ${g + H / 2}H${g + W + 18}" stroke="#222" stroke-width=".7" stroke-dasharray="3 3"/>
+    <rect x="${g + W / 2 - 34}" y="${g + H / 2 - 13}" width="68" height="26" fill="#fff" stroke="#222" stroke-width="1.4"/>
+    <text x="${g + W / 2}" y="${g + H / 2 + 5}" class="dm-logo">GRADE CHECK</text>
+    ${dims ? `<text x="${g + W / 2}" y="${g + H + 22}" class="dm-c">W ${dims[0].toFixed(3)}"</text>
+      <text x="${g + W + 20}" y="${g + H / 2}" class="dm-c" transform="rotate(-90 ${g + W + 20} ${g + H / 2})">H ${dims[1].toFixed(3)}"</text>` : ""}
+    ${[[g, g, "M0 14V0h14"], [g + W, g, "M-14 0H0v14"], [g, g + H, "M0 -14V0h14"], [g + W, g + H, "M-14 0H0v-14"]].map(([x, y, p]) => `<path transform="translate(${x} ${y})" d="${p}" fill="none" stroke="#222" stroke-width="4" stroke-dasharray="3 2"/>`).join("")}
+  </svg>`;
+  return `<div class="dm-grid">
+    ${block("Top L corner", "corners", "top_left", "l")}
+    ${block("Top edge", "edges", "top", "c")}
+    ${block("Top R corner", "corners", "top_right", "r")}
+    ${block("Left edge", "edges", "left", "l")}
+    <div class="dm-center">${svg}</div>
+    ${block("Right edge", "edges", "right", "r")}
+    ${block("Bottom L corner", "corners", "bottom_left", "l")}
+    ${block("Bottom edge", "edges", "bottom", "c")}
+    ${block("Bottom R corner", "corners", "bottom_right", "r")}
+  </div>`;
+}
+
+function surfaceTable(d) {
+  const rows = [];
+  for (const side of ["front", "back"]) {
+    const s = d.surface && d.surface[side];
+    if (!s) continue;
+    s.marks.forEach(m => rows.push([side, `Surface ${m.kind}${m.strength > 7 ? " · likely costs grade" : " · worth a look"}`, `${m.x_pct}% across, ${m.y_pct}% down · ${m.length_mm} mm`]));
+  }
+  const checked = d.surface && Object.keys(d.surface).length;
+  return `<table class="dig-table"><thead><tr><th>ID</th><th>Side</th><th>Type</th><th>Location</th></tr></thead>
+    <tbody>${rows.length ? rows.map((r, i) => `<tr><td>${i + 1}</td><td>${r[0]}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join("")
+      : `<tr><td colspan="4" class="empty">${checked ? "No surface defects" : "Surface not checked yet: add the 180° scans"}</td></tr>`}</tbody></table>`;
+}
+
+function dingsList(d) {
+  const all = [];
+  for (const side of ["front", "back"]) {
+    const cu = d[side] && d[side].closeups;
+    if (cu) cu.findings.forEach(f => all.push({...f, side}));
+  }
+  if (!all.length) return `<p class="dig-empty">No DINGS. Nothing found that should affect the grade.</p>`;
+  const pill = f => f.cleared
+    ? `<span class="pill cleared">Cleared by 180° scan</span>`
+    : `<span class="pill ${f.severity === "red" ? "no" : "maybe"}">${f.severity === "red" ? "likely costs grade" : "worth a look"}</span>`;
+  const bothBadge = f => f.cleared ? `<span class="both clr">Not in the 180° scan · likely dust · not counted</span>`
+    : f.both === true ? `<span class="both yes">✓ Seen in both scans</span>`
+    : f.both === false ? `<span class="both no">Only in one scan</span>` : "";
+  const sev = f => f.cleared ? "cleared" : f.severity;
+  return `<div class="findings">${all.map(f => `
+    <div class="finding ${f.cleared ? "is-cleared" : ""}" data-zoom="${esc(f.img)}" data-side="${f.side}" data-sev="${sev(f)}" data-rect="${(f.rect || []).join(",")}" data-box="${(f.view_box || []).join(",")}" data-title="${f.side} · ${esc(f.kind)}${f.cleared ? " (cleared by 180° scan)" : ""}">
+      <img src="${esc(f.img)}" alt="${esc(f.kind)}">
+      <div>${pill(f)}
+        <b>${esc(f.kind)}</b>
+        <div class="muted small">${f.side} · ${REGION_LABEL(f.region)}${f.region === "surface" ? "" : isCorner(f.region) ? " corner" : " edge"} · ${f.size_mm} mm long${f.depth_mm ? (/whiten/.test(f.kind) ? ` · reaches ${f.depth_mm.toFixed(2)} mm in` : ` · ${f.depth_mm.toFixed(2)} mm deep`) : ""}</div>
+        ${bothBadge(f)}</div>
+    </div>`).join("")}</div>${COLOR_KEY}`;
+}
+
+function annToggle(id) {
+  return `<label class="ann-toggle"><input type="checkbox" data-ann="${id}" ${state.annotations === true ? "checked" : ""}> Display measurement annotations</label>`;
+}
+
+function detailTiles(d, side, kind) {
+  const m = d[side];
+  if (!m || !m.closeups) return `<p class="dig-empty">${side[0].toUpperCase() + side.slice(1)} not scanned yet.</p>`;
+  const keys = kind === "corners" ? ["top_left", "top_right", "bottom_left", "bottom_right"] : ["top", "bottom", "left", "right"];
+  const ann = state.annotations === true;
+  return `<div class="${kind === "corners" ? "dt-corners" : "dt-edges"}">${keys.map(k => {
+    const v = m.closeups[kind][k], s = m.subscores ? m.subscores[kind][k] : null;
+    const src = ann ? (v.img_ann || v.img) : v.img;
+    const ends = kind === "edges" ? `<div class="dt-ends"><span>← ${EDGE_ENDS[k][0]}</span><span>${EDGE_ENDS[k][1]} →</span></div>` : "";
+    return `<figure class="dt" data-zoom="${esc(src)}" data-side="${side}" data-rect="${(v.rect || []).join(",")}" data-title="${side} · ${kind === "corners" ? CORNER_TITLE[k] + " corner" : k + " edge"}">
+      <img src="${esc(src)}" data-plain="${esc(v.img)}" data-ann="${esc(v.img_ann || v.img)}" alt="${side} ${REGION_LABEL(k)}">${ends}
+      <figcaption><h5>${kind === "corners" ? CORNER_TITLE[k] : k}</h5>${scoreLines(s, kind === "corners" && side === "front")}</figcaption>
+    </figure>`;
+  }).join("")}</div>`;
+}
+
+function sideHeading(letter, title) {
+  return `<div class="dig-sub"><span class="dig-badge">${letter}</span><h3>${title}</h3></div>`;
+}
+
+function surfaceCards(d) {
+  let html = "";
+  for (const side of ["front", "back"]) {
+    const s = d.surface && d.surface[side];
+    if (!s) continue;
+    html += `<div class="surf-card"><h5>${side} surface</h5>
+      <p class="muted small" style="margin:0">${s.marks.length ? `${s.marks.length} possible mark${s.marks.length > 1 ? "s" : ""}.` : "No dents, scratches or indents stood out."}
+      ${(s.debris || []).length ? `<br>Ignored ${s.debris.length} speck${s.debris.length > 1 ? "s" : ""} of dust or lint (grey circles) that showed up in only one scan.` : ""}</p>
+      <img class="surface-img" src="${esc(s.heatmap)}" alt="${side} surface differences">
+      ${[...s.marks.map(m => ({...m, what: m.strength > 7 ? "Surface mark · likely costs grade" : "Surface mark · worth a look"})),
+         ...(s.debris || []).map(m => ({...m, what: `Dust or lint · only in the ${m.only_in}`}))].map(m => m.pair ? `
+        <figure class="spot" data-zoom="${esc(m.pair)}"><img src="${esc(m.pair)}" alt="${esc(m.what)} in both scans">
+          <figcaption><b>${esc(m.what)}</b> · ${m.length_mm} mm · ${m.x_pct}% across, ${m.y_pct}% down</figcaption></figure>` : "").join("")}
+    </div>`;
+  }
+  return html;
+}
+
+function digReport(d) {
+  const est = d.estimates, counts = digCounts(d), v = verdictFor(est);
+  const tag = est.TAG;
+  const meta = d.meta || {};
+  const scoreText = tag.score_range ? `${tag.score_range[0]}–${tag.score_range[1]}` : "—";
+  const gradeNum = (tag.grade.match(/\d+(\.\d)?/) || ["—"])[0];
+  const gradeWord = tag.grade.replace(/\s*\d+(\.\d)?\s*/, "").toUpperCase() || "";
+  const graded = meta.graded_at ? new Date(meta.graded_at * 1000).toLocaleDateString(undefined, {year: "numeric", month: "short", day: "numeric"}) : "";
+  return `<article class="dig">
+    <header class="dig-head">
+      <div class="dig-title">
+        <input class="dig-name" id="cardName" value="${esc(meta.name || "")}" placeholder="Name this card (e.g. Pikachu · Crown Zenith 160/159)" aria-label="Card name">
+        <div class="dig-meta">Grade Check DIG-style report${graded ? " · checked " + graded : ""} · ID ${esc(state.session.slice(-6).toUpperCase())}</div>
+        <div class="dig-verdict ${v.cls}">${esc(v.text)}</div>
+      </div>
+      <div class="dig-score">
+        <div><div class="dig-score-box">${scoreText}</div><div class="dig-score-lbl">Est. TAG score</div></div>
+        <div><div class="dig-grade">${gradeNum}</div><div class="dig-score-lbl">${esc(gradeWord)}</div></div>
+      </div>
+    </header>
+    ${summaryRow(d, counts)}
+    <div class="dig-bar">Expected grade by company</div>
+    ${expectedBox(est)}
+    <div class="dig-bar">Defects identified of notable grade significance</div>
+    <div class="dig-centered">${ICONS.pin}<h3>DINGS</h3><p>Snapshot of defects with a notable impact on the grade.</p></div>
+    ${dingsList(d)}
+    <div class="dig-bar">DINGS map</div>
+    ${dingsMap(d)}
+    ${surfaceTable(d)}
+    <p class="dig-note">Fray, Fill and Angle are Grade Check's estimates on TAG's 1000-point style, built from the scan: Fray = edge whitening, Fill = missing material, Angle = corner shape. TAG doesn't publish its formulas.</p>
+    <div class="dig-bar">Centering</div>
+    <div class="measure">${centerCard(d.front, "Front")}${centerCard(d.back, "Back")}</div>
+    <div class="dig-bar">Corner details</div>
+    ${sideHeading("F", "Front corners")}${annToggle("c")}${detailTiles(d, "front", "corners")}
+    ${sideHeading("B", "Back corners")}${detailTiles(d, "back", "corners")}${COLOR_KEY}
+    <div class="dig-bar">Edge details</div>
+    ${sideHeading("F", "Front edges")}${annToggle("e")}${detailTiles(d, "front", "edges")}
+    ${sideHeading("B", "Back edges")}${detailTiles(d, "back", "edges")}${COLOR_KEY}
+    ${d.surface_checked ? `<div class="dig-bar">Surface <span class="dig-tag">experimental</span></div><div class="measure">${surfaceCards(d)}</div>` : ""}
+    <p class="fine">This is a pre-screen from a flatbed scan, not a guarantee. Graders use magnification and multi-angle lighting a scanner can't match, so treat a "10 candidate" as "worth the fee", not "certain".</p>
+  </article>`;
+}
+
+function centerCard(m, label) {
+  if (!m) return `<div class="surf-card"><h5>${label}</h5><p class="muted">Not scanned yet.</p></div>`;
+  const c = m.centering || {};
+  return `<div class="surf-card"><h5>${label} · ${centerTag(c)}</h5>
+    <div class="diagram">${centerScan(m, label.toLowerCase())}
+      <div class="kv">
+        <div><span>Left · right border</span><span>${c.widths_mm ? c.widths_mm.left.toFixed(2) + " · " + c.widths_mm.right.toFixed(2) + " mm" : "—"}</span></div>
+        <div><span>Top · bottom border</span><span>${c.widths_mm ? c.widths_mm.top.toFixed(2) + " · " + c.widths_mm.bottom.toFixed(2) + " mm" : "—"}</span></div>
+        <div><span>Precise centering</span><span>${c.lr !== undefined ? `${c.lr.toFixed(2)} / ${(100 - c.lr).toFixed(2)} · ${c.tb.toFixed(2)} / ${(100 - c.tb).toFixed(2)}` : "—"}</span></div>
+      </div></div></div>`;
+}
+
+/* ---------- zoom viewer: full-resolution scan, first scan and 180° scan side by side ---------- */
+const Z = {scale: 1, tx: 0, ty: 0, panes: [], box: null, natural: null};
+
+function zoomApply() {
+  for (const p of Z.panes) {
+    p.img.style.transform = `translate(${Z.tx}px, ${Z.ty}px) scale(${Z.scale})`;
+    p.el.classList.toggle("px", Z.scale >= 2.5);
+    if (Z.box && p.box) {
+      const [x0, y0, x1, y1] = Z.box, pad = 10;
+      Object.assign(p.box.style, {left: Z.tx + x0 * Z.scale - pad + "px", top: Z.ty + y0 * Z.scale - pad + "px",
+        width: (x1 - x0) * Z.scale + 2 * pad + "px", height: (y1 - y0) * Z.scale + 2 * pad + "px"});
+    }
+  }
+  // Scale relative to the scan's own pixels (100% = one scan pixel per screen pixel).
+  $("#zoomPct").textContent = Math.round(Z.scale * 100) + "%";
+}
+
+function zoomFit(rect) {
+  const pane = Z.panes[0].el.getBoundingClientRect();
+  const [x0, y0, x1, y1] = rect;
+  Z.scale = Math.min(pane.width / (x1 - x0), pane.height / (y1 - y0)) * 0.92;
+  Z.tx = pane.width / 2 - (x0 + x1) / 2 * Z.scale;
+  Z.ty = pane.height / 2 - (y0 + y1) / 2 * Z.scale;
+  zoomApply();
+}
+
+function zoomAt(factor, cx, cy) {
+  const s = Math.min(16, Math.max(0.05, Z.scale * factor));
+  Z.tx = cx - (cx - Z.tx) * (s / Z.scale);
+  Z.ty = cy - (cy - Z.ty) * (s / Z.scale);
+  Z.scale = s;
+  zoomApply();
+}
+
+function openZoom(el) {
+  const d = state.report, side = el.dataset.side;
+  const zoom = d && d[side] && d[side].zoom;
+  const rect = el.dataset.rect.split(",").map(Number);
+  if (!zoom || rect.length !== 4) return;
+  Z.rect = rect;
+  Z.box = el.dataset.box ? el.dataset.box.split(",").map(Number) : null;
+  Z.sev = el.dataset.sev || "yellow";
+  const sources = [[zoom.view, "First scan"]];
+  if (zoom.view_r180) sources.push([zoom.view_r180, "180° scan, turned back"]);
+  $("#zoomTitle").textContent = el.dataset.title || side;
+  const panes = $("#zoomPanes");
+  // Wide strips (top/bottom edges) get the two scans one above the other so each uses the full width.
+  const [x0, y0, x1, y1] = rect;
+  panes.classList.toggle("rows", (x1 - x0) / (y1 - y0) > 1.6);
+  panes.innerHTML = sources.map(([src, label]) => `<div class="zp"><span class="zp-label">${label}</span><img src="${esc(src)}" alt="${label}" draggable="false">${Z.box ? `<div class="zp-box ${Z.sev}"></div>` : ""}</div>`).join("");
+  Z.panes = [...panes.querySelectorAll(".zp")].map(p => ({el: p, img: $("img", p), box: $(".zp-box", p)}));
+  // Show only the clicked area (cropped), except for full-card views like centering.
+  for (const p of Z.panes) {
+    const clip = () => {
+      if (el.dataset.full) return;
+      const W = p.img.naturalWidth, H = p.img.naturalHeight;
+      p.img.style.clipPath = `inset(${y0}px ${W - x1}px ${H - y1}px ${x0}px)`;
+    };
+    if (p.img.complete && p.img.naturalWidth) clip(); else p.img.onload = clip;
+  }
+  $("#zoom").classList.add("on");
+  document.body.style.overflow = "hidden";
+  requestAnimationFrame(() => zoomFit(rect));
+  for (const p of Z.panes) {
+    p.el.onwheel = e => { e.preventDefault(); const r = p.el.getBoundingClientRect(); zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX - r.left, e.clientY - r.top); };
+    const pointers = new Map();
+    let last = null, pinch = null;
+    p.el.onpointerdown = e => { p.el.setPointerCapture(e.pointerId); pointers.set(e.pointerId, e); p.el.classList.add("dragging"); last = e; };
+    p.el.onpointermove = e => {
+      if (!pointers.has(e.pointerId)) return;
+      pointers.set(e.pointerId, e);
+      const r = p.el.getBoundingClientRect();
+      if (pointers.size === 2) {
+        const [a, b] = [...pointers.values()];
+        const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+        if (pinch) zoomAt(dist / pinch, (a.clientX + b.clientX) / 2 - r.left, (a.clientY + b.clientY) / 2 - r.top);
+        pinch = dist;
+        return;
+      }
+      if (last) { Z.tx += e.clientX - last.clientX; Z.ty += e.clientY - last.clientY; zoomApply(); }
+      last = e;
+    };
+    p.el.onpointerup = p.el.onpointercancel = e => { pointers.delete(e.pointerId); pinch = null; last = null; if (!pointers.size) p.el.classList.remove("dragging"); };
+    p.el.ondblclick = e => { const r = p.el.getBoundingClientRect(); zoomAt(2, e.clientX - r.left, e.clientY - r.top); };
+  }
+}
+
+function closeZoom() { $("#zoom").classList.remove("on"); document.body.style.overflow = ""; $("#zoomPanes").innerHTML = ""; }
+
+document.querySelectorAll("#zoom [data-z]").forEach(b => b.onclick = () => {
+  const r = Z.panes[0] && Z.panes[0].el.getBoundingClientRect();
+  if (b.dataset.z === "close") return closeZoom();
+  if (b.dataset.z === "fit") return zoomFit(Z.rect);
+  zoomAt(b.dataset.z === "in" ? 1.6 : 1 / 1.6, r.width / 2, r.height / 2);
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && $("#zoom").classList.contains("on")) closeZoom(); });
+window.addEventListener("resize", () => { if ($("#zoom").classList.contains("on")) zoomFit(Z.rect); });
+
+function wireReport() {
+  document.querySelectorAll("#results [data-zoom]").forEach(el => el.onclick = () => {
+    if (el.dataset.rect && state.report && state.report[el.dataset.side] && state.report[el.dataset.side].zoom) return openZoom(el);
+    $("#modal img").src = el.dataset.zoom; $("#modal").classList.add("on");
+  });
+  document.querySelectorAll("#results [data-ann]").forEach(cb => cb.onchange = () => {
+    state.annotations = cb.checked;
+    document.querySelectorAll("#results [data-ann]").forEach(o => { o.checked = cb.checked; });
+    document.querySelectorAll("#results figure.dt").forEach(fig => {
+      const img = fig.querySelector("img");
+      img.src = cb.checked ? img.dataset.ann : img.dataset.plain;
+      fig.dataset.zoom = img.src;
+    });
+  });
+  const name = $("#cardName");
+  if (name) name.onchange = () => fetch(`/api/meta/${state.session}`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({name: name.value})});
 }
 
 async function buildReport() {
   const box = $("#results");
   const d = await (await fetch(`/api/report/${state.session}`)).json();
   if (d.error) return;
-  const est = d.estimates, v = verdictFor(est);
-  let surface = "";
-  for (const side of ["front", "back"]) {
-    const s = d.surface[side];
-    if (!s) continue;
-    surface += `<div class="card"><div class="eyebrow">${side} surface</div>
-      <p class="muted small" style="margin:0">${s.marks.length ? `${s.marks.length} possible mark${s.marks.length > 1 ? "s" : ""}, also boxed in the close-ups.` : "No dents, scratches or indents stood out."}
-      ${(s.debris || []).length ? `<br>Ignored ${s.debris.length} speck${s.debris.length > 1 ? "s" : ""} of dust or lint (grey circles) that showed up in only one scan. A quick wipe of the card and glass avoids these.` : ""}</p>
-      ${[...s.marks.map(m => ({...m, what: m.strength > 7 ? "Surface mark · likely costs grade" : "Surface mark · worth a look"})),
-         ...(s.debris || []).map(m => ({...m, what: `Dust or lint · only in the ${m.only_in}`}))].map(m => m.pair ? `
-        <figure class="spot" data-zoom="${esc(m.pair)}">
-          <img src="${esc(m.pair)}" alt="${esc(m.what)} close-up in both scans">
-          <figcaption><b>${esc(m.what)}</b> · ${m.length_mm} mm · ${m.x_pct}% across, ${m.y_pct}% down</figcaption>
-        </figure>` : "").join("")}
-      <img class="surface-img" src="${esc(s.heatmap)}" alt="${side} surface differences"></div>`;
-  }
-  box.innerHTML = `
-    <h2 class="section-title">Your estimate</h2>
-    <div class="verdict ${v.cls}">
-      <div><h3>${v.title}</h3><p>${v.body}</p></div>
-      <div class="big-num">${v.num}<small>${v.sub}</small></div>
-    </div>
-    ${expectedBox(est)}
-    <h2 class="section-title" style="margin-top:48px">Close-up inspection</h2>
-    <p class="muted" style="margin:0 0 16px">Every corner and edge at full scan resolution. Click any image to enlarge it.${d.surface_checked ? "" : " Surface marks appear here once you add the 180° scans."}</p>
-    <div class="card" id="inspect">${inspection(d)}</div>
-    <h2 class="section-title" style="margin-top:48px">Centering and size</h2>
-    <div class="measure">${measureCard(d.front, "Front")}${measureCard(d.back, "Back")}</div>
-    ${surface ? `<h2 class="section-title" style="margin-top:48px">Surface <span class="pill grey" style="vertical-align:middle">experimental</span></h2><div class="measure">${surface}</div>` : ""}
-    <p class="fine">This is a pre-screen from a flatbed scan, not a guarantee. Graders use magnification and multi-angle lighting a scanner can't match, so treat a "10 candidate" as "worth the fee", not "certain".</p>`;
-  wireInspection(d);
-  document.querySelectorAll("#results .cs[data-zoom], #results .spot[data-zoom]").forEach(el => el.onclick = () => { $("#modal img").src = el.dataset.zoom; $("#modal").classList.add("on"); });
+  state.report = d;
+  box.innerHTML = digReport(d);
+  wireReport();
   box.classList.add("on");
 }
 
@@ -660,9 +1039,27 @@ async function newSession() {
   go(state.checks.every(Boolean) ? "front" : "prep");
 }
 
-$("#newCard").onclick = newSession;
+async function openSaved(sid) {
+  state.session = sid;
+  state.checks = state.checks.map(() => true);
+  state.done = {}; state.data = {};
+  $("#sessionLabel").textContent = "Card " + sid.slice(9, 15);
+  for (const slot of ["front", "back", "front_rot", "back_rot"]) {
+    const r = await fetch(`/scans/${sid}/${slot}.json`);
+    if (!r.ok) continue;
+    const d = await r.json();
+    state.done[slot] = true; state.data[slot] = d;
+    setThumb(slot, (d.center_view && d.center_view.img) || `/scans/${sid}/${slot}_overlay.jpg`, centeringShort(d.centering));
+  }
+  go(nextStep() || "front");
+  await buildReport();
+  $("#results").scrollIntoView();
+}
+
+$("#newCard").onclick = () => { history.replaceState(null, "", "/"); newSession(); };
 checkScanner(); setInterval(checkScanner, 15000);
-newSession();
+const savedCard = new URLSearchParams(location.search).get("card");
+if (savedCard && /^[A-Za-z0-9-]+$/.test(savedCard)) openSaved(savedCard); else newSession();
 </script>
 </body>
 </html>

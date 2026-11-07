@@ -11,7 +11,7 @@ import numpy as np
 
 DEFAULT_PPI = 600  # used for photos and other images without a known scan resolution
 CARD_W_IN, CARD_H_IN = 2.5, 3.5
-VIEW_MARGIN_IN = 0.08  # background kept around the card for close-ups, so the edge itself is visible
+VIEW_MARGIN_IN = 0.16  # ~4 mm of background kept around the card, so the edge itself is visible
 
 
 class CardNotFound(Exception):

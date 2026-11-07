@@ -9,6 +9,7 @@ import uuid
 from pathlib import Path
 
 import cv2
+import numpy as np
 from flask import Flask, abort, jsonify, render_template, request, send_from_directory
 from PIL import Image
 
@@ -49,10 +50,12 @@ def _measurement_json(m):
 def _closeup_urls(sid, rendered):
     base = f"/scans/{sid}/"
     t = f"?t={int(time.time())}"
+    tile = lambda v: {**v, "img": base + v["img"] + t, "img_ann": base + v.get("img_ann", v["img"]) + t}
     return {
+        "view_size": rendered.get("view_size"),
         "full": base + rendered["full"] + t,
-        "corners": {k: {**v, "img": base + v["img"] + t} for k, v in rendered["corners"].items()},
-        "edges": {k: {**v, "img": base + v["img"] + t} for k, v in rendered["edges"].items()},
+        "corners": {k: tile(v) for k, v in rendered["corners"].items()},
+        "edges": {k: tile(v) for k, v in rendered["edges"].items()},
         "findings": [{**f, "img": base + f["img"] + t} for f in rendered["findings"]],
     }
 
@@ -68,13 +71,20 @@ def _process(sid, slot, raw: bytes, src_ppi):
     data["ppi"] = m.ppi
     data["findings"] = closeups.build_findings(m)
     cv2.imwrite(str(d / f"{slot}_view.jpg"), m.canon_view, [cv2.IMWRITE_JPEG_QUALITY, 95])
+    if slot.endswith("_rot"):
+        # Turned upright again, so it lines up with the first scan of this side for side-by-side zooming.
+        cv2.imwrite(str(d / f"{slot[:-4]}_view_r180.jpg"), cv2.rotate(m.canon_view, cv2.ROTATE_180), [cv2.IMWRITE_JPEG_QUALITY, 95])
     data["view_pad"] = m.view_pad
     vw = 900
     small = cv2.resize(m.canon_view, (vw, int(m.canon_view.shape[0] * vw / m.canon_view.shape[1])), interpolation=cv2.INTER_AREA)
     cv2.imwrite(str(d / f"{slot}_center.jpg"), small, [cv2.IMWRITE_JPEG_QUALITY, 90])
     data["center_view"] = {"img": f"/scans/{sid}/{slot}_center.jpg?t={int(time.time())}",
                            "margin_mm": round(m.view_pad * m.mmpp, 3), "card_mm": [63.5, 88.9]}
-    data["closeups"] = _closeup_urls(sid, closeups.render(m.canon_view, m.view_pad, data["findings"], d, slot, m.ppi))
+    data["subscores"] = closeups.subscores(m)
+    outline = m._outline[0] if getattr(m, "_outline", None) is not None else None
+    if outline is not None:
+        np.save(d / f"{slot}_outline.npy", outline.astype(np.float32))
+    data["closeups"] = _closeup_urls(sid, closeups.render(m.canon_view, m.view_pad, data["findings"], d, slot, m.ppi, outline))
     (d / f"{slot}.json").write_text(json.dumps(data))
     return data
 
@@ -98,6 +108,65 @@ def new_session():
     sid = time.strftime("%Y%m%d-%H%M%S-") + uuid.uuid4().hex[:6]
     _session_dir(sid)
     return jsonify({"session": sid})
+
+
+def _meta(d):
+    f = d / "meta.json"
+    if f.exists():
+        return json.loads(f.read_text())
+    # Older sessions: the folder name starts with the date and time it was created.
+    try:
+        created = time.mktime(time.strptime(d.name[:15], "%Y%m%d-%H%M%S"))
+    except ValueError:
+        created = d.stat().st_mtime
+    return {"name": "", "graded_at": created}
+
+
+@app.route("/api/meta/<sid>", methods=["POST"])
+def save_meta(sid):
+    d = _session_dir(sid)
+    meta = _meta(d)
+    name = str((request.json or {}).get("name", ""))[:120].strip()
+    meta["name"] = name
+    (d / "meta.json").write_text(json.dumps(meta))
+    return jsonify(meta)
+
+
+@app.route("/library")
+def library_page():
+    return render_template("library.html")
+
+
+@app.route("/api/library")
+def library():
+    cards = []
+    for d in sorted(SCANS.iterdir(), reverse=True):
+        snap = d / "report.json"
+        if not (d.is_dir() and snap.exists()):
+            continue
+        r = json.loads(snap.read_text())
+        meta = _meta(d)
+        est = r.get("estimates", {})
+        front = r.get("front") or {}
+        thumb = f"/scans/{d.name}/front_center.jpg" if (d / "front_center.jpg").exists() else (
+            f"/scans/{d.name}/back_center.jpg" if (d / "back_center.jpg").exists() else None)
+        cards.append({
+            "id": d.name, "name": meta.get("name") or "", "graded_at": meta.get("graded_at"),
+            "thumb": thumb,
+            "grades": {k: {"grade": est[k]["grade"], "score_range": est[k].get("score_range")} for k in ("TAG", "PSA", "CGC") if k in est},
+            "counts": est.get("counts"), "centering": (front.get("centering") or {}).get("worst"),
+            "dims": front.get("dims_in"), "surface_checked": r.get("surface_checked", False),
+        })
+    return jsonify(cards)
+
+
+@app.route("/api/card/<sid>", methods=["DELETE"])
+def delete_card(sid):
+    d = _session_dir(sid)
+    trash = SCANS / ".deleted"
+    trash.mkdir(exist_ok=True)
+    d.rename(trash / d.name)  # recoverable: moved aside, not erased
+    return jsonify({"ok": True})
 
 
 @app.route("/guide")
@@ -181,7 +250,7 @@ def report(sid):
     if not front and not back:
         return jsonify({"error": "Scan at least one side first."}), 400
     surf = {}
-    surface_found = []
+    surface_by_side = {}
     for side, data in (("front", front), ("back", back)):
         a, b = d / f"{side}_canon.png", d / f"{side}_rot_canon.png"
         if not (data and a.exists() and b.exists()):
@@ -194,15 +263,41 @@ def report(sid):
             cv2.imwrite(str(d / f"{side}_spot_{i}.jpg"), img, [cv2.IMWRITE_JPEG_QUALITY, 92])
             entry["pair"] = f"/scans/{sid}/{side}_spot_{i}.jpg?t={int(time.time())}"
         surf[side] = res
-        found = closeups.surface_findings(res["marks"], canon.shape)
-        surface_found += found
-        # Redraw this side's close-ups with the surface marks boxed too.
+        surface_by_side[side] = closeups.surface_findings(res["marks"], canon.shape)
+
+    t = int(time.time())
+    for side, data in (("front", front), ("back", back)):
+        if not data:
+            continue
+        r180 = d / f"{side}_view_r180.jpg"
+        data["zoom"] = {"view": f"/scans/{sid}/{side}_view.jpg?t={t}",
+                        "view_r180": f"/scans/{sid}/{side}_view_r180.jpg?t={t}" if r180.exists() else None}
+        # Check each corner/edge finding against the 180° scan. A yellow it didn't see is "cleared".
+        rot = load(f"{side}_rot")
+        findings = data.get("findings", [])
+        for f in findings:
+            f.pop("both", None)
+            f["cleared"] = False
+        if rot:
+            ppi = data.get("ppi", 600)
+            seen = closeups.match_in_rotated(findings, rot.get("findings", []), int(2.5 * ppi), int(3.5 * ppi), 25.4 / ppi)
+            for f, b in zip(findings, seen):
+                f["both"] = b
+                f["cleared"] = f["severity"] == "yellow" and b is False
+        # Redraw this side's close-ups so boxes and tile outlines reflect cleared findings and surface marks.
+        outline_file = d / f"{side}_outline.npy"
         rendered = closeups.render(cv2.imread(str(d / f"{side}_view.jpg")), data.get("view_pad", 0),
-                                   data["findings"] + found, d, side, data.get("ppi", 600))
+                                   findings + surface_by_side.get(side, []), d, side, data.get("ppi", 600),
+                                   np.load(outline_file) if outline_file.exists() else None)
         data["closeups"] = _closeup_urls(sid, rendered)
+    surface_found = [f for found in surface_by_side.values() for f in found]
     est = standards.estimate_all(front, back, surface_found)
-    return jsonify({"front": front, "back": back, "surface": surf, "estimates": est,
-                    "surface_checked": bool(surf)})
+    out = {"front": front, "back": back, "surface": surf, "estimates": est,
+           "surface_checked": bool(surf), "meta": _meta(d)}
+    if not (d / "meta.json").exists():
+        (d / "meta.json").write_text(json.dumps(out["meta"]))
+    (d / "report.json").write_text(json.dumps(out))  # snapshot for the library
+    return jsonify(out)
 
 
 @app.route("/scans/<sid>/<path:name>")

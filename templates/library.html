@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Card Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f6f5f4; --white: #fff; --ink: #000; --ink-90: rgba(0,0,0,.9); --ink-60: rgba(0,0,0,.6); --ink-40: rgba(0,0,0,.4);
+    --ink-20: rgba(0,0,0,.2); --hair: rgba(0,0,0,.08); --hair-2: rgba(0,0,0,.05);
+    --blue: #0075de; --peach: #ffe4d4; --coral: #f64932; --mint: #e3f5e9; --mint-ink: #1f7a45; --butter: #fff3d6; --rose: #fde7e3; --vermillion: #e32d14;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; --serif: "Source Serif 4", Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; }
+  body { margin: 0; background: var(--paper); color: var(--ink-90); font: 16px/1.5 var(--sans); }
+  main { max-width: 1080px; margin: 0 auto; padding: 0 16px 80px; }
+  a { color: inherit; text-decoration: none; }
+  .bar { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; color: var(--ink); }
+  .logo { width: 28px; height: 28px; border-radius: 7px; background: var(--ink); color: var(--white); display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+  .nav { display: flex; gap: 6px; }
+  .nav a { padding: 7px 14px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--ink-60); }
+  .nav a.on { background: var(--white); color: var(--ink); box-shadow: 0 0 0 1px var(--hair); }
+  .nav a.cta { background: var(--blue); color: var(--white); }
+  h1 { font-size: clamp(36px, 6vw, 56px); line-height: 1.04; letter-spacing: -0.03em; margin: 32px 0 6px; color: var(--ink); }
+  .lede { font-family: var(--serif); font-size: 19px; color: var(--ink-60); margin: 0 0 22px; }
+  .tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
+  .tools input, .tools select { font: inherit; font-size: 14px; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--hair); background: var(--white); color: var(--ink); }
+  .tools input { flex: 1 1 260px; }
+  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
+  .stat { background: var(--white); border: 1px solid var(--hair); border-radius: 10px; padding: 10px 16px; font-size: 13px; color: var(--ink-60); }
+  .stat b { display: block; font-size: 22px; color: var(--ink); letter-spacing: -0.02em; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+  .card { background: var(--white); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; transition: border-color .2s ease, transform .2s cubic-bezier(.34,1.56,.64,1); }
+  .card:hover { border-color: var(--ink-20); transform: translateY(-2px); }
+  .thumb { background: #1d1d1d; aspect-ratio: 5 / 7; display: grid; place-items: center; overflow: hidden; }
+  .thumb img { width: 100%; height: 100%; object-fit: contain; }
+  .thumb .ph { color: rgba(255,255,255,.5); font-size: 13px; }
+  .body { padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .name { font-weight: 700; font-size: 15px; color: var(--ink); line-height: 1.3; }
+  .name.untitled { color: var(--ink-40); font-weight: 500; font-style: italic; }
+  .date { font-size: 12px; color: var(--ink-60); }
+  .grades { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 2px; }
+  .g { border-radius: 8px; padding: 6px 4px; text-align: center; background: var(--hair-2); }
+  .g img { height: 14px; max-width: 46px; object-fit: contain; display: block; margin: 0 auto 4px; }
+  .g b { display: block; font-size: 12px; color: var(--ink); line-height: 1.2; }
+  .g.good { background: var(--mint); } .g.maybe { background: var(--butter); } .g.no { background: var(--rose); }
+  .meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-60); margin-top: auto; padding-top: 6px; border-top: 1px solid var(--hair-2); }
+  .del { border: 0; background: none; color: var(--ink-40); font: inherit; font-size: 12px; cursor: pointer; padding: 0; }
+  .del:hover { color: var(--vermillion); }
+  .empty { background: var(--white); border: 1px dashed var(--ink-20); border-radius: 12px; padding: 40px; text-align: center; color: var(--ink-60); }
+  .empty a { color: var(--blue); font-weight: 500; }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar">
+    <a class="brand" href="/"><div class="logo">10</div>Grade Check</a>
+    <nav class="nav"><a href="/library" class="on">Library</a><a href="/" class="cta">Check a card</a></nav>
+  </div>
+  <h1>Your graded cards</h1>
+  <p class="lede">Every card you've checked, with its scans, close-ups and expected grades.</p>
+  <div class="stats" id="stats"></div>
+  <div class="tools">
+    <input id="q" type="search" placeholder="Search by name…" aria-label="Search cards">
+    <select id="sort" aria-label="Sort cards">
+      <option value="date">Newest first</option>
+      <option value="grade">Best TAG estimate first</option>
+      <option value="name">Name A–Z</option>
+    </select>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+<script>
+const LOGOS = {TAG: "/static/logos/tag.png", PSA: "/static/logos/psa.svg", CGC: "/static/logos/cgc.svg"};
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const tone = g => /10/.test(g) ? "good" : /(^9|Mint 9|8\.5)/.test(g) ? "maybe" : "no";
+const short = g => g.replace("Gem Mint", "GM").replace("Pristine", "Pristine").replace("below ", "<");
+let cards = [];
+
+function render() {
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const sort = document.getElementById("sort").value;
+  let list = cards.filter(c => !q || (c.name || "").toLowerCase().includes(q));
+  const tagHi = c => (c.grades.TAG && c.grades.TAG.score_range) ? c.grades.TAG.score_range[1] : 0;
+  if (sort === "grade") list.sort((a, b) => tagHi(b) - tagHi(a));
+  else if (sort === "name") list.sort((a, b) => (a.name || "~").localeCompare(b.name || "~"));
+  else list.sort((a, b) => (b.graded_at || 0) - (a.graded_at || 0));
+  const tens = cards.filter(c => ["TAG", "PSA", "CGC"].every(k => c.grades[k] && /10/.test(c.grades[k].grade))).length;
+  document.getElementById("stats").innerHTML = cards.length ? `
+    <div class="stat"><b>${cards.length}</b>cards checked</div>
+    <div class="stat"><b>${tens}</b>10 candidates everywhere</div>` : "";
+  const grid = document.getElementById("grid");
+  if (!cards.length) { grid.innerHTML = `<div class="empty">No cards yet. <a href="/">Check your first card</a> and its report will be saved here.</div>`; return; }
+  if (!list.length) { grid.innerHTML = `<div class="empty">No cards match "${esc(q)}".</div>`; return; }
+  grid.innerHTML = list.map(c => {
+    const date = c.graded_at ? new Date(c.graded_at * 1000).toLocaleDateString(undefined, {year: "numeric", month: "short", day: "numeric"}) : "";
+    const grades = ["TAG", "PSA", "CGC"].map(k => c.grades[k] ? `<div class="g ${tone(c.grades[k].grade)}"><img src="${LOGOS[k]}" alt="${k}"><b>${esc(short(c.grades[k].grade))}</b></div>` : "").join("");
+    const counts = c.counts ? `${c.counts.red} red · ${c.counts.yellow} yellow` : "";
+    return `<a class="card" href="/?card=${encodeURIComponent(c.id)}">
+      <div class="thumb">${c.thumb ? `<img src="${esc(c.thumb)}" alt="${esc(c.name || "card")} scan" loading="lazy">` : `<span class="ph">No image</span>`}</div>
+      <div class="body">
+        <div class="name ${c.name ? "" : "untitled"}">${esc(c.name || "Untitled card")}</div>
+        <div class="date">Checked ${esc(date)}${c.centering ? ` · centering ${c.centering.toFixed(1)}/${(100 - c.centering).toFixed(1)}` : ""}</div>
+        <div class="grades">${grades}</div>
+        <div class="meta"><span>${esc(counts)}${c.surface_checked ? " · surface ✓" : ""}</span>
+          <button class="del" data-del="${esc(c.id)}" title="Move this card out of the library">Remove</button></div>
+      </div></a>`;
+  }).join("");
+  grid.querySelectorAll("[data-del]").forEach(b => b.onclick = async e => {
+    e.preventDefault(); e.stopPropagation();
+    const c = cards.find(x => x.id === b.dataset.del);
+    if (!confirm(`Remove "${c.name || "Untitled card"}" from the library? Its files are moved aside to data/scans/.deleted, not erased.`)) return;
+    await fetch(`/api/card/${encodeURIComponent(c.id)}`, {method: "DELETE"});
+    cards = cards.filter(x => x.id !== c.id); render();
+  });
+}
+
+(async () => {
+  cards = await (await fetch("/api/library")).json();
+  render();
+  document.getElementById("q").oninput = render;
+  document.getElementById("sort").onchange = render;
+})();
+</script>
+</body>
+</html>
