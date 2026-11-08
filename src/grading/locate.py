@@ -125,7 +125,9 @@ def _find_card_with(bgr, per_in, dark_bg, bg_override):
         bg = np.median(frame, axis=0)
     if np.hypot(bg[1] - 128, bg[2] - 128) > 25:
         # coloured paper: different colour, or much lighter/darker (black or white borders)
-        m = ((np.hypot(lab[..., 1] - bg[1], lab[..., 2] - bg[2]) > 18) | (np.abs(lab[..., 0] - bg[0]) > 40)).astype(np.uint8) * 255
+        from .measure import paper_shadow
+        m = (((np.hypot(lab[..., 1] - bg[1], lab[..., 2] - bg[2]) > 18) | (np.abs(lab[..., 0] - bg[0]) > 40))
+             & ~paper_shadow(lab, bg)).astype(np.uint8) * 255
     else:
         dist = np.linalg.norm(lab - bg, axis=2)
         thr = 25 if dark_bg else 18

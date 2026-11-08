@@ -14,13 +14,14 @@ import numpy as np
 from flask import Flask, abort, jsonify, render_template, request, send_from_directory
 from PIL import Image
 
-from src.grading import cards, closeups, fees, locate, market, measure, standards, surface, tag_compare
+from src.grading import cards, closeups, fees, locate, market, measure, relief, standards, surface, tag_compare
 from src.grading.scanner import DEFAULT_REGION, PLATEN_REGION, PREVIEW_DPI, Scanner
 
 ROOT = Path(__file__).parent
 SCANS = ROOT / "data" / "scans"
 SCANS.mkdir(parents=True, exist_ok=True)
-SLOTS = ("front", "back", "front_rot", "back_rot")
+SLOTS = ("front", "back", "front_rot", "back_rot", "front_r90", "front_r270", "back_r90", "back_r270")
+QUARTER_SLOTS = ("front_r90", "front_r270", "back_r90", "back_r270")  # extra light directions for the surface check
 LAST_REGION = SCANS / "last_region.json"
 
 app = Flask(__name__)
@@ -86,7 +87,7 @@ def _check_side(d, slot, canon):
     side = slot.split("_")[0]
     other = "back" if side == "front" else "front"
     load = lambda names: [cv2.imread(str(d / f"{n}_canon.png")) for n in names if (d / f"{n}_canon.png").exists()]
-    same = load([n for n in (side, f"{side}_rot") if n != slot])
+    same = load([n for n in (side, f"{side}_rot", f"{side}_r90", f"{side}_r270") if n != slot])
     opp = load([other, f"{other}_rot"])
     if not opp:
         return
@@ -100,6 +101,8 @@ def _check_side(d, slot, canon):
 def _upside_down(d, slot, canon):
     """True when this scan is the same way up as its 180° partner (or the opposite way up from its
     first-scan partner), i.e. the card went on the glass the wrong way round for this slot."""
+    if slot in QUARTER_SLOTS:  # a quarter turn: either way up works, it's matched to the first scan later
+        return False
     side = slot.split("_")[0]
     partner = f"{side}_rot" if slot == side else side
     f = d / f"{partner}_canon.png"
@@ -488,6 +491,35 @@ def _same_card(a, b):
     return float(np.dot(fa[1:], fb[1:]) / (len(fa) - 1)) > 0.9
 
 
+def _upright_like(canon, ref):
+    """A quarter-turn scan, straightened, can come out either way up: pick the way that matches the first scan."""
+    if canon.shape != ref.shape:
+        canon = cv2.resize(canon, (ref.shape[1], ref.shape[0]), interpolation=cv2.INTER_AREA)
+    turned = cv2.rotate(canon, cv2.ROTATE_180)
+    sr = _small(ref)
+    same = float(np.dot(_small(canon), sr)) / len(sr)
+    flip = float(np.dot(_small(turned), sr)) / len(sr)
+    return canon if same >= flip else turned
+
+
+def _merge_marks(first, second, shape, tol_mm=1.5):
+    """Combine marks from the two light pairs; a mark both pairs saw is kept once, tagged with both."""
+    h, w = shape[:2]
+    mm_x, mm_y = 63.5 / 100, 88.9 / 100  # mm per percent across / down
+    out = [dict(m) for m in first]
+    for m in second:
+        m = dict(m, light=["90/270"])
+        near = next((o for o in out if np.hypot((o["x_pct"] - m["x_pct"]) * mm_x, (o["y_pct"] - m["y_pct"]) * mm_y) <= tol_mm), None)
+        if near is not None:
+            near["light"] = sorted(set(near.get("light", [])) | {"90/270"})
+            near["strength"] = max(near["strength"], m["strength"])
+            near.setdefault("pair_q", m.get("pair"))
+        else:
+            out.append(m)
+    out.sort(key=lambda m: -m["strength"])
+    return out
+
+
 @app.route("/api/report/<sid>")
 def report(sid):
     d = _session_dir(sid)
@@ -508,15 +540,57 @@ def report(sid):
         for i, (entry, img) in enumerate(res.pop("_pairs")):
             cv2.imwrite(str(d / f"{side}_spot_{i}.jpg"), img, [cv2.IMWRITE_JPEG_QUALITY, 92])
             entry["pair"] = f"/scans/{sid}/{side}_spot_{i}.jpg?t={int(time.time())}"
+        for m in res["marks"] + res["debris"]:
+            m["light"] = ["0/180"]
+        # Second light pair: the card turned 90° and 270°, lit across it instead of along it. Marks that run
+        # along one light direction barely shade in that pair, but stand out in the other.
+        q90, q270 = d / f"{side}_r90_canon.png", d / f"{side}_r270_canon.png"
+        res["light_pairs"] = 1
+        if q90.exists() and q270.exists():
+            a90, a270 = _upright_like(cv2.imread(str(q90)), canon), _upright_like(cv2.imread(str(q270)), canon)
+            res2, heat2 = surface.compare(a90, cv2.rotate(a270, cv2.ROTATE_180))
+            cv2.imwrite(str(d / f"{side}_surface_q.jpg"), heat2, [cv2.IMWRITE_JPEG_QUALITY, 85])
+            res["heatmap_q"] = f"/scans/{sid}/{side}_surface_q.jpg?t={int(time.time())}"
+            for i, (entry, img) in enumerate(res2.pop("_pairs")):
+                cv2.imwrite(str(d / f"{side}_qspot_{i}.jpg"), img, [cv2.IMWRITE_JPEG_QUALITY, 92])
+                entry["pair"] = f"/scans/{sid}/{side}_qspot_{i}.jpg?t={int(time.time())}"
+            res["light_pairs"] = 2
+            # TAG-style relief map: slopes from both light pairs, shaded with one virtual light.
+            along, across = relief.slopes(canon, cv2.rotate(cv2.imread(str(b)), cv2.ROTATE_180), a90, a270,
+                                          data.get("ppi", 1200))
+            relief_img, slope_heat = relief.render(along, across, data.get("ppi", 1200))
+            cv2.imwrite(str(d / f"{side}_relief.jpg"), relief_img, [cv2.IMWRITE_JPEG_QUALITY, 90])
+            cv2.imwrite(str(d / f"{side}_slope.jpg"), slope_heat, [cv2.IMWRITE_JPEG_QUALITY, 85])
+            res["relief"] = f"/scans/{sid}/{side}_relief.jpg?t={int(time.time())}"
+            res["slope"] = f"/scans/{sid}/{side}_slope.jpg?t={int(time.time())}"
+            res["marks"] = _merge_marks(res["marks"], res2["marks"], canon.shape)
+            res["debris"] = _merge_marks(res["debris"], res2["debris"], canon.shape)
         surf[side] = res
         surface_by_side[side] = closeups.surface_findings(res["marks"], canon.shape)
 
     _auto_identify(d)
     ignored = set(_meta(d).get("ignored") or [])
 
+    def parse_key(k):
+        try:
+            sd, region, kind, box = k.split("|")
+            return sd, region, kind, [int(v) for v in box.split(",")]
+        except ValueError:
+            return None
+
+    ignored_parsed = [(k, parse_key(k)) for k in ignored]
+
     def mark(side, f):
         f["key"] = f"{side}|{f.get('region')}|{f.get('kind')}|{','.join(str(int(v)) for v in f.get('box', []))}"
         f["ignored"] = f["key"] in ignored
+        if not f["ignored"] and f.get("box"):
+            # Re-measured scans move a finding by a few pixels: an ignore still applies within ~1 mm.
+            cx, cy = (f["box"][0] + f["box"][2]) / 2, (f["box"][1] + f["box"][3]) / 2
+            for k, pk in ignored_parsed:
+                if pk and pk[0] == side and pk[1] == f.get("region") and pk[2] == f.get("kind") and len(pk[3]) == 4:
+                    if np.hypot((pk[3][0] + pk[3][2]) / 2 - cx, (pk[3][1] + pk[3][3]) / 2 - cy) <= 50:
+                        f["key"], f["ignored"] = k, True  # keep the saved key so Undo still finds it
+                        break
 
     for side, found in surface_by_side.items():
         for f in found:
@@ -535,19 +609,43 @@ def report(sid):
             f.pop("both", None)
             f["cleared"] = False
             mark(side, f)
-        if rot:
-            ppi = data.get("ppi", 600)
-            seen = closeups.match_in_rotated(findings, rot.get("findings", []), int(2.5 * ppi), int(3.5 * ppi), 25.4 / ppi)
-            for f, b in zip(findings, seen):
-                f["both"] = b
-                if f.get("was_red"):
-                    f["severity"] = "red"  # rebuilt report: judge the original call again
-                f.pop("was_red", None)
-                # A clear (red) call that the turned scan doesn't see is more likely lighting or shadow than
-                # damage (a real bent corner or chip shows from both sides): count it as borderline instead.
-                if f["severity"] == "red" and b is False:
-                    f["severity"], f["was_red"] = "yellow", True
-                f["cleared"] = f["severity"] == "yellow" and b is False and not f.get("was_red")
+        # Check each corner/edge finding against every other scan of this side: the 180° turn and, when
+        # scanned, the 90° and 270° turns (light from the other two directions).
+        ppi = data.get("ppi", 600)
+        cw, ch, mmpp = int(2.5 * ppi), int(3.5 * ppi), 25.4 / ppi
+        first = cv2.imread(str(d / f"{side}_canon.png"))
+        checks = []
+        for slot, label in ((f"{side}_rot", "180°"), (f"{side}_r90", "90°"), (f"{side}_r270", "270°")):
+            other = rot if slot.endswith("_rot") else load(slot)
+            if not other:
+                continue
+            ofl = [x for x in other.get("findings", []) if x.get("box")]
+            if not slot.endswith("_rot"):
+                c = cv2.imread(str(d / f"{slot}_canon.png"))
+                if first is None or c is None:
+                    continue
+                if _upright_like(c, first) is c:
+                    # same way up as the first scan: pre-turn its boxes so the 180° matcher lines them up
+                    ofl = [dict(x, box=[cw - 1 - x["box"][2], ch - 1 - x["box"][3], cw - 1 - x["box"][0], ch - 1 - x["box"][1]]) for x in ofl]
+            checks.append((label, closeups.match_in_rotated(findings, ofl, cw, ch, mmpp)))
+        for i, f in enumerate(findings):
+            if f.get("was_red"):
+                f["severity"] = "red"  # rebuilt report: judge the original call again
+            f.pop("was_red", None)
+            f.pop("seen_in", None)
+            seen = [(label, s[i]) for label, s in checks if s[i] is not None]
+            if not seen:
+                continue
+            n, hits = len(seen), sum(1 for _, v in seen if v)
+            confirmed = hits * 2 > n if n > 1 else hits == 1  # a majority of the other scans saw it
+            f["both"] = confirmed
+            if n > 1:
+                f["seen_in"] = {label: bool(v) for label, v in seen}
+            # A clear (red) call the other scans don't back up is more likely lighting or shadow than damage
+            # (a real bent corner or chip shows whichever way the light falls): count it as borderline.
+            if f["severity"] == "red" and not confirmed:
+                f["severity"], f["was_red"] = "yellow", True
+            f["cleared"] = f["severity"] == "yellow" and hits == 0 and not f.get("was_red")
         # Redraw this side's close-ups so boxes and tile outlines reflect cleared findings and surface marks.
         outline_file = d / f"{side}_outline.npy"
         rendered = closeups.render(cv2.imread(str(d / f"{side}_view.jpg")), data.get("view_pad", 0),

@@ -79,6 +79,19 @@ def window_backdrop(lab, edge_bg):
     return np.median(lab[near], axis=0)
 
 
+def paper_shadow(lab, bg):
+    """Pixels of coloured paper in the card's shadow: the paper's own hue, still clearly coloured, just darker.
+    A card's border is never that colour, so these are backdrop, not card."""
+    bg_chroma = float(np.hypot(bg[1] - 128, bg[2] - 128))
+    if bg_chroma <= 25:
+        return np.zeros(lab.shape[:2], bool)
+    hue = np.degrees(np.arctan2(lab[..., 2] - 128, lab[..., 1] - 128))
+    bg_hue = float(np.degrees(np.arctan2(bg[2] - 128, bg[1] - 128)))
+    dh = np.abs((hue - bg_hue + 180) % 360 - 180)
+    chroma = np.hypot(lab[..., 1] - 128, lab[..., 2] - 128)
+    return (dh < 20) & (chroma > 0.4 * bg_chroma) & (lab[..., 0] < bg[0] + 10)
+
+
 def _card_mask(img, scanned=True, bg=None):
     lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB).astype(np.float32)
     h, w = lab.shape[:2]
@@ -102,6 +115,7 @@ def _card_mask(img, scanned=True, bg=None):
         # shares its colour, so "different colour or clearly different lightness" separates the card,
         # whatever its border - black, silver, white, yellow or the blue back.
         m = (chroma_dist > 16) | (np.abs(lab[..., 0] - bg[0]) > 40)
+        m &= ~paper_shadow(lab, bg)
     elif bg[0] < 110:
         m = (chroma_dist > 10) | (lab[..., 0] - bg[0] > 28)
     elif bg[0] < 190:

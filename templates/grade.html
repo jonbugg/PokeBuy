@@ -149,6 +149,8 @@
   .surface-img { width: 100%; border-radius: 8px; margin-top: 12px; border: 1px solid var(--hair); }
 
   /* TAG comparison */
+  .relief-fig { margin: 8px 0 12px; cursor: zoom-in; }
+  .relief-img { filter: none; background: #888; }
   .tc-verdict { border-radius: 12px; padding: 14px 16px; margin: 14px 0; background: var(--hair-2); }
   .tc-verdict.good { background: var(--mint); } .tc-verdict.maybe { background: var(--butter); } .tc-verdict.no { background: var(--rose); }
   .tc-verdict span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-60); }
@@ -425,6 +427,12 @@
         <div class="thumb" data-slot="front_rot"><div class="ph">Front 180° · optional</div></div>
         <div class="thumb" data-slot="back_rot"><div class="ph">Back 180° · optional</div></div>
       </div>
+      <div class="tray-sub tray-q">
+        <div class="thumb" data-slot="front_r90"><div class="ph">Front 90° · optional</div></div>
+        <div class="thumb" data-slot="front_r270"><div class="ph">Front 270° · optional</div></div>
+        <div class="thumb" data-slot="back_r90"><div class="ph">Back 90° · optional</div></div>
+        <div class="thumb" data-slot="back_r270"><div class="ph">Back 270° · optional</div></div>
+      </div>
       <div class="actions" style="margin-top:16px; justify-content:space-between">
         <span class="muted small" id="sessionLabel"></span>
         <button class="btn btn-text" id="newCard">Start a new card</button>
@@ -456,6 +464,10 @@ const STEPS = [
   {id: "back", label: "Back"},
   {id: "front_rot", label: "Front 180°", optional: true},
   {id: "back_rot", label: "Back 180°", optional: true},
+  {id: "front_r90", label: "Front 90°", optional: true},
+  {id: "front_r270", label: "Front 270°", optional: true},
+  {id: "back_r90", label: "Back 90°", optional: true},
+  {id: "back_r270", label: "Back 270°", optional: true},
 ];
 const SCAN_SECONDS = {600: 40, 1200: 150};
 const state = {session: null, step: "prep", dpi: 1200, done: {}, data: {}, checks: [false, false, false]};
@@ -486,9 +498,9 @@ function renderSteps() {
 function go(step) { state.step = step; renderSteps(); renderPanel(); }
 
 /* ---------- placement diagram ---------- */
-function platenSVG({flipped = false, rotated = false} = {}) {
+function platenSVG({flipped = false, rotated = false, quarter = 0} = {}) {
   const card = flipped ? "#3c5aa6" : "#ffd84d";
-  const rot = rotated ? "rotate(180 92 112)" : "";
+  const rot = quarter ? `rotate(${quarter} 92 112)` : rotated ? "rotate(180 92 112)" : "";
   return `<svg viewBox="0 0 170 210" width="100%" role="img" aria-label="The card sitting in the scan guide's window">
     <rect x="4" y="4" width="162" height="202" rx="10" fill="#fff" stroke="rgba(0,0,0,.2)"/>
     <path d="M14 14 L34 14 M14 14 L14 34 M14 14 L30 30" stroke="#0075de" stroke-width="3" stroke-linecap="round" fill="none"/>
@@ -496,8 +508,8 @@ function platenSVG({flipped = false, rotated = false} = {}) {
     <g transform="${rot}">
       <rect x="48" y="52" width="88" height="122" rx="6" fill="${card}" stroke="rgba(0,0,0,.25)"/>
       <rect x="55" y="59" width="74" height="108" rx="3" fill="${flipped ? "#6f8fd6" : "#fff4c2"}"/>
-      ${rotated ? "" : `<text x="92" y="118" text-anchor="middle" font-size="16" font-weight="700" font-family="Inter, sans-serif" fill="rgba(0,0,0,.55)">${flipped ? "BACK" : "FRONT"}</text>`}
-      ${rotated ? `<text x="92" y="118" text-anchor="middle" font-size="16" font-weight="700" font-family="Inter, sans-serif" fill="rgba(0,0,0,.55)" transform="rotate(180 92 112)">${flipped ? "BACK" : "FRONT"}</text>` : ""}
+      ${rotated && !quarter ? "" : `<text x="92" y="118" text-anchor="middle" font-size="16" font-weight="700" font-family="Inter, sans-serif" fill="rgba(0,0,0,.55)">${flipped ? "BACK" : "FRONT"}</text>`}
+      ${rotated && !quarter ? `<text x="92" y="118" text-anchor="middle" font-size="16" font-weight="700" font-family="Inter, sans-serif" fill="rgba(0,0,0,.55)" transform="rotate(180 92 112)">${flipped ? "BACK" : "FRONT"}</text>` : ""}
     </g>
     <text x="40" y="32" font-size="10" font-family="Inter, sans-serif" fill="rgba(0,0,0,.5)">card near the arrow corner</text>
     <text x="85" y="200" text-anchor="middle" font-size="10" font-family="Inter, sans-serif" fill="rgba(0,0,0,.5)">face down, red paper on top</text>
@@ -515,6 +527,10 @@ const SCAN_COPY = {
   back: {title: "Scan the back", body: "Lift the paper, flip the card over in the same spot, put the paper back.", svg: {flipped: true}},
   front_rot: {title: "Front, turned upside down", body: "For the surface check: front facing the glass again, turned 180° in the same spot. The light then hits from the other side, so dents and scratches show up.", svg: {rotated: true}},
   back_rot: {title: "Back, turned upside down", body: "Same idea for the back: flip it, then turn it 180°.", svg: {flipped: true, rotated: true}},
+  front_r90: {title: "Front, turned a quarter (90°)", body: "Extra surface check: front facing the glass, card turned a quarter turn clockwise so it lies sideways. Keep it well inside the red paper. The light then sweeps across the card instead of along it.", svg: {quarter: 90}},
+  front_r270: {title: "Front, turned three quarters (270°)", body: "Turn it half a turn from the last scan, so it lies sideways the other way.", svg: {quarter: 270}},
+  back_r90: {title: "Back, turned a quarter (90°)", body: "Same for the back: back facing the glass, a quarter turn clockwise, lying sideways.", svg: {flipped: true, quarter: 90}},
+  back_r270: {title: "Back, turned three quarters (270°)", body: "Half a turn from the last scan, sideways the other way.", svg: {flipped: true, quarter: 270}},
 };
 
 function renderPanel() {
@@ -624,6 +640,16 @@ function stopProgress() { clearInterval(timer); const bar = $("#prog"); if (bar)
 
 async function scan(slot) {
   const btn = $("#scanBtn");
+  const quarter = /_r(90|270)$/.test(slot);
+  if (quarter || state.regionQuarter) {
+    // The card lies sideways for the 90°/270° scans (and upright again after): find it afresh first.
+    btn.disabled = true; btn.textContent = "Finding the card…";
+    startProgress(15);
+    try { state.locate = await (await fetch(`/api/locate/${state.session}`, {method: "POST"})).json(); } catch (e) { state.locate = {}; }
+    stopProgress();
+    if (!state.locate.region) { handleResult(slot, {error: (state.locate.warnings || []).join(" ") || "Couldn't find the card on the glass."}); return; }
+    state.regionQuarter = quarter;
+  }
   btn.disabled = true; btn.textContent = "Scanning… keep the lid closed";
   startProgress(SCAN_SECONDS[state.dpi]);
   try {
@@ -1138,6 +1164,11 @@ function dingsList(d) {
     : `<span class="pill ${f.severity === "red" ? "no" : "maybe"}">${f.severity === "red" ? "likely costs grade" : "worth a look"}</span>`;
   const bothBadge = f => f.ignored ? `<span class="both clr">You marked this as not a defect · not counted</span>`
     : f.cleared ? `<span class="both clr">Not in the 180° scan · likely dust · not counted</span>`
+    : f.seen_in ? (() => {
+        const ks = Object.keys(f.seen_in), n = ks.filter(k => f.seen_in[k]).length;
+        const detail = ks.map(k => `${k} ${f.seen_in[k] ? "✓" : "✗"}`).join(" · ");
+        return `<span class="both ${f.both ? "yes" : "no"}">Seen in ${n} of ${ks.length} other scans (${detail})${f.was_red ? " · not backed up, counted as borderline" : ""}</span>`;
+      })()
     : f.was_red ? `<span class="both no">Red in one scan, not seen when turned · counted as borderline</span>`
     : f.both === true ? `<span class="both yes">✓ Seen in both scans</span>`
     : f.both === false ? `<span class="both no">Only in one scan</span>` : "";
@@ -1185,11 +1216,16 @@ function surfaceCards(d) {
     html += `<div class="surf-card"><h5>${side} surface</h5>
       <p class="muted small" style="margin:0">${s.marks.length ? `${s.marks.length} possible mark${s.marks.length > 1 ? "s" : ""}.` : "No dents, scratches or indents stood out."}
       ${(s.debris || []).length ? `<br>Ignored ${s.debris.length} speck${s.debris.length > 1 ? "s" : ""} of dust or lint (grey circles) that showed up in only one scan.` : ""}</p>
+      <p class="muted small" style="margin:4px 0">Light from ${s.light_pairs === 2 ? "4 directions (0°/180° and 90°/270° scans)" : "2 directions (0°/180° scans) · add the 90° and 270° scans for 4"}.</p>
+      ${s.relief ? `<figure class="relief-fig" data-zoom="${esc(s.relief)}" data-src="${esc(s.relief)}" data-src-label="Surface relief · 4 light directions" data-side="${side}" data-full="1" data-rect="0,0,${Math.round(2.5 * (d[side].ppi || 1200))},${Math.round(3.5 * (d[side].ppi || 1200))}" data-title="${side} · surface relief (4 light directions)">
+          <img class="surface-img relief-img" src="${esc(s.relief)}" alt="${side} surface relief map">
+          <figcaption class="small muted">Surface relief from 4 light directions, like TAG's surface map: the printed colours cancel out and only the card's physical surface is left. Flat card reads as even grey; dents, creases, scratches and roller lines show as light/dark ridges. Holo and silver areas reflect like mirrors and look busy here. Click to zoom.</figcaption></figure>` : ""}
       <img class="surface-img" src="${esc(s.heatmap)}" alt="${side} surface differences">
+      ${s.heatmap_q ? `<img class="surface-img" src="${esc(s.heatmap_q)}" alt="${side} surface differences, 90° and 270° scans">` : ""}
       ${[...s.marks.map(m => ({...m, what: m.strength > 7 ? "Surface mark · likely costs grade" : "Surface mark · worth a look"})),
          ...(s.debris || []).map(m => ({...m, what: `Dust or lint · only in the ${m.only_in}`}))].map(m => m.pair ? `
         <figure class="spot" data-zoom="${esc(m.pair)}"><img src="${esc(m.pair)}" alt="${esc(m.what)} in both scans">
-          <figcaption><b>${esc(m.what)}</b> · ${m.length_mm} mm · ${m.x_pct}% across, ${m.y_pct}% down</figcaption></figure>` : "").join("")}
+          <figcaption><b>${esc(m.what)}</b> · ${m.length_mm} mm · ${m.x_pct}% across, ${m.y_pct}% down${m.light ? ` · seen by ${m.light.length > 1 ? "both light pairs" : m.light[0] === "0/180" ? "the 0°/180° pair only" : "the 90°/270° pair only"}` : ""}</figcaption></figure>` : "").join("")}
     </div>`;
   }
   return html;
@@ -1295,13 +1331,14 @@ function zoomAt(factor, cx, cy) {
 function openZoom(el) {
   const d = state.report, side = el.dataset.side;
   const zoom = d && d[side] && d[side].zoom;
+  const custom = el.dataset.src;  // a single image of the card, e.g. the surface relief map
   const rect = el.dataset.rect.split(",").map(Number);
-  if (!zoom || rect.length !== 4) return;
+  if ((!zoom && !custom) || rect.length !== 4) return;
   Z.rect = rect;
   Z.box = el.dataset.box ? el.dataset.box.split(",").map(Number) : null;
   Z.sev = el.dataset.sev || "yellow";
-  const sources = [[zoom.view, "First scan"]];
-  if (zoom.view_r180) sources.push([zoom.view_r180, "180° scan, turned back"]);
+  const sources = custom ? [[custom, el.dataset.srcLabel || "Surface relief"]] : [[zoom.view, "First scan"]];
+  if (!custom && zoom.view_r180) sources.push([zoom.view_r180, "180° scan, turned back"]);
   $("#zoomTitle").textContent = el.dataset.title || side;
   const panes = $("#zoomPanes");
   // Wide strips (top/bottom edges) get the two scans one above the other so each uses the full width.
@@ -1437,7 +1474,8 @@ async function newSession() {
   $("#sessionLabel").textContent = "Card " + state.session.slice(9, 15);
   document.querySelectorAll(".thumb").forEach(t => {
     const tag = $(".tag", t), slot = t.dataset.slot;
-    t.innerHTML = `${tag ? tag.outerHTML : ""}<div class="ph">${slot.includes("rot") ? (slot.startsWith("front") ? "Front" : "Back") + " 180° · optional" : "Not scanned"}</div>`;
+    const turn = slot.endsWith("_rot") ? "180°" : slot.endsWith("_r90") ? "90°" : slot.endsWith("_r270") ? "270°" : "";
+    t.innerHTML = `${tag ? tag.outerHTML : ""}<div class="ph">${turn ? (slot.startsWith("front") ? "Front" : "Back") + " " + turn + " · optional" : "Not scanned"}</div>`;
     t.onclick = null;
   });
   $("#results").classList.remove("on");
@@ -1449,7 +1487,7 @@ async function openSaved(sid) {
   state.checks = state.checks.map(() => true);
   state.done = {}; state.data = {};
   $("#sessionLabel").textContent = "Card " + sid.slice(9, 15);
-  for (const slot of ["front", "back", "front_rot", "back_rot"]) {
+  for (const slot of ["front", "back", "front_rot", "back_rot", "front_r90", "front_r270", "back_r90", "back_r270"]) {
     const r = await fetch(`/scans/${sid}/${slot}.json`);
     if (!r.ok) continue;
     const d = await r.json();
