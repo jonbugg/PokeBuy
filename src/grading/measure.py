@@ -97,7 +97,12 @@ def _card_mask(img, scanned=True, bg=None):
     # On the guide's printed black (L ~65-75) a card is either lighter/more colourful, or - for
     # black-bordered cards - a much deeper black (L ~15-30). The guide's two sheets differ by only a few
     # levels and faint shadows along the card's edge by a little more, so "darker" needs a wide margin.
-    if bg[0] < 110:
+    if np.hypot(bg[1] - 128, bg[2] - 128) > 25:
+        # A coloured guide (e.g. orange or magenta, like TAG's orange backdrop): nothing on a card's border
+        # shares its colour, so "different colour or clearly different lightness" separates the card,
+        # whatever its border - black, silver, white, yellow or the blue back.
+        m = (chroma_dist > 16) | (np.abs(lab[..., 0] - bg[0]) > 40)
+    elif bg[0] < 110:
         m = (chroma_dist > 10) | (lab[..., 0] - bg[0] > 28)
     elif bg[0] < 190:
         # Grey guide: the card's shadow beside its edge is darker than the grey, so "darker" needs a wide
@@ -113,7 +118,7 @@ def _card_mask(img, scanned=True, bg=None):
     k = max(3, int(min(h, w) * 0.004)) | 1
     m = cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((k, k), np.uint8))
     m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((k * 3, k * 3), np.uint8))
-    return m, float(bg[0])  # backdrop lightness, OpenCV 8-bit L (0..255)
+    return m, float(bg[0]), np.asarray(bg, np.float32)  # backdrop lightness (OpenCV 8-bit L) and colour
 
 
 def _find_card_contour(mask, src_ppi=None):
@@ -282,21 +287,35 @@ def _trace_dark_card(img, ppi):
 
 
 def find_and_straighten(img, src_ppi=None):
-    mask, bg_light = _card_mask(img, scanned=bool(src_ppi))
+    mask, bg_light, bg_lab = _card_mask(img, scanned=bool(src_ppi))
     dark_bg = bg_light < 80
     traced = False
+    if src_ppi and np.hypot(bg_lab[1] - 128, bg_lab[2] - 128) <= 25:
+        # Coloured paper behind the card inside a black/grey guide frame: the scan's edge shows the frame,
+        # but the card sits on the paper. Use the paper's colour when it fills a good part of the scan.
+        from .locate import _paper_colour
+        small = cv2.resize(img, None, fx=0.1, fy=0.1, interpolation=cv2.INTER_AREA)
+        paper = _paper_colour(small)
+        if paper is not None:
+            p_mask, p_light, p_lab = _card_mask(img, scanned=True, bg=paper)
+            try:
+                contour = _find_card_contour(p_mask, src_ppi)
+                mask, bg_light, bg_lab, dark_bg = p_mask, p_light, p_lab, False
+            except CardNotFound:
+                pass
     try:
-        contour = _find_card_contour(mask, src_ppi)
+        if "contour" not in locals():
+            contour = _find_card_contour(mask, src_ppi)
     except CardNotFound:
         # Mixed guide (e.g. black frame with the grey cover in the window): retry against the colour
         # actually around the card.
         alt = window_backdrop(cv2.cvtColor(img, cv2.COLOR_BGR2LAB).astype(np.float32), [bg_light]) if src_ppi else None
         contour = None
         if alt is not None:
-            alt_mask, alt_light = _card_mask(img, scanned=True, bg=alt)
+            alt_mask, alt_light, alt_lab = _card_mask(img, scanned=True, bg=alt)
             try:
                 contour = _find_card_contour(alt_mask, src_ppi)
-                mask, bg_light, dark_bg = alt_mask, alt_light, alt_light < 80
+                mask, bg_light, dark_bg, bg_lab = alt_mask, alt_light, alt_light < 80, alt_lab
             except CardNotFound:
                 contour = None
         if contour is None:
@@ -333,6 +352,7 @@ def find_and_straighten(img, src_ppi=None):
     # "background_dark" really means "a proper backdrop": the black or grey guide, not white paper or the lid.
     m = Measurement(canon=canon, mask=cmask, corners_src=quad, background_dark=bool(bg_light < 190), ppi=ppi)
     m.bg_light = bg_light
+    m.bg_lab = bg_lab
     m.dark_card = traced
     vp = int(VIEW_MARGIN_IN * ppi)
     M_view = cv2.getPerspectiveTransform(quad, dst + vp)
@@ -379,13 +399,131 @@ def _border_width(lab_strip, min_px, max_px, hold):
     return None, 0.0, ref
 
 
+def _border_width_slices(lab_strip, min_px, max_px, hold, slice_px, settle_px=None):
+    """lab_strip: positions-along-edge x depth, depth 0 is the card's outer edge.
+
+    Finds where the border ends separately in each ~1 mm slice along the edge, then keeps the slices
+    that agree. Artwork that cuts into the border (a silver swoosh, a full-art card's busy edge, a
+    copyright line) only spoils the slices it touches, instead of dragging the whole edge's answer.
+    Returns (width_px, agreement 0..1, border colour).
+    """
+    n = lab_strip.shape[0] // slice_px
+    if n < 6:
+        return None, 0.0, None
+    prof = lab_strip[:n * slice_px].reshape(n, slice_px, -1, 3).mean(axis=1)  # slices x depth x 3
+    prof = cv2.GaussianBlur(prof, (3, 1), 0)
+    # The border's colour, sampled away from the cut edge (which carries shading, glare and blur).
+    z0, z1 = int(min_px * 0.5), int(min_px * 0.95)
+    refs = np.median(prof[:, z0:z1], axis=1)                      # each slice's border colour
+    side_ref = np.median(refs, axis=0)
+    # How much the border itself varies along this side (glare streaks, holo sparkle).
+    side_noise = np.median(np.linalg.norm(prof[:, z0:z1] - side_ref, axis=2))
+    widths = np.full(n, np.nan)
+    for i in range(n):
+        if np.linalg.norm(refs[i] - side_ref) > 18:               # artwork where the border should be
+            continue
+        dist = np.linalg.norm(prof[i] - refs[i], axis=1)
+        noise = np.median(np.abs(dist[z0:z1] - np.median(dist[z0:z1]))) * 1.48
+        thr = max(10.0, 5 * noise, 2.5 * side_noise)
+        settle = settle_px or hold
+        for x in range(min_px, min(max_px, len(dist) - settle)):
+            # The art boundary stays changed; a line of small print inside the border (copyright, set
+            # code) is ~1 mm tall and mostly gaps between letters, so it doesn't.
+            if dist[x] > thr and dist[x:x + hold].min() > 0.6 * thr and (dist[x:x + settle] > 0.6 * thr).mean() >= 0.8:
+                inner = float(np.median(dist[x:x + hold]))
+                target = inner / 2                                 # half-way into the change = the edge
+                x0 = x
+                while x0 > min_px and dist[x0 - 1] > target:
+                    x0 -= 1
+                lo, hi = dist[x0 - 1], dist[x0]
+                widths[i] = x0 - 1 + ((target - lo) / (hi - lo) if hi > lo else 1.0)
+                break
+    good = widths[~np.isnan(widths)]
+    good = good[good > min_px + 2]                                 # "changed at once" = the colour sample was off
+    if len(good) < max(4, 0.2 * n):
+        return None, len(good) / n, side_ref
+    med = np.median(good)
+    tol = max(2.0, 0.15 * min_px)                                  # ~0.15 mm at 1200 dpi
+    keep = good[np.abs(good - med) <= tol]
+    if len(keep) < max(4, 0.2 * n):
+        return None, len(keep) / n, side_ref
+    return float(np.mean(keep)), len(keep) / n, side_ref
+
+
+def _line_depth(lab_strip, min_px, max_px, slice_px, settle_px):
+    """Where a long straight line runs parallel to the edge between min_px and max_px deep.
+
+    The border's inner edge is printed as one straight line along the whole side. Even where it barely
+    changes colour (a black holo border against dark art), it is a change at the *same depth* in every
+    slice, while artwork changes land at random depths. Score each depth by the median, over ~1 mm
+    slices, of how sharply that slice changes there (scaled by the slice's own noise), then take the
+    first strong peak that isn't just a line of small print (after which the border colour returns).
+    Returns (depth_px or None, strength).
+    """
+    n = lab_strip.shape[0] // slice_px
+    if n < 6:
+        return None, 0.0
+    prof = lab_strip[:n * slice_px].reshape(n, slice_px, -1, 3).mean(axis=1)
+    prof = cv2.GaussianBlur(prof, (3, 1), 0)
+    g = np.linalg.norm(prof[:, 2:] - prof[:, :-2], axis=2)          # slices x (depth-2), centred at x+1
+    g = np.pad(g, ((0, 0), (1, 1)))
+    lo, hi = min_px, min(max_px, g.shape[1] - settle_px - 1)
+    if hi <= lo + 4:
+        return None, 0.0
+    mad = np.median(np.abs(g[:, lo:hi] - np.median(g[:, lo:hi], axis=1, keepdims=True)), axis=1, keepdims=True) * 1.48 + 0.5
+    z = (g - np.median(g[:, lo:hi], axis=1, keepdims=True)) / mad
+    score = np.median(z, axis=0)
+    score = np.convolve(score, [0.25, 0.5, 0.25], mode="same")
+    z0, z1 = int(min_px * 0.35), int(min_px * 0.9)
+    ref = np.median(prof[:, z0:z1], axis=1)                          # each slice's border colour
+    within = np.linalg.norm(prof[:, z0:z1] - ref[:, None], axis=2)
+    spread = np.median(within, axis=1) + 4
+    best = None
+    for x in range(lo + 1, hi - 1):
+        if score[x] < 2.5 or score[x] < score[x - 1] or score[x] < score[x + 1]:
+            continue
+        a, b = x + max(2, settle_px // 4), x + settle_px
+        away = np.linalg.norm(prof[:, a:b] - ref[:, None], axis=2).mean(axis=1)
+        if (away > 1.5 * spread).mean() < 0.4:                        # the border colour comes back: small print
+            continue
+        den = score[x - 1] - 2 * score[x] + score[x + 1]
+        best = (x + (0.5 * (score[x - 1] - score[x + 1]) / den if den < 0 else 0.0), float(score[x]))
+        break
+    return best if best else (None, 0.0)
+
+
+def _edge_offset(view_lab, pad, side, a, b, slice_px):
+    """How far inside the straightened image the card's real cut edge sits on one side (px; negative =
+    the image starts inside the card). Uses the margin of backdrop kept around the straightened card."""
+    win = max(4, int(pad * 0.8))
+    H, W = view_lab.shape[:2]
+    if side == "left":
+        strip = view_lab[pad + a:pad + b, pad - win:pad + win]
+    elif side == "right":
+        strip = view_lab[pad + a:pad + b, W - pad + win - 1:W - pad - win - 1:-1]
+    elif side == "top":
+        strip = view_lab[pad - win:pad + win, pad + a:pad + b].transpose(1, 0, 2)
+    else:
+        strip = view_lab[H - pad + win - 1:H - pad - win - 1:-1, pad + a:pad + b].transpose(1, 0, 2)
+    n = strip.shape[0] // slice_px
+    if n < 6 or strip.shape[1] < 2 * win:
+        return 0.0
+    prof = strip[:n * slice_px].reshape(n, slice_px, -1, 3).mean(axis=1)
+    g = np.linalg.norm(prof[:, 2:] - prof[:, :-2], axis=2)
+    peaks = np.argmax(g, axis=1) + 1                                   # the backdrop -> card step
+    return float(np.median(peaks)) - win
+
+
+EDGE_OFFSETS = False  # measured edge offsets helped some scans but upset black-bordered fronts; off until fixed
+
+
 def measure_centering(m: Measurement):
     lab = cv2.cvtColor(m.canon, cv2.COLOR_BGR2LAB).astype(np.float32)
     min_px, max_px = int(0.035 * m.ppi), int(0.32 * m.ppi)
     hold = max(6, int(round(m.px(0.25))))
     a, b = int(0.08 * m.ch), int(0.92 * m.ch)
     c, d = int(0.10 * m.cw), int(0.90 * m.cw)
-    depth = max_px + hold + 2
+    depth = max_px + max(hold, int(round(m.px(1.2)))) + 2
     strips = {
         "left": lab[a:b, :depth],
         "right": lab[a:b, ::-1][:, :depth],
@@ -393,9 +531,42 @@ def measure_centering(m: Measurement):
         "bottom": lab[::-1][:depth, c:d].transpose(1, 0, 2),
     }
     widths, agreement, refs = {}, {}, {}
+    slice_px = max(4, int(round(m.px(1.0))))
+    settle_px = int(round(m.px(1.2)))
     for side, strip in strips.items():
-        widths[side], agreement[side], refs[side] = _border_width(strip, min_px, max_px, hold)
+        line, strength = _line_depth(strip, min_px, max_px, slice_px, settle_px)
+        w_s, a_s, r_s = _border_width_slices(strip, min_px, max_px, hold, slice_px, settle_px=settle_px)
+        refs[side] = r_s
+        # The colour-change answer, where enough slices agree; the straight-line answer stands in where the
+        # border barely differs from the art (black holo border against dark art).
+        if w_s is not None and a_s >= 0.3:
+            widths[side], agreement[side] = w_s, a_s
+        elif line is not None and line > min_px + m.px(0.3):
+            widths[side], agreement[side] = line, min(0.45, strength / 8)
+        else:
+            widths[side], agreement[side] = w_s, a_s
+        if refs[side] is None or widths[side] is not None:
+            if refs[side] is None:
+                refs[side] = _border_width(strip, min_px, max_px, hold)[2]
+            continue
+        if widths[side] is None:
+            # Fall back to the whole-edge method (kept for its border colour, used by the edge checks).
+            w_old, a_old, r_old = _border_width(strip, min_px, max_px, hold)
+            refs[side] = r_old
+            if widths[side] is None and w_old is not None and 0 < w_old < max_px:
+                widths[side], agreement[side] = w_old, min(a_old, 0.3)
     m._border_ref = refs
+    if EDGE_OFFSETS and getattr(m, "canon_view", None) is not None and m.view_pad > 4:
+        # Measure each border from where the card's edge really is, not where the straightening put it.
+        view_lab = cv2.cvtColor(m.canon_view, cv2.COLOR_BGR2LAB).astype(np.float32)
+        spans = {"left": (a, b), "right": (a, b), "top": (c, d), "bottom": (c, d)}
+        m._edge_offsets = {}
+        for side in widths:
+            off = _edge_offset(view_lab, m.view_pad, side, *spans[side], slice_px)
+            if abs(off) <= m.px(0.5):
+                m._edge_offsets[side] = off
+                if widths[side] is not None:
+                    widths[side] -= off
     if any(v is None for v in widths.values()):
         m.warnings.append("Couldn't find the inner border on every side (borderless or full-bleed art?).")
         m.centering = {"widths_mm": {k: (None if v is None else round(v * m.mmpp, 3)) for k, v in widths.items()}}
@@ -501,6 +672,9 @@ def _rim_widths(m, lab, pts, refs, labels, centre_offset=0):
     chroma = np.hypot(near[..., 1] - 128, near[..., 2] - 128)
     lighter = near[..., 0] - ref[:, None, 0]
     pale = np.where(ref_chroma > 20, (lighter > 12) & (chroma < ref_chroma * 0.7), lighter > 25)
+    if getattr(m, "border_texture", 0.0) > TEXTURED_BORDER:
+        # Silver dot-mesh border: its lighter moire waves aren't wear. Exposed paper is near-white.
+        pale = (lighter > 40) & (near[..., 0] > 190)
     bg_light = getattr(m, "bg_light", 0.0)
     dark_border = (ref[:, 0] < bg_light - 40) & (ref_chroma[:, 0] < 20)
     if dark_border.any():
@@ -515,16 +689,34 @@ def _rim_widths(m, lab, pts, refs, labels, centre_offset=0):
     return rim
 
 
-def _artwork_at_edge(m, pts, refs):
+def _border_texture(m):
+    """How busy the card's border is at fine scale (median local spread of lightness in a band 0.4-1.6 mm in).
+    Plain borders score ~3-6; silver borders printed as a halftone dot mesh over holo foil score 50+."""
+    L = cv2.cvtColor(m.canon, cv2.COLOR_BGR2LAB)[..., 0].astype(np.float32)
+    a, b = int(round(m.px(0.4))), int(round(m.px(1.6)))
+    band = np.zeros(L.shape, bool)
+    band[:, a:b] = True; band[:, -b:-a] = True; band[a:b, :] = True; band[-b:-a, :] = True
+    k = max(3, int(round(m.px(0.1))) | 1)
+    mean = cv2.blur(L, (k, k))
+    std = np.sqrt(np.clip(cv2.blur(L * L, (k, k)) - mean * mean, 0, None))
+    return float(np.median(std[band]))
+
+
+TEXTURED_BORDER = 20  # above this, the border is a dot mesh / sparkle and is smoothed before the edge checks
+
+
+def _artwork_at_edge(m, pts, refs, canon=None):
     """Outline points whose pale pixels belong to a pale shape that reaches more than 0.8 mm into the
     card: printed artwork (silver stripes, white panels) touching the edge, not edge wear. Whitening hugs
     the edge; artwork connects to something deeper."""
-    lab = cv2.cvtColor(m.canon, cv2.COLOR_BGR2LAB).astype(np.float32)
+    lab = cv2.cvtColor(m.canon if canon is None else canon, cv2.COLOR_BGR2LAB).astype(np.float32)
     ref = np.median(np.array(list(refs.values()), dtype=np.float32), axis=0)
     ref_chroma = float(np.hypot(ref[1] - 128, ref[2] - 128))
     chroma = np.hypot(lab[..., 1] - 128, lab[..., 2] - 128)
     lighter = lab[..., 0] - ref[0]
     pale = (lighter > 12) & (chroma < ref_chroma * 0.7) if ref_chroma > 20 else (lighter > 25)
+    if getattr(m, "border_texture", 0.0) > TEXTURED_BORDER:
+        pale = (lighter > 40) & (lab[..., 0] > 190)
     inside = (m.mask[m.pad:m.pad + m.ch, m.pad:m.pad + m.cw] > 127).astype(np.uint8)
     # The image border is the card's edge too: without a zero frame, a card that fills the straightened
     # image has no edge for the distance to count from.
@@ -552,19 +744,37 @@ def _whitening_runs(m, rim_px, typical):
 
 
 def measure_edges_corners(m: Measurement):
-    lab = cv2.cvtColor(m.canon, cv2.COLOR_BGR2LAB).astype(np.float32)
+    # Silver borders are printed as a fine dot mesh over holo foil: up close, a field of bright and dark
+    # dots that would all read as "pale" (whitening or artwork). Whitening is a continuous pale strip along
+    # the cut edge, so on such borders blur away the dots (at about their spacing) before looking for it.
+    m.border_texture = _border_texture(m)
+    canon, view = m.canon, m.canon_view
+    if m.border_texture > TEXTURED_BORDER:
+        sigma = m.px(0.06)
+        canon = cv2.GaussianBlur(m.canon, (0, 0), sigma)
+        view = cv2.GaussianBlur(m.canon_view, (0, 0), sigma) if m.canon_view is not None else None
+    lab = cv2.cvtColor(canon, cv2.COLOR_BGR2LAB).astype(np.float32)
     pts = _outline(m)
     r = _fit_radius(m, pts)
     labels = _classify(m, pts, r)
     sd = _rounded_rect_sdist(pts, r, m.cw, m.ch)
-    refs = getattr(m, "_border_ref", None) or {}
+    refs = {k: v for k, v in (getattr(m, "_border_ref", None) or {}).items() if v is not None}
+    if m.border_texture > TEXTURED_BORDER:
+        # Compare like with like: the border colour from the same smoothed image (a dot mesh's median dot
+        # is darker than its average, so the unsmoothed colour would make the whole border look pale).
+        a, b = int(round(m.px(0.45))), int(round(m.px(0.95)))
+        y0, y1, x0, x1 = int(0.1 * m.ch), int(0.9 * m.ch), int(0.1 * m.cw), int(0.9 * m.cw)
+        refs = {"left": np.median(lab[y0:y1, a:b].reshape(-1, 3), axis=0),
+                "right": np.median(lab[y0:y1, -b:-a].reshape(-1, 3), axis=0),
+                "top": np.median(lab[a:b, x0:x1].reshape(-1, 3), axis=0),
+                "bottom": np.median(lab[-b:-a, x0:x1].reshape(-1, 3), axis=0)}
     if len(refs) < 4:
         med = np.median(lab[int(0.1 * m.ppi):int(0.12 * m.ppi), :].reshape(-1, 3), axis=0)
         refs = {s: refs.get(s, med) for s in ("top", "bottom", "left", "right")}
     # Sample from the view with real background around the card: outline points can sit a little past the
     # ideal straight edge, where the plain straightened image has no real pixels.
-    if m.canon_view is not None:
-        lab_view = cv2.cvtColor(m.canon_view, cv2.COLOR_BGR2LAB).astype(np.float32)
+    if view is not None:
+        lab_view = cv2.cvtColor(view, cv2.COLOR_BGR2LAB).astype(np.float32)
         rim = _rim_widths(m, lab_view, pts + m.view_pad, refs, labels, centre_offset=m.view_pad)
     else:
         rim = _rim_widths(m, lab, pts, refs, labels)
@@ -574,7 +784,7 @@ def measure_edges_corners(m: Measurement):
     for s_ in ("top", "bottom", "left", "right"):
         vals = rim[labels == s_]
         typ0[s_] = float(np.nanmedian(vals)) if np.any(~np.isnan(vals)) else 0.0
-    rim[_artwork_at_edge(m, pts, refs) & (rim > 0)] = np.nan
+    rim[_artwork_at_edge(m, pts, refs, canon) & (rim > 0)] = np.nan
     nan_idx = np.where(np.isnan(rim))[0]
     rim[nan_idx] = [typ0[side_of.get(labels[i], labels[i])] for i in nan_idx]
     m.print_at_edge = len(nan_idx) / max(1, len(rim))

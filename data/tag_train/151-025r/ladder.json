@@ -1,0 +1,68 @@
+{
+ "C5432028": {
+  "grade": "9",
+  "score": 921,
+  "centF": "52.1L/47.9R 47.1T/52.9B",
+  "centB": "47.0L/53.0R 46.7T/53.3B",
+  "dims": [
+   "3.453",
+   "2.475"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   1,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/68809e2e-824a-4eb1-af66-e3739f3e71a5",
+  "spots": [
+   [
+    "back",
+    "EDGE WEAR",
+    4370,
+    2674
+   ]
+  ]
+ },
+ "L8108773": {
+  "grade": "8.5",
+  "score": 884,
+  "centF": "47L/53R 48T/52B",
+  "centB": "52L/48R 52T/48B",
+  "dims": [
+   "3.462",
+   "2.488"
+  ],
+  "dings": [
+   0,
+   3,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/036941b8-445b-4a73-9347-35bd903c5635",
+  "spots": [
+   [
+    "back",
+    "CORNER WEAR",
+    4113,
+    5816
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    62,
+    5814
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    4131,
+    49
+   ]
+  ]
+ }
+}

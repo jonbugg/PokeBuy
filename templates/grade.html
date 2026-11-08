@@ -454,7 +454,7 @@ const STEPS = [
   {id: "back_rot", label: "Back 180°", optional: true},
 ];
 const SCAN_SECONDS = {600: 40, 1200: 150};
-const state = {session: null, step: "prep", dpi: 1200, done: {}, data: {}, checks: [false, false, false, false]};
+const state = {session: null, step: "prep", dpi: 1200, done: {}, data: {}, checks: [false, false, false]};
 
 const $ = (s, el = document) => el.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
@@ -488,29 +488,28 @@ function platenSVG({flipped = false, rotated = false} = {}) {
   return `<svg viewBox="0 0 170 210" width="100%" role="img" aria-label="The card sitting in the scan guide's window">
     <rect x="4" y="4" width="162" height="202" rx="10" fill="#fff" stroke="rgba(0,0,0,.2)"/>
     <path d="M14 14 L34 14 M14 14 L14 34 M14 14 L30 30" stroke="#0075de" stroke-width="3" stroke-linecap="round" fill="none"/>
-    <rect x="36" y="40" width="112" height="144" rx="8" fill="#111"/>
+    <rect x="36" y="40" width="112" height="144" rx="8" fill="#f2457f"/>
     <g transform="${rot}">
       <rect x="48" y="52" width="88" height="122" rx="6" fill="${card}" stroke="rgba(0,0,0,.25)"/>
       <rect x="55" y="59" width="74" height="108" rx="3" fill="${flipped ? "#6f8fd6" : "#fff4c2"}"/>
       ${rotated ? "" : `<text x="92" y="118" text-anchor="middle" font-size="16" font-weight="700" font-family="Inter, sans-serif" fill="rgba(0,0,0,.55)">${flipped ? "BACK" : "FRONT"}</text>`}
       ${rotated ? `<text x="92" y="118" text-anchor="middle" font-size="16" font-weight="700" font-family="Inter, sans-serif" fill="rgba(0,0,0,.55)" transform="rotate(180 92 112)">${flipped ? "BACK" : "FRONT"}</text>` : ""}
     </g>
-    <text x="40" y="32" font-size="10" font-family="Inter, sans-serif" fill="rgba(0,0,0,.5)">guide in the arrow corner</text>
-    <text x="85" y="200" text-anchor="middle" font-size="10" font-family="Inter, sans-serif" fill="rgba(0,0,0,.5)">card in window, black cover on top</text>
+    <text x="40" y="32" font-size="10" font-family="Inter, sans-serif" fill="rgba(0,0,0,.5)">card near the arrow corner</text>
+    <text x="85" y="200" text-anchor="middle" font-size="10" font-family="Inter, sans-serif" fill="rgba(0,0,0,.5)">face down, red paper on top</text>
   </svg>`;
 }
 
 /* ---------- step panel ---------- */
 const PREP = [
-  `<a href="/guide" target="_blank" rel="noopener">Print the scan guide</a> (two sheets) and cut out sheet 1's window. One time only. For black-bordered cards, use the <a href="/guide?tone=grey" target="_blank" rel="noopener">grey guide</a> instead.`,
-  "Lay sheet 1 on the glass, printed side up, blue corner in the scanner's arrow corner.",
-  "Drop the card into the window face down, lined up with the little ticks.",
-  "Lay sheet 2 on top, black side down, then close the lid gently.",
+  "Get a sheet of red construction paper (it scans as hot pink). It works behind every card: black, silver, white and yellow borders, and the blue back. The printed <a href=\"/guide\" target=\"_blank\" rel=\"noopener\">guide</a> still works too, with the red paper in its window.",
+  "Place the card face down on the glass, a little in from the scanner's arrow corner, roughly straight.",
+  "Lay the red paper flat over the card so it covers well past every edge, then close the lid gently.",
 ];
 const SCAN_COPY = {
-  front: {title: "Scan the front", body: "Card face down in the window, black cover sheet on top.", svg: {}},
-  back: {title: "Scan the back", body: "Lift the cover, flip the card over inside the window, put the cover back.", svg: {flipped: true}},
-  front_rot: {title: "Front, turned upside down", body: "For the surface check: front facing the glass again, turned 180° in the window. The light then hits from the other side, so dents and scratches show up.", svg: {rotated: true}},
+  front: {title: "Scan the front", body: "Card face down on the glass, red paper on top.", svg: {}},
+  back: {title: "Scan the back", body: "Lift the paper, flip the card over in the same spot, put the paper back.", svg: {flipped: true}},
+  front_rot: {title: "Front, turned upside down", body: "For the surface check: front facing the glass again, turned 180° in the same spot. The light then hits from the other side, so dents and scratches show up.", svg: {rotated: true}},
   back_rot: {title: "Back, turned upside down", body: "Same idea for the back: flip it, then turn it 180°.", svg: {flipped: true, rotated: true}},
 };
 

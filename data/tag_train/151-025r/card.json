@@ -1,0 +1,22 @@
+{
+ "card": {
+  "perGrade": 2,
+  "year": 2023,
+  "setPath": "Pok\u00e9mon Scarlet & Violet",
+  "setName": "151",
+  "match": "Pikachu",
+  "number": "025/165",
+  "variation": "Reverse"
+ },
+ "url": "/pop-report/Pok\u00e9mon/2023/Pok\u00e9mon Scarlet & Violet/Pikachu/025%2F165?setName=151&variation=Reverse+Holo",
+ "pop": {
+  "6": 0,
+  "7": 0,
+  "8": 0,
+  "9": 1,
+  "10": 0,
+  "10P": 0,
+  "8.5": 1
+ },
+ "ppi": 1200
+}

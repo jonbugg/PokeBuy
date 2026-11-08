@@ -1,0 +1,82 @@
+{
+ "T2965355": {
+  "grade": "10P",
+  "score": 990,
+  "centF": "51L/49R 51T/49B",
+  "centB": "49L/51R 52T/48B",
+  "dims": [
+   "3.463",
+   "2.475"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/657e68cd-69c5-4895-a721-4f7e5032921d",
+  "spots": []
+ },
+ "X1195570": {
+  "grade": "10P",
+  "score": 990,
+  "centF": "50L/50R 49T/51B",
+  "centB": "49L/51R 51T/49B",
+  "dims": [
+   "3.457",
+   "2.473"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/1fddabb6-2567-40b7-bfa1-2586b22461bd",
+  "spots": []
+ },
+ "H5279551": {
+  "grade": "10",
+  "score": 988,
+  "centF": "50L/50R 49T/51B",
+  "centB": "49L/51R 50T/50B",
+  "dims": [
+   "3.463",
+   "2.476"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/de3a1aad-2cb4-407f-828f-911534a49166",
+  "spots": []
+ },
+ "E5612235": {
+  "grade": "10",
+  "score": 950,
+  "centF": "52L/48R 45T/55B",
+  "centB": "46L/54R 47T/53B",
+  "dims": [
+   "3.475",
+   "2.486"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/4e1eae25-0774-42db-a95e-c1685220ddb6",
+  "spots": []
+ }
+}

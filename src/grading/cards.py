@@ -22,7 +22,8 @@ API = "https://api.pokemontcg.io/v2/cards"
 TESSERACT = "tesseract"
 
 NUM_TOTAL = re.compile(r"(\d{1,3})\s*/\s*(\d{2,3})")
-PROMO = re.compile(r"\b(SWSH|SVP|SV|SM|XY|BW|TG|GG|HGSS|DP)\s?-?(\d{1,3})\b")
+# Promo numbers: "SWSH133", "SM-210", and the Scarlet & Violet style "SVP EN 074" (set code, language, number).
+PROMO = re.compile(r"\b(SWSH|SVP|SV|SM|XY|BW|TG|GG|HGSS|DP)\s?(?:EN\s?)?-?(\d{1,3})\b")
 
 
 def _api_key():
@@ -108,13 +109,25 @@ def _query(q, page_size=12):
     raise RuntimeError(f"Card lookup service didn't answer ({last}). Try again in a minute.")
 
 
+PROMO_SETS = {"svp": "SVP", "swshp": "", "smp": "", "xyp": "", "bwp": "", "dpp": "", "hsp": "", "np": "", "basep": ""}
+
+
+def _display_number(c):
+    """The number as printed on the card: Scarlet & Violet promos read 'SVP 074' (the database stores '74')."""
+    n, set_id = str(c["number"]), c["set"]["id"]
+    if set_id == "svp" and n.isdigit():
+        return f"SVP {int(n):03d}"
+    return n
+
+
 def _card(c):
     prices = (c.get("tcgplayer") or {}).get("prices") or {}
     variants = {k: v.get("market") for k, v in prices.items() if v.get("market")}
     market = max(variants.values()) if variants else None
     return {
-        "id": c["id"], "name": c["name"], "number": c["number"],
-        "set": c["set"]["name"], "set_total": c["set"].get("printedTotal"), "series": c["set"].get("series"),
+        "id": c["id"], "name": c["name"], "number": _display_number(c),
+        "set": c["set"]["name"], "set_total": None if c["set"]["id"] in PROMO_SETS else c["set"].get("printedTotal"),
+        "series": c["set"].get("series"),
         "released": c["set"].get("releaseDate"), "rarity": c.get("rarity"),
         "image": c["images"]["small"], "image_large": c["images"]["large"],
         "market": market, "market_variants": variants,
@@ -141,6 +154,100 @@ def _image_similarity(canon_bgr, url):
         return -1.0
 
 
+CLAUDE_MODEL = "claude-opus-5-5"
+CLAUDE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "name": {"type": "string", "description": "The card's name as printed, e.g. 'Charizard ex', 'Lance's Charizard V'"},
+        "number": {"type": "string", "description": "Collector number exactly as printed, e.g. '160/159', 'SWSH133', 'SVP EN 074', 'TG05/TG30'"},
+        "set_name": {"type": "string", "description": "The set or promo series if you can tell, else empty"},
+        "language": {"type": "string", "description": "Card language, e.g. 'English', 'Japanese'"},
+        "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
+    },
+    "required": ["name", "number", "set_name", "language", "confidence"],
+    "additionalProperties": False,
+}
+
+
+def _claude_key():
+    import os
+    return (dotenv_values(ROOT / ".env").get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_API_KEY") or "").strip()
+
+
+def claude_read(canon_bgr):
+    """Ask Claude to read the card from the front scan (name, printed number, set). Used when OCR can't:
+    stylised titles and small promo codes like 'SVP EN 074' defeat Tesseract. Returns a dict or None."""
+    key = _claude_key()
+    if not key:
+        return None
+    try:
+        import anthropic
+    except ImportError:
+        return None
+    import base64
+    h, w = canon_bgr.shape[:2]
+    s = 1100 / max(h, w)
+    small = cv2.resize(canon_bgr, None, fx=s, fy=s, interpolation=cv2.INTER_AREA) if s < 1 else canon_bgr
+    ok, jpg = cv2.imencode(".jpg", small, [cv2.IMWRITE_JPEG_QUALITY, 90])
+    if not ok:
+        return None
+    client = anthropic.Anthropic(api_key=key, max_retries=2, timeout=60.0)
+    request = dict(
+        model=CLAUDE_MODEL,
+        max_tokens=1024,
+        messages=[{"role": "user", "content": [
+            {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg",
+                                         "data": base64.standard_b64encode(jpg.tobytes()).decode()}},
+            {"type": "text", "text": "This is a flatbed scan of the front of a trading card. Read it: the card's name, "
+                                     "its collector number exactly as printed (bottom corner, e.g. '160/159', 'SWSH133', "
+                                     "'SVP EN 074'), the set or promo series, and the language. Report only what the card "
+                                     "shows; if something isn't legible, give your best reading and set confidence to low."},
+        ]}],
+        extra_body={"output_config": {"effort": "low", "format": {"type": "json_schema", "schema": CLAUDE_SCHEMA}},
+                    "fallbacks": "default"},
+        extra_headers={"anthropic-beta": "server-side-fallback-2026-07-01"},
+    )
+    try:
+        r = client.messages.create(**request)
+    except anthropic.APIStatusError as e:
+        if e.status_code == 400:  # e.g. an account without the fallback beta: retry plainly once
+            request["extra_body"].pop("fallbacks", None)
+            request.pop("extra_headers", None)
+            try:
+                r = client.messages.create(**request)
+            except anthropic.APIError:
+                return None
+        else:
+            return None
+    except anthropic.APIError:
+        return None
+    if r.stop_reason == "refusal":
+        return None
+    text = next((b.text for b in r.content if getattr(b, "type", "") == "text"), "")
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        return None
+
+
+def _claude_queries(c):
+    """Pokémon TCG API searches for what Claude read."""
+    qs = []
+    num = (c.get("number") or "").upper().replace(" EN ", " ").replace("-", " ")
+    name = (c.get("name") or "").strip()
+    m = NUM_TOTAL.search(num)
+    p = re.search(r"\b(SVP|SWSH|SM|XY|BW|DP|HGSS)\s?(\d{1,3})\b", num)
+    if m:
+        qs.append(f"number:{m.group(1).lstrip('0') or '0'} set.printedTotal:{m.group(2)}")
+    elif p:
+        series, n = p.group(1), p.group(2).lstrip("0") or "0"
+        qs.append(f"number:{n} set.id:svp" if series == "SVP" else f"number:{series}{n}")
+    if name:
+        clean = re.sub(r'["*]', "", name)
+        qs.append(f'name:"{clean}"' + (f" number:{m.group(1).lstrip('0')}" if m else ""))
+    return qs
+
+
 def identify(canon_bgr):
     read = read_scan(canon_bgr)
     candidates = []
@@ -149,6 +256,22 @@ def identify(canon_bgr):
         for c in _query(q):
             if c["id"] not in {x["id"] for x in candidates}:
                 candidates.append(c)
+    if not candidates:
+        # The text reader found no usable number: let Claude read the card instead.
+        cr = claude_read(canon_bgr)
+        if cr:
+            read["claude"] = cr
+            read["name_words"] = sorted(set(read["name_words"]) | set(re.findall(r"[a-zé']{4,}", cr.get("name", "").lower())))
+            for q in _claude_queries(cr):
+                try:
+                    found = _query(q)
+                except RuntimeError:
+                    found = []
+                for c in found:
+                    if c["id"] not in {x["id"] for x in candidates}:
+                        candidates.append(c)
+                if candidates and q.startswith("number:"):
+                    break
     seen = " ".join(read["name_words"])
     def name_score(c):  # "Lance's Charizard" may OCR as "anescharizard": match the card's words inside it
         return sum(1 for t in re.findall(r"[a-zé]{4,}", c["name"].lower()) if t in seen)

@@ -1,4 +1,5 @@
-"""Find the card (and the printed guide's black or grey block, if used) in a low-res preview of the whole glass."""
+"""Find the card in a low-res preview of the whole glass: on coloured paper (recommended: red, which scans as
+hot pink), or inside the printed guide's black or grey block."""
 
 import cv2
 import numpy as np
@@ -43,9 +44,10 @@ def locate(preview_bgr, dpi):
     x0, y0 = max(0, cx - m), max(0, cy - m)
     x1, y1 = min(w, cx + cw + m), min(h, cy + ch + m)
     around = np.concatenate([gray[max(0, cy - m):cy, cx:cx + cw].ravel(), gray[cy + ch:min(h, cy + ch + m), cx:cx + cw].ravel()])
-    if around.size and np.median(around) > 70:
-        warnings.append("No black backdrop found. Use the printed guide (or black paper) for accurate edges and corners.")
-    return _result(_to_units((x0, y0, x1 - x0, y1 - y0), per_in), "bare", warnings, annotated,
+    if around.size and np.median(around) > 70 and _paper_colour(preview_bgr[y0:y1, x0:x1]) is None:
+        warnings.append("No backdrop found behind the card. Lay the red paper (or the printed guide) over it for accurate edges and corners.")
+    mode = "paper" if _paper_colour(preview_bgr[y0:y1, x0:x1]) is not None else "bare"
+    return _result(_to_units((x0, y0, x1 - x0, y1 - y0), per_in), mode, warnings, annotated,
                    card_units=_to_units((cx, cy, cw, ch), per_in))
 
 
@@ -65,7 +67,32 @@ def _find_guide_block(gray, per_in):
     return best
 
 
+def _paper_colour(bgr):
+    """The colour of coloured paper used as the backdrop (red/pink, orange, magenta...), if it covers a good
+    part of the area: the most common strongly coloured shade. None when there isn't any."""
+    lab = cv2.cvtColor(bgr, cv2.COLOR_BGR2LAB).astype(np.float32)
+    chroma = np.hypot(lab[..., 1] - 128, lab[..., 2] - 128)
+    vivid = chroma > 30
+    if vivid.mean() < 0.15:
+        return None
+    px = lab[vivid]
+    # most common hue among the vivid pixels (a card's own art is varied; paper is one colour)
+    hue = np.degrees(np.arctan2(px[:, 2] - 128, px[:, 1] - 128)) % 360
+    hist, edges = np.histogram(hue, bins=36, range=(0, 360))
+    i = int(np.argmax(hist))
+    near = (hue >= edges[i] - 10) & (hue <= edges[i + 1] + 10)
+    if near.sum() < 0.1 * vivid.size:
+        return None
+    return np.median(px[near], axis=0)
+
+
 def _find_card(bgr, per_in, dark_bg):
+    paper = _paper_colour(bgr)
+    if paper is not None:
+        # Coloured paper behind the card (the recommended backdrop): find the card against that colour.
+        found = _find_card_with(bgr, per_in, dark_bg, paper)
+        if found is not None:
+            return found
     found = _find_card_with(bgr, per_in, dark_bg, None)
     if found is None and dark_bg:
         # Mixed guide (black frame, grey cover in the window): try the colour actually around the card.
@@ -96,9 +123,13 @@ def _find_card_with(bgr, per_in, dark_bg, bg_override):
         bg = np.median(printed, axis=0) if len(printed) > 0.3 * len(frame) else np.median(frame, axis=0)
     else:
         bg = np.median(frame, axis=0)
-    dist = np.linalg.norm(lab - bg, axis=2)
-    thr = 25 if dark_bg else 18
-    m = (dist > thr).astype(np.uint8) * 255
+    if np.hypot(bg[1] - 128, bg[2] - 128) > 25:
+        # coloured paper: different colour, or much lighter/darker (black or white borders)
+        m = ((np.hypot(lab[..., 1] - bg[1], lab[..., 2] - bg[2]) > 18) | (np.abs(lab[..., 0] - bg[0]) > 40)).astype(np.uint8) * 255
+    else:
+        dist = np.linalg.norm(lab - bg, axis=2)
+        thr = 25 if dark_bg else 18
+        m = (dist > thr).astype(np.uint8) * 255
     m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
     # RETR_LIST: the guide's cut edge shows up as a white outline around the card, so the card
     # can be a contour *inside* another one.

@@ -1,0 +1,79 @@
+{
+ "K6509110": {
+  "grade": "10",
+  "score": 983,
+  "centF": "50.9L/49.1R 50.9T/49.1B",
+  "centB": "45.9L/54.1R 49.5T/50.5B",
+  "dims": [
+   "3.467",
+   "2.482"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/d2392e7e-c34d-47cf-a95b-bd37164ecd17",
+  "spots": []
+ },
+ "F2687942": {
+  "grade": "10",
+  "score": 962,
+  "centF": "53L/47R 46T/54B",
+  "centB": "50L/50R 48T/52B",
+  "dims": [
+   "3.465",
+   "2.483"
+  ],
+  "dings": [
+   0,
+   1,
+   0,
+   0,
+   0,
+   1
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/b61aa204-6f69-4175-a4d1-a5c95f33adc6",
+  "spots": [
+   [
+    "front",
+    "Scratch(es)",
+    2317,
+    898
+   ],
+   [
+    "back",
+    "Pit",
+    1957,
+    393
+   ],
+   [
+    "back",
+    "Ink/Surface Defect",
+    983,
+    165
+   ],
+   [
+    "back",
+    "Scratch(es)",
+    4360,
+    3861
+   ],
+   [
+    "back",
+    "Pit",
+    1434,
+    3249
+   ],
+   [
+    "back",
+    "Pit",
+    1456,
+    3022
+   ]
+  ]
+ }
+}

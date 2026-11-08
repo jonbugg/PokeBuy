@@ -1,0 +1,179 @@
+{
+ "G9375313": {
+  "grade": "10",
+  "score": 988,
+  "centF": "50L/50R 50T/50B",
+  "centB": "53L/47R 49T/51B",
+  "dims": [
+   "3.471",
+   "2.481"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/8c930d07-b210-497b-9684-2825becef6b8",
+  "spots": []
+ },
+ "R5034363": {
+  "grade": "10",
+  "score": 950,
+  "centF": "51L/49R 45T/55B",
+  "centB": "44L/56R 46T/54B",
+  "dims": [
+   "3.464",
+   "2.468"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/11686e0d-1adc-4f5b-bee0-178c881b2937",
+  "spots": []
+ },
+ "V2431585": {
+  "grade": "9",
+  "score": 949,
+  "centF": "45L/55R 56T/44B",
+  "centB": "52L/48R 55T/45B",
+  "dims": [
+   "3.470",
+   "2.486"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/b36c199f-fb66-4658-aac2-908b68dfec59",
+  "spots": []
+ },
+ "P4369138": {
+  "grade": "9",
+  "score": 901,
+  "centF": "40L/60R 52T/48B",
+  "centB": "52L/48R 56T/44B",
+  "dims": [
+   "3.482",
+   "2.497"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   1
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/33e5cd99-f7f4-472a-9954-a0a6f00842f3",
+  "spots": [
+   [
+    "back",
+    "SURFACE / SURFACE DEFECT",
+    312,
+    1819
+   ]
+  ]
+ },
+ "K4588387": {
+  "grade": "8.5",
+  "score": 899,
+  "centF": "59.9L/40.1R 59.3T/40.7B",
+  "centB": "39.1L/60.9R 58.5T/41.5B",
+  "dims": [
+   "3.492",
+   "2.504"
+  ],
+  "dings": [
+   1,
+   0,
+   0,
+   0,
+   0,
+   5
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/024382e4-0b09-4b7b-9b1f-3ece959b7887",
+  "spots": [
+   [
+    "back",
+    "Ink/Surface Defect",
+    648,
+    177
+   ],
+   [
+    "back",
+    "Ink/Surface Defect",
+    1495,
+    66
+   ],
+   [
+    "back",
+    "Ink/Surface Defect",
+    2156,
+    87
+   ],
+   [
+    "back",
+    "Ink/Surface Defect",
+    4219,
+    191
+   ],
+   [
+    "back",
+    "Scratch(es)",
+    4267,
+    4320
+   ],
+   [
+    "back",
+    "Ink/Surface Defect",
+    863,
+    2081
+   ]
+  ]
+ },
+ "Q8444049": {
+  "grade": "8.5",
+  "score": 853,
+  "centF": "43L/57R 47T/53B",
+  "centB": "52L/48R 47T/53B",
+  "dims": [
+   "3.454",
+   "2.470"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   2
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/34f9718b-2f7c-4a0f-b229-001f4c3ed0f6",
+  "spots": [
+   [
+    "back",
+    "SURFACE / PLAY WEAR",
+    55,
+    49
+   ],
+   [
+    "back",
+    "SURFACE / PRINT DEFECT",
+    3908,
+    1921
+   ]
+  ]
+ }
+}

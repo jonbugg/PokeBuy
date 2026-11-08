@@ -59,3 +59,9 @@ data/ebay_cache.json
 
 # TAG report photos and their straightened copies (large; re-downloadable from each ladder.json)
 data/tag_compare/*/*/
+
+# Grade Check training: photos, caches and test scans (large; rebuilt or re-downloaded from ladder.json)
+data/tag_compare/_canon_cache/
+data/tag_train/*/*/
+data/tag_train/harvest_*.json
+data/backdrop_test/

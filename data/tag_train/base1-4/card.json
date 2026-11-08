@@ -1,0 +1,20 @@
+{
+ "card": {
+  "year": 1999,
+  "setPath": "WOTC Pok\u00e9mon",
+  "setName": "Base Set",
+  "match": "Charizard",
+  "perGrade": 2
+ },
+ "url": "/pop-report/Pok\u00e9mon/1999/WOTC Pok\u00e9mon/Charizard/4%2F102?setName=Base+Set&variation=Holo",
+ "pop": {
+  "6": 58,
+  "7": 54,
+  "8": 59,
+  "9": 33,
+  "10": 2,
+  "10P": 0,
+  "8.5": 39
+ },
+ "ppi": 1200
+}

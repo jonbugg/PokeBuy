@@ -68,7 +68,14 @@ def _backdrop_like(m):
     mean = cv2.GaussianBlur(L, k, 2)
     std = np.sqrt(np.clip(cv2.GaussianBlur(L * L, k, 2) - mean * mean, 0, None))
     bg = getattr(m, "bg_light", float(np.median(L[:m.view_pad, :])))
-    m._backdrop_map = (np.abs(mean - bg) < 22) & (chroma < 10) & (std < 14)
+    bg_lab = getattr(m, "bg_lab", None)
+    if bg_lab is not None and np.hypot(bg_lab[1] - 128, bg_lab[2] - 128) > 25:
+        # Coloured guide: backdrop = that colour (card material is never that colour).
+        a = cv2.GaussianBlur(lab[..., 1], k, 2)
+        b = cv2.GaussianBlur(lab[..., 2], k, 2)
+        m._backdrop_map = (np.hypot(a - bg_lab[1], b - bg_lab[2]) < 14) & (np.abs(mean - bg) < 35)
+    else:
+        m._backdrop_map = (np.abs(mean - bg) < 22) & (chroma < 10) & (std < 14)
     return m._backdrop_map
 
 
@@ -135,7 +142,11 @@ def _corner_gap_shows_backdrop(m, pts, name, r):
         xs, ys = np.clip(q[:, 0].astype(int), 0, lab.shape[1] - 1), np.clip(q[:, 1].astype(int), 0, lab.shape[0] - 1)
         g = lab[ys, xs]
         chroma = np.hypot(g[:, 1] - 128, g[:, 2] - 128)
-        out[i] = abs(float(g[:, 0].mean()) - bg) < 22 and float(chroma.mean()) < 10 and float(g[:, 0].std()) < 16
+        bg_lab = getattr(m, "bg_lab", None)
+        if bg_lab is not None and np.hypot(bg_lab[1] - 128, bg_lab[2] - 128) > 25:
+            out[i] = float(np.hypot(g[:, 1].mean() - bg_lab[1], g[:, 2].mean() - bg_lab[2])) < 14
+        else:
+            out[i] = abs(float(g[:, 0].mean()) - bg) < 22 and float(chroma.mean()) < 10 and float(g[:, 0].std()) < 16
     return out
 
 
