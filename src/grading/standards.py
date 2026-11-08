@@ -48,7 +48,8 @@ MAX_GRADE_FOR_LEVEL = {"clean": 10.5, "minor": 9, "moderate": 8, "heavy": 7, "un
 
 def _counted(findings):
     """Findings that count: everything except yellows the 180° scan cleared (likely dust)."""
-    return [f for f in findings if not (f.get("cleared") or (f["severity"] == "yellow" and f.get("both") is False))]
+    return [f for f in findings if not (f.get("cleared") or f.get("ignored")
+                                        or (f["severity"] == "yellow" and f.get("both") is False and not f.get("was_red")))]
 
 
 def defect_level(front, back, extra_findings=()):
@@ -59,7 +60,9 @@ def defect_level(front, back, extra_findings=()):
     counted = _counted(findings)
     red = sum(f["severity"] == "red" for f in counted)
     yellow = sum(f["severity"] == "yellow" for f in counted)
-    return _level(red, yellow), {"red": red, "yellow": yellow, "likely_dust": len(findings) - len(counted)}
+    ignored = sum(1 for f in findings if f.get("ignored"))
+    return _level(red, yellow), {"red": red, "yellow": yellow, "likely_dust": len(findings) - len(counted) - ignored,
+                                 "ignored": ignored}
 
 
 def _level(red, yellow):

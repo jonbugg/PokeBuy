@@ -378,6 +378,10 @@
   .zp-box { position: absolute; z-index: 1; border: 2px solid #ffc400; border-radius: 2px; pointer-events: none; box-shadow: 0 0 0 1px rgba(0,0,0,.6); }
   .pill.cleared { background: #e6f0fd; color: #1c63c4; }
   .finding.is-cleared { border-color: #b9d3f7; background: #f6f9fe; }
+  .finding.is-ignored { opacity: .55; background: var(--hair-2); }
+  .finding.is-ignored b { text-decoration: line-through; }
+  .pill.ignored { background: var(--hair); color: var(--ink-60); }
+  .ign-btn { display: block; margin-top: 6px; padding: 0; font-size: 12px; color: var(--blue); background: none; border: 0; cursor: pointer; text-decoration: underline; }
   .finding.is-cleared b { text-decoration: line-through; text-decoration-color: rgba(28,99,196,.5); color: var(--ink-60); }
   .both.clr { background: #e6f0fd; color: #1c63c4; margin: 6px 0 0; }
   .finding .both { display: inline-block; margin-top: 6px; margin-left: 0; }
@@ -1127,21 +1131,26 @@ function dingsList(d) {
     if (cu) cu.findings.forEach(f => all.push({...f, side}));
   }
   if (!all.length) return `<p class="dig-empty">No DINGS. Nothing found that should affect the grade.</p>`;
-  const pill = f => f.cleared
+  const pill = f => f.ignored
+    ? `<span class="pill ignored">Ignored by you</span>`
+    : f.cleared
     ? `<span class="pill cleared">Cleared by 180° scan</span>`
     : `<span class="pill ${f.severity === "red" ? "no" : "maybe"}">${f.severity === "red" ? "likely costs grade" : "worth a look"}</span>`;
-  const bothBadge = f => f.cleared ? `<span class="both clr">Not in the 180° scan · likely dust · not counted</span>`
+  const bothBadge = f => f.ignored ? `<span class="both clr">You marked this as not a defect · not counted</span>`
+    : f.cleared ? `<span class="both clr">Not in the 180° scan · likely dust · not counted</span>`
+    : f.was_red ? `<span class="both no">Red in one scan, not seen when turned · counted as borderline</span>`
     : f.both === true ? `<span class="both yes">✓ Seen in both scans</span>`
     : f.both === false ? `<span class="both no">Only in one scan</span>` : "";
   const sev = f => f.cleared ? "cleared" : f.severity;
   return `<div class="findings">${all.map(f => `
-    <div class="finding ${f.cleared ? "is-cleared" : ""}" data-zoom="${esc(f.img)}" data-side="${f.side}" data-sev="${sev(f)}" data-rect="${(f.rect || []).join(",")}" data-box="${(f.view_box || []).join(",")}" data-title="${f.side} · ${esc(f.kind)}${f.cleared ? " (cleared by 180° scan)" : ""}">
+    <div class="finding ${f.cleared ? "is-cleared" : ""} ${f.ignored ? "is-ignored" : ""}" data-zoom="${esc(f.img)}" data-side="${f.side}" data-sev="${sev(f)}" data-rect="${(f.rect || []).join(",")}" data-box="${(f.view_box || []).join(",")}" data-title="${f.side} · ${esc(f.kind)}${f.cleared ? " (cleared by 180° scan)" : ""}">
       <img src="${esc(f.img)}" alt="${esc(f.kind)}">
       <div>${pill(f)}
         <b>${esc(f.kind)}</b>
         <div class="muted small">${f.side} · ${REGION_LABEL(f.region)}${f.region === "surface" ? "" : isCorner(f.region) ? " corner" : " edge"} · ${f.size_mm} mm long${f.depth_mm ? (/whiten/.test(f.kind) ? ` · reaches ${f.depth_mm.toFixed(2)} mm in` : ` · ${f.depth_mm.toFixed(2)} mm deep`) : ""}</div>
-        ${bothBadge(f)}</div>
-    </div>`).join("")}</div>${COLOR_KEY}`;
+        ${bothBadge(f)}
+        ${f.key && !f.cleared ? `<button class="btn-text ign-btn" data-ignore="${esc(f.key)}" data-on="${f.ignored ? 0 : 1}">${f.ignored ? "Undo ignore" : "Ignore, not a defect"}</button>` : ""}</div>
+    </div>`).join("")}</div>${all.some(f => f.ignored) ? `<p class="dig-note">Ignored findings stay on the report but aren't counted in the grades, odds or TAG comparison.</p>` : ""}${COLOR_KEY}`;
 }
 
 function annToggle(id) {
@@ -1375,6 +1384,13 @@ async function buildReport() {
   wireReport();
   wireRoi(d);
   wireActual();
+  box.querySelectorAll("[data-ignore]").forEach(b => b.onclick = async e => {
+    e.preventDefault(); e.stopPropagation();
+    b.disabled = true; b.textContent = "Updating the grade…";
+    await fetch(`/api/meta/${state.session}`, {method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ignore: b.dataset.ignore, ignored: b.dataset.on === "1"})});
+    buildReport();
+  });
   box.classList.add("on");
   loadTagCompare();
 }

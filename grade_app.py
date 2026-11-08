@@ -207,6 +207,15 @@ def save_meta(sid):
         # A value the person changed is theirs now: price refreshes leave it alone.
         meta["auto_fields"] = [k for k in meta.get("auto_fields", [])
                                if meta["values"].get(k) is not None and before.get(k) == meta["values"].get(k)]
+    if "ignore" in body:
+        # The person looked at a finding and disagrees: keep it on the report, leave it out of the grade.
+        ignored = set(meta.get("ignored") or [])
+        key = str(body["ignore"])[:200]
+        if body.get("ignored", True):
+            ignored.add(key)
+        else:
+            ignored.discard(key)
+        meta["ignored"] = sorted(ignored)
     if "actual" in body:
         a = body["actual"]
         meta["actual"] = None if not a else {
@@ -503,6 +512,15 @@ def report(sid):
         surface_by_side[side] = closeups.surface_findings(res["marks"], canon.shape)
 
     _auto_identify(d)
+    ignored = set(_meta(d).get("ignored") or [])
+
+    def mark(side, f):
+        f["key"] = f"{side}|{f.get('region')}|{f.get('kind')}|{','.join(str(int(v)) for v in f.get('box', []))}"
+        f["ignored"] = f["key"] in ignored
+
+    for side, found in surface_by_side.items():
+        for f in found:
+            mark(side, f)
     t = int(time.time())
     for side, data in (("front", front), ("back", back)):
         if not data:
@@ -516,12 +534,20 @@ def report(sid):
         for f in findings:
             f.pop("both", None)
             f["cleared"] = False
+            mark(side, f)
         if rot:
             ppi = data.get("ppi", 600)
             seen = closeups.match_in_rotated(findings, rot.get("findings", []), int(2.5 * ppi), int(3.5 * ppi), 25.4 / ppi)
             for f, b in zip(findings, seen):
                 f["both"] = b
-                f["cleared"] = f["severity"] == "yellow" and b is False
+                if f.get("was_red"):
+                    f["severity"] = "red"  # rebuilt report: judge the original call again
+                f.pop("was_red", None)
+                # A clear (red) call that the turned scan doesn't see is more likely lighting or shadow than
+                # damage (a real bent corner or chip shows from both sides): count it as borderline instead.
+                if f["severity"] == "red" and b is False:
+                    f["severity"], f["was_red"] = "yellow", True
+                f["cleared"] = f["severity"] == "yellow" and b is False and not f.get("was_red")
         # Redraw this side's close-ups so boxes and tile outlines reflect cleared findings and surface marks.
         outline_file = d / f"{side}_outline.npy"
         rendered = closeups.render(cv2.imread(str(d / f"{side}_view.jpg")), data.get("view_pad", 0),

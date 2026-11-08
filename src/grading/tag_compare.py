@@ -162,11 +162,12 @@ def build(session_dir, card_id, report):
     for side in ("front", "back"):
         data = report.get(side) or {}
         for f in data.get("findings", []):
-            if f.get("cleared"):
+            if f.get("cleared") or f.get("ignored"):
                 continue
             counted.append((side, f))
     for f in report.get("surface_findings", []):
-        counted.append((f["side"], f))
+        if not f.get("ignored"):
+            counted.append((f["side"], f))
     your_spots = []
     for j, (side, f) in enumerate(counted):
         if side not in views or not f.get("box"):
