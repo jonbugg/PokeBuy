@@ -1,78 +1,295 @@
 {
- "K6509110": {
-  "grade": "10",
-  "score": 983,
-  "centF": "50.9L/49.1R 50.9T/49.1B",
-  "centB": "45.9L/54.1R 49.5T/50.5B",
+ "E4152686": {
+  "grade": "8",
+  "score": 847,
+  "centF": "46L/54R 53T/47B",
+  "centB": "54L/46R 48T/52B",
   "dims": [
-   "3.467",
-   "2.482"
+   "3.465",
+   "2.479"
   ],
   "dings": [
    0,
-   0,
+   3,
    0,
    0,
    0,
    0
   ],
-  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/d2392e7e-c34d-47cf-a95b-bd37164ecd17",
-  "spots": []
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/6cc635e9-2ab1-40ab-b738-ed38e9728673",
+  "spots": [
+   [
+    "back",
+    "CORNER WEAR",
+    4130,
+    5816
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    4116,
+    50
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    50,
+    51
+   ]
+  ]
  },
- "F2687942": {
-  "grade": "10",
-  "score": 962,
-  "centF": "53L/47R 46T/54B",
-  "centB": "50L/50R 48T/52B",
+ "C2443497": {
+  "grade": "8",
+  "score": 811,
+  "centF": "42L/58R 60T/40B",
+  "centB": "54L/46R 58T/42B",
   "dims": [
-   "3.465",
-   "2.483"
+   "3.463",
+   "2.485"
+  ],
+  "dings": [
+   0,
+   3,
+   0,
+   2,
+   1,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/6dd46956-c046-410d-ba42-212905c228c5",
+  "spots": [
+   [
+    "front",
+    "SURFACE / PLAY WEAR",
+    514,
+    921
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    50,
+    5729
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    52,
+    50
+   ],
+   [
+    "back",
+    "EDGE WEAR",
+    2629,
+    5937
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    4063,
+    5727
+   ],
+   [
+    "back",
+    "EDGE WEAR",
+    4272,
+    1531
+   ]
+  ]
+ },
+ "R1026639": {
+  "grade": "7",
+  "score": 737,
+  "centF": "48L/52R 46T/54B",
+  "centB": "52L/48R 47T/53B",
+  "dims": [
+   "3.472",
+   "2.484"
+  ],
+  "dings": [
+   0,
+   2,
+   0,
+   1,
+   1,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/a997424f-f8c2-4993-a1ed-73d01701cebe",
+  "spots": [
+   [
+    "front",
+    "SURFACE / PRINT LINE",
+    3735,
+    2000
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    50,
+    50
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    61,
+    5744
+   ],
+   [
+    "back",
+    "EDGE WEAR",
+    4270,
+    638
+   ]
+  ]
+ },
+ "C1362284": {
+  "grade": "7",
+  "score": 733,
+  "centF": "51L/49R 52T/48B",
+  "centB": "50L/50R 52T/48B",
+  "dims": [
+   "3.464",
+   "2.484"
+  ],
+  "dings": [
+   0,
+   3,
+   0,
+   1,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/24475785-4c32-4e2f-bd35-16b6fd833e67",
+  "spots": [
+   [
+    "back",
+    "CORNER WEAR",
+    4058,
+    50
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    4064,
+    5731
+   ],
+   [
+    "back",
+    "EDGE WEAR",
+    4267,
+    5305
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    52,
+    5731
+   ]
+  ]
+ },
+ "D8861141": {
+  "grade": "6",
+  "score": 640,
+  "centF": "61L/39R 43T/57B",
+  "centB": "45L/55R 47T/53B",
+  "dims": [
+   "3.469",
+   "2.485"
   ],
   "dings": [
    0,
    1,
    0,
-   0,
-   0,
+   3,
+   1,
    1
   ],
-  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/b61aa204-6f69-4175-a4d1-a5c95f33adc6",
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/746492eb-26eb-4daa-bf3a-619b99ffbd2d",
   "spots": [
    [
     "front",
-    "Scratch(es)",
-    2317,
-    898
+    "SURFACE / PLAY WEAR",
+    612,
+    873
    ],
    [
     "back",
-    "Pit",
-    1957,
-    393
+    "SURFACE / PLAY WEAR",
+    18,
+    42
    ],
    [
     "back",
-    "Ink/Surface Defect",
-    983,
-    165
+    "EDGE WEAR",
+    2237,
+    49
    ],
    [
     "back",
-    "Scratch(es)",
-    4360,
-    3861
+    "EDGE WEAR",
+    3900,
+    6027
    ],
    [
     "back",
-    "Pit",
-    1434,
-    3249
+    "CORNER WEAR",
+    67,
+    50
    ],
    [
     "back",
-    "Pit",
-    1456,
-    3022
+    "EDGE WEAR",
+    4329,
+    5259
+   ]
+  ]
+ },
+ "T6229594": {
+  "grade": "6",
+  "score": 600,
+  "centF": "42L/58R 51T/49B",
+  "centB": "51L/49R 51T/49B",
+  "dims": [
+   "3.458",
+   "2.482"
+  ],
+  "dings": [
+   0,
+   4,
+   0,
+   0,
+   1,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/d666e737-81e9-49d9-81fa-199713594457",
+  "spots": [
+   [
+    "front",
+    "SURFACE / PLAY WEAR",
+    521,
+    911
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    49,
+    49
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    4137,
+    5827
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    4135,
+    49
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    55,
+    5831
    ]
   ]
  }

@@ -1,0 +1,21 @@
+{
+ "card": {
+  "perGrade": 2,
+  "year": 2023,
+  "setPath": "Pok\u00e9mon Scarlet & Violet",
+  "setName": "151",
+  "match": "Bulbasaur",
+  "number": "001/165"
+ },
+ "url": "/pop-report/Pok\u00e9mon/2023/Pok\u00e9mon Scarlet & Violet/Bulbasaur/001%2F165?setName=151&variation=Reverse+Holo",
+ "pop": {
+  "6": 0,
+  "7": 0,
+  "8": 0,
+  "9": 1,
+  "10": 0,
+  "10P": 0,
+  "8.5": 0
+ },
+ "ppi": 1200
+}

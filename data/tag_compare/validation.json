@@ -1,45 +1,103 @@
 [
  {
+  "card": "me5-120",
+  "cert": "S4636736",
+  "tag": "10",
+  "error": "Couldn't find a card-shaped object. Check the card is fully inside the scan area."
+ },
+ {
+  "card": "me5-120",
+  "cert": "E4756486",
+  "tag": "10",
+  "error": "Couldn't find a card-shaped object. Check the card is fully inside the scan area."
+ },
+ {
+  "card": "me5-120",
+  "cert": "L6419333",
+  "tag": "10",
+  "error": "Couldn't find a card-shaped object. Check the card is fully inside the scan area."
+ },
+ {
+  "card": "me5-120",
+  "cert": "J2547396",
+  "tag": "10",
+  "error": "Couldn't find a card-shaped object. Check the card is fully inside the scan area."
+ },
+ {
+  "card": "me5-120",
+  "cert": "F8843992",
+  "tag": "8",
+  "error": "Couldn't find a card-shaped object. Check the card is fully inside the scan area."
+ },
+ {
+  "card": "me5-120",
+  "cert": "J2224697",
+  "tag": "9",
+  "error": "Couldn't find a card-shaped object. Check the card is fully inside the scan area."
+ },
+ {
+  "card": "me5-120",
+  "cert": "W3165554",
+  "tag": "9",
+  "error": "Couldn't find a card-shaped object. Check the card is fully inside the scan area."
+ },
+ {
+  "card": "me5-120",
+  "cert": "D2796358",
+  "tag": "9",
+  "error": "Couldn't find a card-shaped object. Check the card is fully inside the scan area."
+ },
+ {
+  "card": "me5-120",
+  "cert": "V2131769",
+  "tag": "9",
+  "error": "Couldn't find a card-shaped object. Check the card is fully inside the scan area."
+ },
+ {
+  "card": "me5-120",
+  "cert": "V5008454",
+  "tag": "8.5",
+  "error": "Couldn't find a card-shaped object. Check the card is fully inside the scan area."
+ },
+ {
+  "card": "me5-120",
+  "cert": "Y6389714",
+  "tag": "8.5",
+  "error": "Couldn't find a card-shaped object. Check the card is fully inside the scan area."
+ },
+ {
   "card": "swsh12pt5-160",
   "cert": "E2403849",
   "tag": "10P",
   "tag_score": 990,
   "tag_dings": 0,
   "tag_spots": [],
-  "ours_tag": "NM-MT 8",
-  "ours_could_be": "below NM-MT 8",
+  "ours_tag": "Pristine 10",
+  "ours_could_be": null,
   "ours_odds": [
    {
-    "grade": "Mint 9",
-    "p": 0.066
+    "grade": "Pristine 10",
+    "p": 0.899
    },
    {
-    "grade": "NM-MT+ 8.5",
-    "p": 0.138
-   },
-   {
-    "grade": "NM-MT 8",
-    "p": 0.645
-   },
-   {
-    "grade": "below NM-MT 8",
-    "p": 0.151
+    "grade": "Gem Mint 10",
+    "p": 0.101
    }
   ],
   "psa": "10",
   "our_findings": {
    "red": 0,
-   "yellow": 2
+   "yellow": 0
   },
   "level": "clean",
   "cent_ours": {
    "front": [
-    null,
-    null
+    50.4,
+    49.6
    ],
    "back": [
-    60.09,
-    50.33
+    51.31,
+    49.9
    ]
   },
   "cent_tag": {
@@ -53,7 +111,6 @@
    ]
   },
   "warnings": [
-   "Couldn't find the inner border on every side (borderless or full-bleed art?).",
    "Border detection was inconsistent on at least one side; centering is approximate."
   ]
  },
@@ -64,32 +121,32 @@
   "tag_score": 986,
   "tag_dings": 0,
   "tag_spots": [],
-  "ours_tag": "Mint 9",
-  "ours_could_be": "Gem Mint 10",
+  "ours_tag": "Gem Mint 10",
+  "ours_could_be": "Pristine 10",
   "ours_odds": [
    {
-    "grade": "Gem Mint 10",
-    "p": 0.266
+    "grade": "Pristine 10",
+    "p": 0.282
    },
    {
-    "grade": "Mint 9",
-    "p": 0.727
+    "grade": "Gem Mint 10",
+    "p": 0.718
    }
   ],
   "psa": "10",
   "our_findings": {
    "red": 0,
-   "yellow": 1
+   "yellow": 0
   },
   "level": "clean",
   "cent_ours": {
    "front": [
-    null,
-    null
+    50.12,
+    48.26
    ],
    "back": [
-    56.94,
-    48.45
+    48.13,
+    48.23
    ]
   },
   "cent_tag": {
@@ -103,7 +160,6 @@
    ]
   },
   "warnings": [
-   "Couldn't find the inner border on every side (borderless or full-bleed art?).",
    "Border detection was inconsistent on at least one side; centering is approximate."
   ]
  },
@@ -124,20 +180,20 @@
     "p": 1.0
    }
   ],
-  "psa": "below 7",
+  "psa": "7",
   "our_findings": {
-   "red": 4,
-   "yellow": 0
+   "red": 16,
+   "yellow": 10
   },
   "level": "heavy",
   "cent_ours": {
    "front": [
-    50.62,
-    45.09
+    null,
+    null
    ],
    "back": [
-    50.0,
-    -14.01
+    47.97,
+    48.26
    ]
   },
   "cent_tag": {
@@ -151,7 +207,7 @@
    ]
   },
   "warnings": [
-   "Border detection was inconsistent on at least one side; centering is approximate."
+   "Couldn't find the inner border on every side (borderless or full-bleed art?)."
   ]
  },
  {
@@ -169,10 +225,10 @@
     "p": 1.0
    }
   ],
-  "psa": "below 7",
+  "psa": "7",
   "our_findings": {
-   "red": 4,
-   "yellow": 0
+   "red": 19,
+   "yellow": 12
   },
   "level": "heavy",
   "cent_ours": {
@@ -181,8 +237,8 @@
     null
    ],
    "back": [
-    50.0,
-    103.73
+    47.77,
+    51.54
    ]
   },
   "cent_tag": {
@@ -196,7 +252,8 @@
    ]
   },
   "warnings": [
-   "Couldn't find the inner border on every side (borderless or full-bleed art?)."
+   "Couldn't find the inner border on every side (borderless or full-bleed art?).",
+   "Border detection was inconsistent on at least one side; centering is approximate."
   ]
  },
  {
@@ -219,8 +276,8 @@
   ],
   "psa": "7",
   "our_findings": {
-   "red": 17,
-   "yellow": 25
+   "red": 41,
+   "yellow": 23
   },
   "level": "heavy",
   "cent_ours": {
@@ -229,8 +286,8 @@
     null
    ],
    "back": [
-    50.88,
-    51.97
+    49.86,
+    51.39
    ]
   },
   "cent_tag": {
@@ -244,6 +301,7 @@
    ]
   },
   "warnings": [
+   "Light background detected. Put black paper behind the card for accurate edge and corner checks.",
    "Couldn't find the inner border on every side (borderless or full-bleed art?).",
    "Border detection was inconsistent on at least one side; centering is approximate."
   ]
@@ -259,40 +317,28 @@
    "Ink/Surface Defect",
    "Scratch(es)"
   ],
-  "ours_tag": "Mint 9",
-  "ours_could_be": "NM-MT+ 8.5",
+  "ours_tag": "below NM-MT 8",
+  "ours_could_be": null,
   "ours_odds": [
    {
-    "grade": "Gem Mint 10",
-    "p": 0.061
-   },
-   {
-    "grade": "Mint 9",
-    "p": 0.455
-   },
-   {
-    "grade": "NM-MT+ 8.5",
-    "p": 0.423
-   },
-   {
-    "grade": "NM-MT 8",
-    "p": 0.053
+    "grade": "below NM-MT 8",
+    "p": 1.0
    }
   ],
-  "psa": "9",
+  "psa": "7",
   "our_findings": {
-   "red": 0,
-   "yellow": 7
+   "red": 13,
+   "yellow": 8
   },
-  "level": "moderate",
+  "level": "heavy",
   "cent_ours": {
    "front": [
     null,
     null
    ],
    "back": [
-    52.27,
-    53.58
+    52.77,
+    53.34
    ]
   },
   "cent_tag": {
@@ -323,32 +369,24 @@
   "ours_could_be": null,
   "ours_odds": [
    {
-    "grade": "NM-MT+ 8.5",
-    "p": 0.066
-   },
-   {
-    "grade": "NM-MT 8",
-    "p": 0.089
-   },
-   {
     "grade": "below NM-MT 8",
-    "p": 0.839
+    "p": 1.0
    }
   ],
-  "psa": "8",
+  "psa": "7",
   "our_findings": {
-   "red": 0,
-   "yellow": 17
+   "red": 6,
+   "yellow": 23
   },
-  "level": "moderate",
+  "level": "heavy",
   "cent_ours": {
    "front": [
     null,
     null
    ],
    "back": [
-    null,
-    null
+    52.96,
+    45.77
    ]
   },
   "cent_tag": {
@@ -362,7 +400,7 @@
    ]
   },
   "warnings": [
-   "Couldn't find the inner border on every side (borderless or full-bleed art?).",
+   "Light background detected. Put black paper behind the card for accurate edge and corner checks.",
    "Couldn't find the inner border on every side (borderless or full-bleed art?)."
   ]
  },
@@ -376,32 +414,28 @@
    "SURFACE / INK DEFECT",
    "CORNER WEAR"
   ],
-  "ours_tag": "NM-MT+ 8.5",
-  "ours_could_be": "Mint 9",
+  "ours_tag": "Gem Mint 10",
+  "ours_could_be": null,
   "ours_odds": [
    {
-    "grade": "Mint 9",
-    "p": 0.334
-   },
-   {
-    "grade": "NM-MT+ 8.5",
-    "p": 0.662
+    "grade": "Gem Mint 10",
+    "p": 0.999
    }
   ],
-  "psa": "7",
+  "psa": "10",
   "our_findings": {
-   "red": 4,
+   "red": 0,
    "yellow": 0
   },
-  "level": "heavy",
+  "level": "clean",
   "cent_ours": {
    "front": [
-    null,
-    null
+    50.1,
+    53.74
    ],
    "back": [
-    50.0,
-    50.0
+    47.73,
+    53.82
    ]
   },
   "cent_tag": {
@@ -415,7 +449,7 @@
    ]
   },
   "warnings": [
-   "Couldn't find the inner border on every side (borderless or full-bleed art?)."
+   "Border detection was inconsistent on at least one side; centering is approximate."
   ]
  },
  {
@@ -433,32 +467,32 @@
   "ours_could_be": "NM-MT+ 8.5",
   "ours_odds": [
    {
+    "grade": "Gem Mint 10",
+    "p": 0.015
+   },
+   {
     "grade": "Mint 9",
-    "p": 0.649
+    "p": 0.612
    },
    {
     "grade": "NM-MT+ 8.5",
-    "p": 0.289
-   },
-   {
-    "grade": "NM-MT 8",
-    "p": 0.062
+    "p": 0.374
    }
   ],
   "psa": "8",
   "our_findings": {
-   "red": 2,
-   "yellow": 2
+   "red": 3,
+   "yellow": 1
   },
   "level": "moderate",
   "cent_ours": {
    "front": [
-    null,
-    null
+    46.0,
+    52.32
    ],
    "back": [
-    58.18,
-    49.93
+    48.59,
+    50.2
    ]
   },
   "cent_tag": {
@@ -471,10 +505,7 @@
     50.0
    ]
   },
-  "warnings": [
-   "Couldn't find the inner border on every side (borderless or full-bleed art?).",
-   "Border detection was inconsistent on at least one side; centering is approximate."
-  ]
+  "warnings": []
  },
  {
   "card": "swsh12pt5-160",
@@ -496,18 +527,18 @@
   ],
   "psa": "7",
   "our_findings": {
-   "red": 0,
-   "yellow": 3
+   "red": 13,
+   "yellow": 7
   },
-  "level": "minor",
+  "level": "heavy",
   "cent_ours": {
    "front": [
-    47.99,
-    30.0
-   ],
-   "back": [
     null,
     null
+   ],
+   "back": [
+    47.25,
+    47.53
    ]
   },
   "cent_tag": {
@@ -521,8 +552,8 @@
    ]
   },
   "warnings": [
-   "Border detection was inconsistent on at least one side; centering is approximate.",
-   "Couldn't find the inner border on every side (borderless or full-bleed art?)."
+   "Couldn't find the inner border on every side (borderless or full-bleed art?).",
+   "Border detection was inconsistent on at least one side; centering is approximate."
   ]
  },
  {
@@ -546,20 +577,20 @@
     "p": 1.0
    }
   ],
-  "psa": "below 7",
+  "psa": "7",
   "our_findings": {
-   "red": 5,
-   "yellow": 2
+   "red": 25,
+   "yellow": 9
   },
   "level": "heavy",
   "cent_ours": {
    "front": [
-    59.85,
-    24.54
+    null,
+    null
    ],
    "back": [
-    50.0,
-    105.05
+    50.64,
+    49.58
    ]
   },
   "cent_tag": {
@@ -573,7 +604,7 @@
    ]
   },
   "warnings": [
-   "Border detection was inconsistent on at least one side; centering is approximate."
+   "Couldn't find the inner border on every side (borderless or full-bleed art?)."
   ]
  },
  {
@@ -590,28 +621,24 @@
   "ours_could_be": null,
   "ours_odds": [
    {
-    "grade": "NM-MT 8",
-    "p": 0.049
-   },
-   {
     "grade": "below NM-MT 8",
-    "p": 0.951
+    "p": 1.0
    }
   ],
-  "psa": "9",
+  "psa": "7",
   "our_findings": {
-   "red": 0,
-   "yellow": 1
+   "red": 33,
+   "yellow": 8
   },
-  "level": "clean",
+  "level": "heavy",
   "cent_ours": {
    "front": [
-    46.74,
-    44.59
+    null,
+    null
    ],
    "back": [
-    37.75,
-    59.42
+    50.79,
+    59.26
    ]
   },
   "cent_tag": {
@@ -625,7 +652,7 @@
    ]
   },
   "warnings": [
-   "Border detection was inconsistent on at least one side; centering is approximate.",
+   "Couldn't find the inner border on every side (borderless or full-bleed art?).",
    "Border detection was inconsistent on at least one side; centering is approximate."
   ]
  },
@@ -636,32 +663,32 @@
   "tag_score": null,
   "tag_dings": 0,
   "tag_spots": [],
-  "ours_tag": "NM-MT+ 8.5",
-  "ours_could_be": "Mint 9",
+  "ours_tag": "Pristine 10",
+  "ours_could_be": "Gem Mint 10",
   "ours_odds": [
    {
-    "grade": "Mint 9",
-    "p": 0.354
+    "grade": "Pristine 10",
+    "p": 0.537
    },
    {
-    "grade": "NM-MT+ 8.5",
-    "p": 0.642
+    "grade": "Gem Mint 10",
+    "p": 0.463
    }
   ],
-  "psa": "7",
+  "psa": "10",
   "our_findings": {
-   "red": 4,
+   "red": 0,
    "yellow": 0
   },
-  "level": "heavy",
+  "level": "clean",
   "cent_ours": {
    "front": [
-    49.6,
-    50.39
+    50.86,
+    50.28
    ],
    "back": [
-    51.76,
-    49.05
+    52.25,
+    48.67
    ]
   },
   "cent_tag": {
@@ -685,32 +712,32 @@
   "tag_score": 972,
   "tag_dings": 0,
   "tag_spots": [],
-  "ours_tag": "Gem Mint 10",
-  "ours_could_be": "Pristine 10",
+  "ours_tag": "Pristine 10",
+  "ours_could_be": "Gem Mint 10",
   "ours_odds": [
    {
     "grade": "Pristine 10",
-    "p": 0.163
+    "p": 0.648
    },
    {
     "grade": "Gem Mint 10",
-    "p": 0.837
+    "p": 0.352
    }
   ],
   "psa": "10",
   "our_findings": {
    "red": 0,
-   "yellow": 1
+   "yellow": 0
   },
   "level": "clean",
   "cent_ours": {
    "front": [
-    48.46,
-    51.81
+    49.9,
+    51.22
    ],
    "back": [
-    null,
-    null
+    51.35,
+    49.41
    ]
   },
   "cent_tag": {
@@ -724,7 +751,8 @@
    ]
   },
   "warnings": [
-   "Couldn't find the inner border on every side (borderless or full-bleed art?)."
+   "Border detection was inconsistent on at least one side; centering is approximate.",
+   "Border detection was inconsistent on at least one side; centering is approximate."
   ]
  },
  {
@@ -734,36 +762,32 @@
   "tag_score": 965,
   "tag_dings": 0,
   "tag_spots": [],
-  "ours_tag": "Mint 9",
-  "ours_could_be": "NM-MT+ 8.5",
+  "ours_tag": "Gem Mint 10",
+  "ours_could_be": null,
   "ours_odds": [
    {
+    "grade": "Pristine 10",
+    "p": 0.061
+   },
+   {
     "grade": "Gem Mint 10",
-    "p": 0.185
-   },
-   {
-    "grade": "Mint 9",
-    "p": 0.617
-   },
-   {
-    "grade": "NM-MT+ 8.5",
-    "p": 0.198
+    "p": 0.939
    }
   ],
-  "psa": "9",
+  "psa": "10",
   "our_findings": {
    "red": 0,
-   "yellow": 5
+   "yellow": 0
   },
-  "level": "minor",
+  "level": "clean",
   "cent_ours": {
    "front": [
-    46.75,
-    50.39
+    47.6,
+    50.22
    ],
    "back": [
-    51.72,
-    49.83
+    51.36,
+    49.48
    ]
   },
   "cent_tag": {
@@ -790,36 +814,32 @@
    "EDGE WEAR",
    "EDGE WEAR"
   ],
-  "ours_tag": "NM-MT 8",
-  "ours_could_be": "NM-MT+ 8.5",
+  "ours_tag": "Mint 9",
+  "ours_could_be": "Gem Mint 10",
   "ours_odds": [
    {
+    "grade": "Gem Mint 10",
+    "p": 0.245
+   },
+   {
     "grade": "Mint 9",
-    "p": 0.031
-   },
-   {
-    "grade": "NM-MT+ 8.5",
-    "p": 0.4
-   },
-   {
-    "grade": "NM-MT 8",
-    "p": 0.569
+    "p": 0.751
    }
   ],
-  "psa": "8",
+  "psa": "10",
   "our_findings": {
-   "red": 2,
-   "yellow": 2
+   "red": 0,
+   "yellow": 1
   },
-  "level": "moderate",
+  "level": "clean",
   "cent_ours": {
    "front": [
-    41.47,
-    47.37
+    49.61,
+    47.39
    ],
    "back": [
-    null,
-    null
+    56.94,
+    47.12
    ]
   },
   "cent_tag": {
@@ -834,7 +854,7 @@
   },
   "warnings": [
    "Border detection was inconsistent on at least one side; centering is approximate.",
-   "Couldn't find the inner border on every side (borderless or full-bleed art?)."
+   "Border detection was inconsistent on at least one side; centering is approximate."
   ]
  },
  {
@@ -851,11 +871,11 @@
   "ours_odds": [
    {
     "grade": "Gem Mint 10",
-    "p": 0.963
+    "p": 0.984
    },
    {
     "grade": "Mint 9",
-    "p": 0.037
+    "p": 0.016
    }
   ],
   "psa": "10",
@@ -866,12 +886,12 @@
   "level": "clean",
   "cent_ours": {
    "front": [
-    51.05,
-    45.58
+    52.36,
+    45.79
    ],
    "back": [
-    48.59,
-    48.39
+    47.56,
+    48.14
    ]
   },
   "cent_tag": {
@@ -884,7 +904,9 @@
     47.0
    ]
   },
-  "warnings": []
+  "warnings": [
+   "Border detection was inconsistent on at least one side; centering is approximate."
+  ]
  },
  {
   "card": "swshp-SWSH133",
@@ -893,28 +915,32 @@
   "tag_score": 922,
   "tag_dings": 0,
   "tag_spots": [],
-  "ours_tag": "Gem Mint 10",
-  "ours_could_be": null,
+  "ours_tag": "Mint 9",
+  "ours_could_be": "Gem Mint 10",
   "ours_odds": [
    {
     "grade": "Gem Mint 10",
-    "p": 0.992
+    "p": 0.294
+   },
+   {
+    "grade": "Mint 9",
+    "p": 0.704
    }
   ],
   "psa": "10",
   "our_findings": {
    "red": 0,
-   "yellow": 1
+   "yellow": 2
   },
   "level": "clean",
   "cent_ours": {
    "front": [
-    50.06,
-    54.06
+    50.7,
+    53.89
    ],
    "back": [
-    null,
-    null
+    48.29,
+    56.59
    ]
   },
   "cent_tag": {
@@ -928,8 +954,7 @@
    ]
   },
   "warnings": [
-   "Border detection was inconsistent on at least one side; centering is approximate.",
-   "Couldn't find the inner border on every side (borderless or full-bleed art?)."
+   "Border detection was inconsistent on at least one side; centering is approximate."
   ]
  },
  {
@@ -941,36 +966,32 @@
   "tag_spots": [
    "EDGE WEAR"
   ],
-  "ours_tag": "NM-MT+ 8.5",
-  "ours_could_be": "NM-MT 8",
+  "ours_tag": "Gem Mint 10",
+  "ours_could_be": null,
   "ours_odds": [
    {
-    "grade": "Mint 9",
-    "p": 0.042
+    "grade": "Pristine 10",
+    "p": 0.018
    },
    {
-    "grade": "NM-MT+ 8.5",
-    "p": 0.645
-   },
-   {
-    "grade": "NM-MT 8",
-    "p": 0.314
+    "grade": "Gem Mint 10",
+    "p": 0.982
    }
   ],
-  "psa": "7",
+  "psa": "9",
   "our_findings": {
-   "red": 5,
-   "yellow": 1
+   "red": 1,
+   "yellow": 0
   },
-  "level": "heavy",
+  "level": "minor",
   "cent_ours": {
    "front": [
-    null,
-    null
+    51.98,
+    50.96
    ],
    "back": [
-    50.29,
-    48.85
+    50.37,
+    48.47
    ]
   },
   "cent_tag": {
@@ -984,7 +1005,7 @@
    ]
   },
   "warnings": [
-   "Couldn't find the inner border on every side (borderless or full-bleed art?)."
+   "Border detection was inconsistent on at least one side; centering is approximate."
   ]
  },
  {
@@ -999,39 +1020,39 @@
    "CORNER WEAR"
   ],
   "ours_tag": "NM-MT+ 8.5",
-  "ours_could_be": "NM-MT 8",
+  "ours_could_be": "Mint 9",
   "ours_odds": [
    {
     "grade": "Mint 9",
-    "p": 0.038
+    "p": 0.249
    },
    {
     "grade": "NM-MT+ 8.5",
-    "p": 0.422
+    "p": 0.584
    },
    {
     "grade": "NM-MT 8",
-    "p": 0.315
+    "p": 0.138
    },
    {
     "grade": "below NM-MT 8",
-    "p": 0.225
+    "p": 0.023
    }
   ],
-  "psa": "7",
+  "psa": "8",
   "our_findings": {
-   "red": 4,
-   "yellow": 4
+   "red": 2,
+   "yellow": 5
   },
-  "level": "heavy",
+  "level": "moderate",
   "cent_ours": {
    "front": [
-    47.67,
-    50.39
+    48.8,
+    49.35
    ],
    "back": [
-    57.0,
-    48.6
+    50.13,
+    48.37
    ]
   },
   "cent_tag": {

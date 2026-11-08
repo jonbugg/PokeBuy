@@ -62,6 +62,7 @@
   .earlier .row { display: flex; gap: 8px; align-items: baseline; }
   .earlier .open { color: var(--blue); cursor: pointer; }
   .earlier .open:hover { text-decoration: underline; }
+  details.earlier summary { cursor: pointer; }
   a.stat:hover { border-color: var(--ink-20); }
   .empty { background: var(--white); border: 1px dashed var(--ink-20); border-radius: 12px; padding: 40px; text-align: center; color: var(--ink-60); }
   .empty a { color: var(--blue); font-weight: 500; }
@@ -130,7 +131,12 @@ function render() {
       ? `<div class="pending"><b>${missing.includes("back") ? "Back not scanned yet" : "Front not scanned yet"}</b>: no grade until both sides are in.${ceiling ? `<small>Best case from the ${missing.includes("back") ? "front" : "back"} alone: ${esc(ceiling)}</small>` : ""}</div>`
       : `<div class="grades">${["TAG", "PSA", "CGC"].map(k => c.grades[k] ? `<div class="g ${tone(c.grades[k].grade)}"><img src="${LOGOS[k]}" alt="${k}"><b>${esc(short(c.grades[k].grade))}</b></div>` : "").join("")}</div>`;
     const when = t => t ? new Date(t * 1000).toLocaleString(undefined, {month: "short", day: "numeric", hour: "numeric", minute: "2-digit"}) : "";
-    const earlier = (c.earlier || []).length ? `<div class="earlier"><span>Also scanned ${c.earlier.length === 1 ? "once more" : c.earlier.length + " more times"}:</span>${c.earlier.map(e => `<div class="row"><span class="open" data-open="${esc(e.id)}">${esc(when(e.graded_at))}</span>${(e.missing || []).length ? `<span>${e.missing.includes("back") ? "front only" : "back only"}</span>` : ""}<button class="del" data-del="${esc(e.id)}" title="Move this earlier scan out of the library">remove</button></div>`).join("")}</div>` : "";
+    // Earlier scans of the same card: listed when there are a few, folded away behind a toggle when there are many.
+    const earlierRows = (c.earlier || []).map(e => `<div class="row"><span class="open" data-open="${esc(e.id)}">${esc(when(e.graded_at))}</span>${(e.missing || []).length ? `<span>${e.missing.includes("back") ? "front only" : "back only"}</span>` : ""}<button class="del" data-del="${esc(e.id)}" title="Move this earlier scan out of the library">remove</button></div>`).join("");
+    const nEarlier = (c.earlier || []).length;
+    const earlier = !nEarlier ? "" : nEarlier <= 3
+      ? `<div class="earlier"><span>Also scanned ${nEarlier === 1 ? "once more" : nEarlier + " more times"}:</span>${earlierRows}</div>`
+      : `<details class="earlier"><summary>Also scanned ${nEarlier} more times</summary>${earlierRows}</details>`;
     const counts = c.counts ? `${c.counts.red} red · ${c.counts.yellow} yellow` : "";
     const a = c.actual;
     const actual = a ? `<div class="actual ${c.grades[a.company] ? (matches(c.grades[a.company].grade, a.grade, a.company) ? "hit" : "miss") : ""}">Graded <b>${esc(a.company)} ${esc(a.grade)}</b>${a.score ? ` (${a.score})` : ""}${c.grades[a.company] ? (matches(c.grades[a.company].grade, a.grade, a.company) ? " · matched" : ` · est. ${esc(c.grades[a.company].grade)}`) : ""}</div>` : "";
@@ -169,5 +175,6 @@ function render() {
   document.getElementById("sort").onchange = render;
 })();
 </script>
+<script src="/static/js/scanbar.js"></script>
 </body>
 </html>

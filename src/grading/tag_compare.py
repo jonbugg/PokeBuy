@@ -24,10 +24,11 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data" / "tag_compare"
 PPI = 1200          # everything is compared at the scan's resolution
 TAG_PPI = 1628      # TAG's published photos, measured from the card's size in them
+TAG_PHOTO_W = 4406  # the usual width of those photos at TAG_PPI
 TAG_COORD_PPI = 1687  # TAG's DINGS coordinates (card-relative): 4185 px across a 2.48" card
 CARD_PX = (3000, 4200)  # card at 1200 ppi
 CROP_MM = 4.0       # side of each comparison crop (small enough to see a 0.2 mm speck)
-GRADE_ORDER = ["10P", "10", "9", "8.5", "8", "7.5", "7", "6.5", "6"]  # 10P = Pristine 10
+GRADE_ORDER = ["10P", "10", "9.5", "9", "8.5", "8", "7.5", "7", "6.5", "6"]  # 10P = Pristine 10
 
 
 def available(card_id):
@@ -51,7 +52,13 @@ def _tag_view(card_id, cert, side):
     img = cv2.imread(str(folder / f"{side.upper()}_MAIN.jpg"))
     if img is None:
         return None, 0
-    m = measure.find_and_straighten(img, TAG_PPI)
+    # TAG publishes some sets' photos smaller (e.g. Pitch Black: ~3250 px wide instead of ~4400). The photo is
+    # cropped tight to the card, so its width gives the scale; the card finder checks the card's size against it.
+    ppi = TAG_PPI * img.shape[1] / TAG_PHOTO_W if img.shape[1] < 0.9 * TAG_PHOTO_W else TAG_PPI
+    try:
+        m = measure.find_and_straighten(img, ppi)
+    except measure.CardNotFound:
+        return None, 0  # e.g. a gold card on TAG's orange: too alike to separate; that photo is left out
     s = PPI / m.ppi
     view = cv2.resize(m.canon_view, None, fx=s, fy=s, interpolation=cv2.INTER_AREA)
     pad = int(round(m.view_pad * s))
@@ -145,6 +152,8 @@ def build(session_dir, card_id, report):
         for side, kind, px, py in v.get("spots", []):
             x, y = _tag_point(card_id, cert, side, px, py)
             tv, tp = _tag_view(card_id, cert, side)
+            if tv is None:
+                continue
             tiles, labels = [_crop(tv, tp, x, y)], [f"TAG {v['grade']} {cert}"]
             if side in views:
                 tiles.append(_crop(*views[side], x, y)); labels.append("Your card, same spot")
@@ -177,7 +186,8 @@ def build(session_dir, card_id, report):
         tiles, labels = [_crop(*views[side], x, y)], [f"Yours: {f['kind']} ({f['severity']})"]
         for cert in tens[:2]:
             tv, tp = _tag_view(card_id, cert, side)
-            tiles.append(_crop(tv, tp, x, y)); labels.append(f"TAG 10 {cert}")
+            if tv is not None:
+                tiles.append(_crop(tv, tp, x, y)); labels.append(f"TAG 10 {cert}")
         name = f"tagcmp_yours_{j}.jpg"
         cv2.imwrite(str(d / name), _strip(tiles, labels), [cv2.IMWRITE_JPEG_QUALITY, 88])
         your_spots.append({"side": side, "kind": f["kind"], "severity": f["severity"], "region": f.get("region"),
@@ -201,7 +211,7 @@ def build(session_dir, card_id, report):
                              f"{max(yours['back']):.1f}/{100 - max(yours['back']):.1f} are within what TAG gave a {_name(grade)} on this card "
                              f"(as far as {cap['front']:.0f}/{100 - cap['front']:.0f} front, {cap['back']:.0f}/{100 - cap['back']:.0f} back).")
                 lines.append(f"Defects: TAG's {_name(grade, True)} of this card had up to {most_dings} counted DINGS; your card has {red} "
-                             f"clear (red) finding{'s' if red != 1 else ''} after the 180° check"
+                             f"clear (red) finding{'s' if red != 1 else ''} after checking it against your other scans"
                              + (f", plus {yellow} borderline (yellow) to check by eye." if yellow else "."))
                 break
             why = []

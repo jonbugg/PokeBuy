@@ -30,18 +30,42 @@ def worst(a, b):
     return max(float(a), float(b))
 
 
-def main():
-    rows = list(csv.DictReader(SRC.open()))
+def report_rows():
+    """Every TAG report we have: data/tag_reports.csv plus the copies saved by the harvests (ladder.json files).
+    Each row: grade key (as in LADDER), worst off-centre % front and back, corner+edge DINGS, surface DINGS,
+    score and which card it is."""
+    import re
+    rows = []
+    for r in csv.DictReader(SRC.open()):
+        key = r["condition"] if r["condition"] in ("PRISTINE", "GEM MINT") else r["grade"]
+        rows.append({"key": key, "card": r.get("name") or r["cert"], "cert": r["cert"],
+                     "front": max(worst(r["fL"], r["fR"]), worst(r["fT"], r["fB"])),
+                     "back": max(worst(r["bL"], r["bR"]), worst(r["bT"], r["bB"])),
+                     "dings": sum(int(r[k]) for k in ("dings_corner_f", "dings_corner_b", "dings_edge_f", "dings_edge_b")),
+                     "surface": int(r["dings_surface_f"]) + int(r["dings_surface_b"]),
+                     "score": int(r["score"]) if r["score"] else None})
+    seen = {r["cert"] for r in rows}
+    pair = lambda t: (lambda n: max(max(n[0], n[1]), max(n[2], n[3])) if len(n) >= 4 else None)([float(x) for x in re.findall(r"[\d.]+", t or "")])
+    for ladder in sorted((ROOT / "data" / "tag_compare").glob("*/ladder.json")) + sorted((ROOT / "data" / "tag_train").glob("*/ladder.json")):
+        for cert, v in json.loads(ladder.read_text()).items():
+            d = v.get("dings") or []
+            if cert in seen or len(d) < 6 or not v.get("centF") or not v.get("centB"):
+                continue
+            g = str(v.get("grade"))
+            key = {"10P": "PRISTINE", "10": "GEM MINT"}.get(g, g)
+            f, b = pair(v["centF"]), pair(v["centB"])
+            if f is None or b is None:
+                continue
+            seen.add(cert)
+            rows.append({"key": key, "card": ladder.parent.name, "cert": cert, "front": f, "back": b,
+                         "dings": d[0] + d[1] + d[2] + d[3], "surface": d[4] + d[5], "score": v.get("score")})
+    return rows
+
+
+def fit(rows):
     groups = {}
     for r in rows:
-        key = r["condition"] if r["condition"] in ("PRISTINE", "GEM MINT") else r["grade"]
-        groups.setdefault(key, []).append({
-            "front": max(worst(r["fL"], r["fR"]), worst(r["fT"], r["fB"])),
-            "back": max(worst(r["bL"], r["bR"]), worst(r["bT"], r["bB"])),
-            "dings": sum(int(r[k]) for k in ("dings_corner_f", "dings_corner_b", "dings_edge_f", "dings_edge_b")),
-            "surface": int(r["dings_surface_f"]) + int(r["dings_surface_b"]),
-            "score": int(r["score"]) if r["score"] else None,
-        })
+        groups.setdefault(r["key"], []).append(r)
     ladder, prev = [], None
     for label, value, key in LADDER:
         g = groups.get(key, [])
@@ -61,11 +85,17 @@ def main():
         row = [label, value, round(float(f) + 0.5, 1), round(float(b) + 0.5, 1), [int(lo), int(hi)], d]
         ladder.append(row)
         prev = row
+    return ladder, {k: len(v) for k, v in groups.items()}
+
+
+def main():
+    rows = report_rows()
+    ladder, bands = fit(rows)
     out = {
         "n_reports": len(rows),
         "ladder": ladder,
         "note": "front/back = worst off-centre % accepted (e.g. 55.5 means 55.5/44.5); last field = corner+edge DINGS tolerated",
-        "bands": {k: len(v) for k, v in groups.items()},
+        "bands": bands,
     }
     OUT.write_text(json.dumps(out, indent=2))
     print(json.dumps(out, indent=2))

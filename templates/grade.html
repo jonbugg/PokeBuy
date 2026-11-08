@@ -88,6 +88,9 @@
   .progress { height: 6px; background: var(--hair-2); border-radius: 9999px; overflow: hidden; margin-top: 16px; display: none; }
   .progress.on { display: block; }
   .progress i { display: block; height: 100%; width: 0; background: var(--blue); border-radius: 9999px; transition: width .4s linear; }
+  .loading-report { padding: 24px 0; }
+  .loading-report .progress i { animation: report-wait 1.6s ease-in-out infinite alternate; }
+  @keyframes report-wait { from { margin-left: 0; } to { margin-left: 65%; } }
   .msg { margin-top: 14px; font-size: 14px; padding: 10px 14px; border-radius: 8px; display: none; }
   .msg.on { display: block; }
   .msg.err { background: var(--rose); color: var(--vermillion); }
@@ -149,8 +152,15 @@
   .surface-img { width: 100%; border-radius: 8px; margin-top: 12px; border: 1px solid var(--hair); }
 
   /* TAG comparison */
-  .relief-fig { margin: 8px 0 12px; cursor: zoom-in; }
+  .relief-fig { margin: 8px auto 12px; cursor: zoom-in; max-width: 440px; }
   .relief-img { filter: none; background: #888; }
+  /* TAG-style overlay: the surface map faded over the card photo with a slider */
+  .relief-stack { position: relative; border-radius: 8px; overflow: hidden; background: #888; }
+  .relief-stack img { display: block; width: 100%; }
+  .relief-stack .relief-over { position: absolute; inset: 0; height: 100%; object-fit: cover; }
+  .relief-ctl { display: flex; align-items: center; gap: 10px; margin: 8px 0 4px; font-size: 12px; color: var(--ink-60); cursor: default; }
+  .relief-ctl input { flex: 1; accent-color: var(--blue); }
+  .relief-ctl button { font-size: 12px; padding: 2px 8px; border-radius: 9999px; border: 1px solid var(--hair); background: var(--white); color: var(--ink-60); }
   .tc-verdict { border-radius: 12px; padding: 14px 16px; margin: 14px 0; background: var(--hair-2); }
   .tc-verdict.good { background: var(--mint); } .tc-verdict.maybe { background: var(--butter); } .tc-verdict.no { background: var(--rose); }
   .tc-verdict span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-60); }
@@ -371,6 +381,7 @@
   #zoomPct { min-width: 54px; text-align: center; font-size: 13px; color: rgba(255,255,255,.75); font-variant-numeric: tabular-nums; }
   .zoom-panes { flex: 1; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; min-height: 0; background: #2a2a2a; }
   .zoom-panes.rows { grid-auto-flow: row; grid-auto-rows: 1fr; }
+  .zoom-panes.quad { grid-auto-flow: row; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; }
   @media (max-width: 760px) { .zoom-panes { grid-auto-flow: row; grid-auto-rows: 1fr; } }
   .zp { position: relative; overflow: hidden; background: #0c0c0c; cursor: grab; touch-action: none; }
   .zp.dragging { cursor: grabbing; }
@@ -628,9 +639,9 @@ async function locateCard() {
 
 /* ---------- scanning ---------- */
 let timer = null;
-function startProgress(seconds) {
+function startProgress(seconds, elapsed = 0) {
   const bar = $("#prog"); bar.classList.add("on");
-  const t0 = Date.now();
+  const t0 = Date.now() - elapsed * 1000;
   timer = setInterval(() => {
     const pct = Math.min(94, 100 * (1 - Math.exp(-(Date.now() - t0) / 1000 / (seconds * 0.6))));
     $("i", bar).style.width = pct + "%";
@@ -651,12 +662,36 @@ async function scan(slot) {
     state.regionQuarter = quarter;
   }
   btn.disabled = true; btn.textContent = "Scanning… keep the lid closed";
-  startProgress(SCAN_SECONDS[state.dpi]);
+  const follow = followJob();
   try {
     const r = await fetch(`/api/scan/${state.session}/${slot}`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({dpi: state.dpi})});
+    follow.stop();
     handleResult(slot, await r.json());
-  } catch (e) { handleResult(slot, {error: "Couldn't reach the scanner: " + e}); }
-  stopProgress();
+  } catch (e) { follow.stop(); handleResult(slot, {error: "Couldn't reach the scanner: " + e}); }
+}
+
+// Drive this page's progress bar and button from the server's real steps: scanning (lid closed), receiving the
+// image from the printer, measuring. Returns {stop, done} where done resolves with the finished job.
+const STEP_TEXT = {scanning: "Scanning… keep the lid closed", receiving: "Receiving the image from the printer…", measuring: "Measuring…"};
+function followJob() {
+  const bar = $("#prog"); bar.classList.add("on");
+  let stopped = false, resolve;
+  const done = new Promise(r => resolve = r);
+  (async function tick() {
+    while (!stopped) {
+      let job = null;
+      try { job = await (await fetch("/api/scan-job", {cache: "no-store"})).json(); } catch (e) {}
+      if (job && job.sid === state.session && STEP_TEXT[job.stage]) {
+        const b = $("#prog i"), btn = $("#scanBtn");
+        if (b) b.style.width = (job.progress || 0) + "%";
+        if (btn) btn.textContent = STEP_TEXT[job.stage] + (job.eta ? ` about ${Math.max(1, Math.round(job.eta / 10) * 10)} s left` : "");
+      } else if (job && job.started && (job.sid !== state.session || job.stage === "done" || job.stage === "error")) {
+        resolve(job);
+      }
+      await new Promise(r => setTimeout(r, 1000));
+    }
+  })();
+  return {stop() { stopped = true; const b = $("#prog i"); if (b) b.style.width = "100%"; }, done};
 }
 
 async function upload(slot, file) {
@@ -701,7 +736,7 @@ const COLOR_KEY = `<div class="legend key">
   <span><i style="background:${SEV_COLOR.green}"></i>clean</span>
   <span><i style="background:${SEV_COLOR.yellow}"></i>yellow · worth a look (counts)</span>
   <span><i style="background:${SEV_COLOR.red}"></i>red · likely costs grade (counts)</span>
-  <span><i style="background:${SEV_COLOR.cleared}"></i>blue · cleared by the 180° scan, likely dust (not counted)</span>
+  <span><i style="background:${SEV_COLOR.cleared}"></i>blue · not seen in the other scans: likely dust, glare or shadow (not counted)</span>
 </div>`;
 const LOGOS = {TAG: "/static/logos/tag.png", PSA: "/static/logos/psa.svg", CGC: "/static/logos/cgc.svg"};
 // Which corner sits at the left and right end of each edge strip (side strips are rotated so the edge is on top).
@@ -1110,7 +1145,7 @@ function dingsMap(d) {
   const W = 250, H = 350, g = 30;
   const svg = `<svg viewBox="0 0 ${W + 2 * g} ${H + 2 * g}" class="dm-svg" aria-label="Card diagram with centering">
     <rect x="${g}" y="${g}" width="${W}" height="${H}" fill="none" stroke="#222" stroke-width="1.6"/>
-    ${c && c.widths_mm ? (() => { const k = W / 63.5; const L = g + c.widths_mm.left * k, R = g + W - c.widths_mm.right * k, T = g + c.widths_mm.top * k, B = g + H - c.widths_mm.bottom * k;
+    ${c && c.widths_mm && c.lr !== undefined ? (() => { const k = W / 63.5; const L = g + c.widths_mm.left * k, R = g + W - c.widths_mm.right * k, T = g + c.widths_mm.top * k, B = g + H - c.widths_mm.bottom * k;
       return `<rect x="${L}" y="${T}" width="${R - L}" height="${B - T}" fill="none" stroke="#222" stroke-width="1" stroke-dasharray="4 3"/>
         <path d="M${L} ${T}L${R} ${B}M${R} ${T}L${L} ${B}" stroke="#222" stroke-width=".8" stroke-dasharray="4 3"/>
         <text x="${(L + g) / 2 + 2}" y="${g + H / 2}" class="dm-c" transform="rotate(-90 ${(L + g) / 2 + 2} ${g + H / 2})">C ${c.lr.toFixed(2)}</text>
@@ -1160,10 +1195,12 @@ function dingsList(d) {
   const pill = f => f.ignored
     ? `<span class="pill ignored">Ignored by you</span>`
     : f.cleared
-    ? `<span class="pill cleared">Cleared by 180° scan</span>`
+    ? `<span class="pill cleared">${f.seen_in && Object.keys(f.seen_in).length > 1 ? "Cleared by the other scans" : "Cleared by 180° scan"}</span>`
     : `<span class="pill ${f.severity === "red" ? "no" : "maybe"}">${f.severity === "red" ? "likely costs grade" : "worth a look"}</span>`;
   const bothBadge = f => f.ignored ? `<span class="both clr">You marked this as not a defect · not counted</span>`
-    : f.cleared ? `<span class="both clr">Not in the 180° scan · likely dust · not counted</span>`
+    : f.cleared ? `<span class="both clr">${f.seen_in && Object.keys(f.seen_in).length > 1
+        ? `Not in any of the ${Object.keys(f.seen_in).length} other scans (${Object.keys(f.seen_in).join(", ")}) · likely dust, glare or shadow · not counted`
+        : "Not in the 180° scan · likely dust · not counted"}</span>`
     : f.seen_in ? (() => {
         const ks = Object.keys(f.seen_in), n = ks.filter(k => f.seen_in[k]).length;
         const detail = ks.map(k => `${k} ${f.seen_in[k] ? "✓" : "✗"}`).join(" · ");
@@ -1174,7 +1211,7 @@ function dingsList(d) {
     : f.both === false ? `<span class="both no">Only in one scan</span>` : "";
   const sev = f => f.cleared ? "cleared" : f.severity;
   return `<div class="findings">${all.map(f => `
-    <div class="finding ${f.cleared ? "is-cleared" : ""} ${f.ignored ? "is-ignored" : ""}" data-zoom="${esc(f.img)}" data-side="${f.side}" data-sev="${sev(f)}" data-rect="${(f.rect || []).join(",")}" data-box="${(f.view_box || []).join(",")}" data-title="${f.side} · ${esc(f.kind)}${f.cleared ? " (cleared by 180° scan)" : ""}">
+    <div class="finding ${f.cleared ? "is-cleared" : ""} ${f.ignored ? "is-ignored" : ""}" data-zoom="${esc(f.img)}" data-side="${f.side}" data-sev="${sev(f)}" data-rect="${(f.rect || []).join(",")}" data-box="${(f.view_box || []).join(",")}" data-title="${f.side} · ${esc(f.kind)}${f.cleared ? " (not seen in the other scans, not counted)" : ""}">
       <img src="${esc(f.img)}" alt="${esc(f.kind)}">
       <div>${pill(f)}
         <b>${esc(f.kind)}</b>
@@ -1215,20 +1252,44 @@ function surfaceCards(d) {
     if (!s) continue;
     html += `<div class="surf-card"><h5>${side} surface</h5>
       <p class="muted small" style="margin:0">${s.marks.length ? `${s.marks.length} possible mark${s.marks.length > 1 ? "s" : ""}.` : "No dents, scratches or indents stood out."}
-      ${(s.debris || []).length ? `<br>Ignored ${s.debris.length} speck${s.debris.length > 1 ? "s" : ""} of dust or lint (grey circles) that showed up in only one scan.` : ""}</p>
-      <p class="muted small" style="margin:4px 0">Light from ${s.light_pairs === 2 ? "4 directions (0°/180° and 90°/270° scans)" : "2 directions (0°/180° scans) · add the 90° and 270° scans for 4"}.</p>
-      ${s.relief ? `<figure class="relief-fig" data-zoom="${esc(s.relief)}" data-src="${esc(s.relief)}" data-src-label="Surface relief · 4 light directions" data-side="${side}" data-full="1" data-rect="0,0,${Math.round(2.5 * (d[side].ppi || 1200))},${Math.round(3.5 * (d[side].ppi || 1200))}" data-title="${side} · surface relief (4 light directions)">
-          <img class="surface-img relief-img" src="${esc(s.relief)}" alt="${side} surface relief map">
-          <figcaption class="small muted">Surface relief from 4 light directions, like TAG's surface map: the printed colours cancel out and only the card's physical surface is left. Flat card reads as even grey; dents, creases, scratches and roller lines show as light/dark ridges. Holo and silver areas reflect like mirrors and look busy here. Click to zoom.</figcaption></figure>` : ""}
-      <img class="surface-img" src="${esc(s.heatmap)}" alt="${side} surface differences">
+      ${(s.debris || []).length ? `<br>Not counted: ${s.debris.length} speck${s.debris.length > 1 ? "s" : ""} (grey circles) that showed up in only one scan (dust or lint) or were too small and faint to matter.` : ""}</p>
+      <p class="muted small" style="margin:4px 0">Light from ${reliefDirs(s)} directions (${esc((s.relief_scans || ["0°", "180°"]).join(", "))} scans)${reliefDirs(s) < 4 ? " · scan the missing quarter turns for all 4" : ""}.</p>
+      ${s.relief ? `<figure class="relief-fig" data-zoom="${esc(s.relief)}" data-src="${esc(s.relief)}" data-src-label="Surface relief · ${reliefDirs(s)} light directions" data-side="${side}" data-full="1" data-rect="0,0,${Math.round(2.5 * (d[side].ppi || 1200))},${Math.round(3.5 * (d[side].ppi || 1200))}" data-title="${side} · surface relief (${reliefDirs(s)} light directions)">
+          ${s.relief_web && s.photo_web ? `<div class="relief-stack"><img src="${esc(s.photo_web)}" alt="${side} scan">
+              <img class="relief-over" src="${esc(s.relief_web)}" alt="${side} surface map" style="opacity:1"></div>
+            <div class="relief-ctl" data-noclick="1"><button type="button" data-relief-set="0">Photo</button>
+              <input type="range" min="0" max="100" value="100" aria-label="Fade between the photo and the surface map" data-relief-slider>
+              <button type="button" data-relief-set="100">Surface map</button></div>`
+          : `<img class="surface-img relief-img" src="${esc(s.relief)}" alt="${side} surface relief map">`}
+          <figcaption class="small muted"><b>Built from ${reliefDirs(s)} scans (${esc((s.relief_scans || ["0°", "180°", "90°", "270°"]).join(", "))}).</b> ${RELIEF_NOTE[reliefDirs(s)] || ""}
+            <br><b>How to read it:</b> this is the card's physical surface with the printing taken out, the same idea as TAG's surface map. Flat card is even grey. A dent, crease, scratch or roller line shows as a light-and-dark ridge that doesn't follow the artwork. Slide toward <i>Photo</i> to see what's printed there. Raised or etched designs (textured full arts, gold cards) show as ridges along the artwork; that's normal. Holo and silver foil reflect like mirrors, so they look busy. Click the map to zoom in.
+            <br><b>How TAG uses theirs:</b> TAG lights the card from several directions and reads scratches, print lines, dents and ink defects off this kind of map; each one it finds is a surface DING on the report.</figcaption></figure>` : ""}
+      ${s.heatmap ? `<img class="surface-img" src="${esc(s.heatmap)}" alt="${side} surface differences">` : ""}
       ${s.heatmap_q ? `<img class="surface-img" src="${esc(s.heatmap_q)}" alt="${side} surface differences, 90° and 270° scans">` : ""}
       ${[...s.marks.map(m => ({...m, what: m.strength > 7 ? "Surface mark · likely costs grade" : "Surface mark · worth a look"})),
-         ...(s.debris || []).map(m => ({...m, what: `Dust or lint · only in the ${m.only_in}`}))].map(m => m.pair ? `
-        <figure class="spot" data-zoom="${esc(m.pair)}"><img src="${esc(m.pair)}" alt="${esc(m.what)} in both scans">
+         ...(s.debris || []).map(m => ({...m, what: m.faint ? "Too small and faint to count · likely the print's dot pattern" : `Dust or lint · only in the ${m.only_in}`}))].map(m => m.pair ? `
+        <figure class="spot" data-zoom="${esc(m.pair)}" ${spotZoom(d, side, m)}><img src="${esc(m.pair)}" alt="${esc(m.what)} in both scans">
           <figcaption><b>${esc(m.what)}</b> · ${m.length_mm} mm · ${m.x_pct}% across, ${m.y_pct}% down${m.light ? ` · seen by ${m.light.length > 1 ? "both light pairs" : m.light[0] === "0/180" ? "the 0°/180° pair only" : "the 90°/270° pair only"}` : ""}</figcaption></figure>` : "").join("")}
     </div>`;
   }
   return html;
+}
+
+const reliefDirs = s => s.relief_dirs || (s.light_pairs === 2 ? 4 : 2);
+const RELIEF_NOTE = {
+  2: "Lit along the card only: marks running across it show up, marks running top to bottom barely do. Add the 90° and 270° scans for the full map.",
+  3: "Lit along the card and from one side across it: marks running top to bottom show more faintly than with all 4. Add the missing quarter turn for the full map.",
+  4: "Lit from all four sides, so marks show whichever way they run.",
+};
+// A surface mark opens in the side-by-side viewer with every scan of this side, like corner and edge findings.
+function spotZoom(d, side, m) {
+  const sd = d[side];
+  if (!sd || !sd.zoom) return "";
+  const ppi = sd.ppi || 1200, pad = sd.view_pad || 0, mmpx = ppi / 25.4;
+  const cx = pad + m.x_pct / 100 * 2.5 * ppi, cy = pad + m.y_pct / 100 * 3.5 * ppi;
+  const half = Math.max((m.length_mm || 0) / 2 + 0.4, 0.8) * mmpx, view = 4 * mmpx;
+  const r = v => Math.round(v);
+  return `data-side="${side}" data-rect="${r(cx - view)},${r(cy - view)},${r(cx + view)},${r(cy + view)}" data-box="${r(cx - half)},${r(cy - half)},${r(cx + half)},${r(cy + half)}" data-sev="${m.strength > 7 ? "red" : "yellow"}" data-title="${side} · ${esc(m.what || "surface mark")}"`;
 }
 
 function digReport(d) {
@@ -1282,14 +1343,17 @@ function digReport(d) {
   </article>`;
 }
 
+// A border that couldn't be found (busy full-art edge) shows as "not found" rather than breaking the report.
+const mmPair = (a, b) => [a, b].map(v => v == null ? "not found" : Number(v).toFixed(2)).join(" · ") + (a != null || b != null ? " mm" : "");
+
 function centerCard(m, label) {
   if (!m) return `<div class="surf-card"><h5>${label}</h5><p class="muted">Not scanned yet.</p></div>`;
   const c = m.centering || {};
   return `<div class="surf-card"><h5>${label} · ${centerTag(c)}</h5>
     <div class="diagram">${centerScan(m, label.toLowerCase())}
       <div class="kv">
-        <div><span>Left · right border</span><span>${c.widths_mm ? c.widths_mm.left.toFixed(2) + " · " + c.widths_mm.right.toFixed(2) + " mm" : "—"}</span></div>
-        <div><span>Top · bottom border</span><span>${c.widths_mm ? c.widths_mm.top.toFixed(2) + " · " + c.widths_mm.bottom.toFixed(2) + " mm" : "—"}</span></div>
+        <div><span>Left · right border</span><span>${c.widths_mm ? mmPair(c.widths_mm.left, c.widths_mm.right) : "—"}</span></div>
+        <div><span>Top · bottom border</span><span>${c.widths_mm ? mmPair(c.widths_mm.top, c.widths_mm.bottom) : "—"}</span></div>
         <div><span>Precise centering</span><span>${c.lr !== undefined ? `${c.lr.toFixed(2)} / ${(100 - c.lr).toFixed(2)} · ${c.tb.toFixed(2)} / ${(100 - c.tb).toFixed(2)}` : "—"}</span></div>
       </div></div></div>`;
 }
@@ -1337,13 +1401,18 @@ function openZoom(el) {
   Z.rect = rect;
   Z.box = el.dataset.box ? el.dataset.box.split(",").map(Number) : null;
   Z.sev = el.dataset.sev || "yellow";
-  const sources = custom ? [[custom, el.dataset.srcLabel || "Surface relief"]] : [[zoom.view, "First scan"]];
-  if (!custom && zoom.view_r180) sources.push([zoom.view_r180, "180° scan, turned back"]);
+  // Every scan of this side (first, 180°, and the 90°/270° turns when scanned), all turned the same way up.
+  const sources = custom ? [[custom, el.dataset.srcLabel || "Surface relief"]]
+    : zoom.views ? zoom.views.map(v => [v.src, v.label])
+    : [[zoom.view, "First scan"], ...(zoom.view_r180 ? [[zoom.view_r180, "180° scan, turned back"]] : [])];
   $("#zoomTitle").textContent = el.dataset.title || side;
   const panes = $("#zoomPanes");
-  // Wide strips (top/bottom edges) get the two scans one above the other so each uses the full width.
+  // Wide strips (top/bottom edges) get the scans one above the other so each uses the full width;
+  // four scans of a corner or spot sit in a 2×2 grid.
   const [x0, y0, x1, y1] = rect;
-  panes.classList.toggle("rows", (x1 - x0) / (y1 - y0) > 1.6);
+  const wide = (x1 - x0) / (y1 - y0) > 1.6;
+  panes.classList.toggle("rows", wide);
+  panes.classList.toggle("quad", !wide && sources.length === 4);
   panes.innerHTML = sources.map(([src, label]) => `<div class="zp"><span class="zp-label">${label}</span><img src="${esc(src)}" alt="${label}" draggable="false">${Z.box ? `<div class="zp-box ${Z.sev}"></div>` : ""}</div>`).join("");
   Z.panes = [...panes.querySelectorAll(".zp")].map(p => ({el: p, img: $("img", p), box: $(".zp-box", p)}));
   // Show only the clicked area (cropped), except for full-card views like centering.
@@ -1394,7 +1463,15 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && $("#zoom")
 window.addEventListener("resize", () => { if ($("#zoom").classList.contains("on")) zoomFit(Z.rect); });
 
 function wireReport() {
-  document.querySelectorAll("#results [data-zoom]").forEach(el => el.onclick = () => {
+  // Relief overlay: fade the surface map in and out over the card photo, like the slider on TAG's report.
+  document.querySelectorAll("#results [data-relief-slider]").forEach(sl => {
+    const over = sl.closest("figure").querySelector(".relief-over");
+    const apply = () => { over.style.opacity = sl.value / 100; };
+    sl.oninput = apply;
+    sl.closest(".relief-ctl").querySelectorAll("[data-relief-set]").forEach(b => b.onclick = () => { sl.value = b.dataset.reliefSet; apply(); });
+  });
+  document.querySelectorAll("#results [data-zoom]").forEach(el => el.onclick = e => {
+    if (e.target.closest("[data-noclick]")) return;  // e.g. the relief slider under a zoomable map
     if (el.dataset.rect && state.report && state.report[el.dataset.side] && state.report[el.dataset.side].zoom) return openZoom(el);
     $("#modal img").src = el.dataset.zoom; $("#modal").classList.add("on");
   });
@@ -1413,9 +1490,17 @@ function wireReport() {
 
 async function buildReport() {
   const box = $("#results");
+  // Saved reports come back at once; only say "building" when this one is actually being built (new scans re-run
+  // the surface checks, which takes up to a minute).
+  const slow = box.classList.contains("on") ? null : setTimeout(() => {
+    box.innerHTML = `<div class="loading-report"><div class="progress on"><i style="width:35%"></i></div>
+      <p class="muted small">Checking the new scans… this takes up to a minute after a scan.</p></div>`;
+    box.classList.add("on");
+  }, 1200);
   if (!state.fees) { try { state.fees = await (await fetch("/api/fees")).json(); } catch (e) { state.fees = null; } }
   const d = await (await fetch(`/api/report/${state.session}`)).json();
-  if (d.error) return;
+  clearTimeout(slow);
+  if (d.error) { box.classList.remove("on"); return; }
   state.report = d;
   box.innerHTML = digReport(d);
   wireReport();
@@ -1446,7 +1531,7 @@ async function loadTagCompare() {
   const pair = c => c ? `${pct(c[0])} · ${pct(c[1])}` : "—";
   const y = t.yours;
   const tone = g => /^10/.test(g) ? "good" : /^9/.test(g) ? "maybe" : "no";
-  const gname = g => ({"10P": "Pristine 10", "10": "Gem Mint 10", "9": "Mint 9", "8.5": "NM-MT+ 8.5", "8": "NM-MT 8"})[g] || "TAG " + g;
+  const gname = g => ({"10P": "Pristine 10", "10": "Gem Mint 10", "9.5": "TAG 9.5", "9": "Mint 9", "8.5": "NM-MT+ 8.5", "8": "NM-MT 8"})[g] || "TAG " + g;
   const verdict = t.missing.length
     ? `<div class="tc-verdict pending">Scan the ${esc(t.missing.join(" and "))} to compare the whole card.</div>`
     : `<div class="tc-verdict ${tone(t.call || "")}"><div><span>Against TAG's own grades of this card</span><b>${t.call ? esc(gname(t.call)) : "below the copies saved"}</b></div>
@@ -1495,14 +1580,41 @@ async function openSaved(sid) {
     setThumb(slot, (d.center_view && d.center_view.img) || `/scans/${sid}/${slot}_overlay.jpg`, centeringShort(d.centering));
   }
   go(nextStep() || "front");
-  await buildReport();
-  $("#results").scrollIntoView();
+  if (await resumeScan()) return;
+  if (state.done.front || state.done.back) {
+    await buildReport();
+    if (state.done.front && state.done.back) $("#results").scrollIntoView();
+  }
 }
+
+// Coming back to a card whose scan is still running (the page was left mid-scan): show its progress here and
+// pick up the result when the server finishes it.
+async function resumeScan() {
+  let job;
+  try { job = await (await fetch("/api/scan-job", {cache: "no-store"})).json(); } catch (e) { return false; }
+  if (job.sid !== state.session || !STEP_TEXT[job.stage]) return false;
+  state.dpi = job.dpi || state.dpi;
+  go(job.slot);
+  const btn = $("#scanBtn");
+  btn.disabled = true; btn.textContent = STEP_TEXT[job.stage];
+  const follow = followJob();
+  job = await follow.done;
+  follow.stop();
+  if (job.stage === "done") {
+    const r = await fetch(`/scans/${state.session}/${job.slot}.json`, {cache: "no-store"});
+    if (r.ok) { handleResult(job.slot, await r.json()); return true; }
+  }
+  handleResult(job.slot, {error: job.error || "The scan didn't finish. Try scanning again."});
+  return true;
+}
+// This page shows its own progress for the card it has open; the bar is for other cards.
+window.scanbarHide = job => job.sid === state.session;
 
 $("#newCard").onclick = () => { history.replaceState(null, "", "/"); newSession(); };
 checkScanner(); setInterval(checkScanner, 15000);
 const savedCard = new URLSearchParams(location.search).get("card");
 if (savedCard && /^[A-Za-z0-9-]+$/.test(savedCard)) openSaved(savedCard); else newSession();
 </script>
+<script src="/static/js/scanbar.js"></script>
 </body>
 </html>

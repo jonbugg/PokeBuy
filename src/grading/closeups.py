@@ -23,6 +23,13 @@ CHIP_RED = (0.15, 0.25)
 # Corners: outline off a perfect rounded corner...
 CORNER_YELLOW_MM = 0.12
 CORNER_RED_MM = 0.20
+LOCAL_CORNER_EDGES = True  # measure each corner against where its neighbouring edges actually run
+# Outward (corner sticking out past the ideal curve): on a flat scan that's the cut, almost never damage (a bent
+# corner lifts off the glass rather than growing sideways), so it needs a bigger deviation to count.
+CORNER_OUT_YELLOW_MM = 0.20
+CORNER_OUT_RED_MM = 0.30
+LOCAL_CHIPS = True  # judge chips against the edge around them, not a perfectly straight line
+DEEP_CHIP_MM = 0.30  # a dip this deep counts in full however long it runs
 
 
 def _sev_rank(s):
@@ -154,6 +161,58 @@ def _corner_gap_shows_backdrop(m, pts, name, r):
     return out
 
 
+def _corner_devs(m, pts, labels, sd):
+    """Each corner's outline deviation (mm, + = material missing, - = sticking out) from the ideal rounded corner.
+
+    The ideal corner sits where this corner's two neighbouring edges actually run. A card cut a hair narrow toward
+    one end (~0.15 mm over the top 15-20 mm, as on the Mega Darkrai) has its side edge slightly inside the
+    straightened rectangle there, and that carries into the corner's curve where it meets that edge; against
+    the rectangle, that read as ~0.2 mm of corner wear on a clean card. So each neighbouring edge's offset
+    (median over the 5 mm next to the corner) is taken out: in full along the straight bits, and blended around
+    the curve (all of the side edge's offset where the curve meets the side, all of the top/bottom edge's where
+    it meets the top or bottom)."""
+    r = getattr(m, "_radius_px", None) or m.px(2.6)
+    devs = {}
+    for name in CORNER_NAMES:
+        idx = np.where(labels == name)[0]
+        if not len(idx):
+            continue
+        p = pts[idx]
+        dev = sd[idx].astype(float) * m.mmpp
+        if LOCAL_CORNER_EDGES:
+            left, top = "left" in name, "top" in name
+            cx, cy = (r if left else m.cw - 1 - r), (r if top else m.ch - 1 - r)
+            span, zone = m.px(5.0), r * 1.15
+            vs, hs = pts[labels == ("left" if left else "right")], pts[labels == ("top" if top else "bottom")]
+            vnear = vs[(vs[:, 1] < zone + span) if top else (vs[:, 1] > m.ch - 1 - zone - span)]
+            hnear = hs[(hs[:, 0] < zone + span) if left else (hs[:, 0] > m.cw - 1 - zone - span)]
+            ox = float(np.median(vnear[:, 0] if left else m.cw - 1 - vnear[:, 0])) * m.mmpp if len(vnear) > 10 else 0.0
+            oy = float(np.median(hnear[:, 1] if top else m.ch - 1 - hnear[:, 1])) * m.mmpp if len(hnear) > 10 else 0.0
+            ox, oy = np.clip([ox, oy], -0.3, 0.3)  # a real edge chip next to the corner shouldn't move the corner
+            past_side = (p[:, 1] > cy) if top else (p[:, 1] < cy)   # beyond the curve, along the side edge
+            past_end = (p[:, 0] > cx) if left else (p[:, 0] < cx)   # beyond the curve, along the top/bottom edge
+            arc = ~past_side & ~past_end
+            th = np.arctan2(np.abs(p[:, 1] - cy), np.abs(p[:, 0] - cx))  # 0 where the curve meets the side edge
+            shift = np.where(past_side & ~past_end, ox, np.where(past_end & ~past_side, oy, 0.0))
+            shift = np.where(arc, ox * np.cos(th) ** 2 + oy * np.sin(th) ** 2, shift)
+            dev = dev - shift
+        dev = np.where((dev > 0) & ~_corner_gap_shows_backdrop(m, p, name, r), 0.0, dev)
+        devs[name] = (idx, dev)
+    return devs
+
+
+def _local_dents(m, dent_mm):
+    """How far each point dips in compared with the edge around it (mm). A chip or nick is a short bite out of
+    the edge; a long, shallow inward run (a card cut a hair narrow toward one end, ~0.2 mm over 10+ mm) is the
+    cut, not damage, so it's measured against a ~6 mm running median of the edge itself. A deep missing strip
+    still counts in full."""
+    if not LOCAL_CHIPS or len(dent_mm) == 0:
+        return dent_mm
+    base = _rolling_median(dent_mm, int(round(m.px(6.0))))
+    local = np.clip(dent_mm - base, 0, None)
+    return np.where(dent_mm > DEEP_CHIP_MM, dent_mm, local)
+
+
 def subscores(m: Measurement):
     if not m.edges_reliable or getattr(m, "_outline", None) is None:
         return None
@@ -167,19 +226,12 @@ def subscores(m: Measurement):
         along = pts[idx, 0] if side in ("top", "bottom") else pts[idx, 1]
         idx = idx[np.argsort(along)]
         extra = (rim[idx] - typical[side]) * m.mmpp
-        dent = _edge_depths(m, side, pts[idx])
+        dent = _local_dents(m, _edge_depths(m, side, pts[idx]))
         out["edges"][side] = {"fray": _score(FRAY_PER_MM2 * _defect_area(m, extra, 0.06, 0.04)),
                               "fill": _score(FILL_PER_MM2 * _defect_area(m, dent, 0.06, 0.04))}
-    for name in CORNER_NAMES:
-        idx = np.where(labels == name)[0]
-        if not len(idx):
-            continue
+    for name, (idx, dev) in _corner_devs(m, pts, labels, sd).items():
         side = "top" if name.startswith("top") else "bottom"
         extra = (rim[idx] - typical[side]) * m.mmpp
-        dev = sd[idx] * m.mmpp
-        r_px = getattr(m, "_radius_px", None)
-        if r_px is not None:
-            dev = np.where((dev > 0) & ~_corner_gap_shows_backdrop(m, pts[idx], name, r_px), 0.0, dev)
         shape = float(np.abs(dev).max())
         out["corners"][name] = {"fray": _score(FRAY_PER_MM2 * _defect_area(m, extra, 0.06, 0.04)),
                                 "fill": _score(FILL_PER_MM2 * _defect_area(m, dev, 0.08, 0.06)),
@@ -201,7 +253,7 @@ def build_findings(m: Measurement):
         along = pts[idx, 0] if side in ("top", "bottom") else pts[idx, 1]
         idx = idx[np.argsort(along)]
         extra_mm = (rim[idx] - typical[side]) * m.mmpp
-        dent_mm = _edge_depths(m, side, pts[idx])
+        dent_mm = _local_dents(m, _edge_depths(m, side, pts[idx]))
 
         def runs(flags, min_mm):
             return _runs(flags, min_len=max(2, int(round(m.px(min_mm)))))
@@ -219,21 +271,16 @@ def build_findings(m: Measurement):
                 findings.append(_edge_finding(m, side, "chip / nick", sev, pts[idx[a:b]],
                                               size_mm=(b - a) * m.mmpp, depth_mm=float(dent_mm[a:b].max())))
 
-    for name in CORNER_NAMES:
-        idx = np.where(labels == name)[0]
-        if not len(idx):
-            continue
-        dev_mm = sd[idx] * m.mmpp
-        r_px = getattr(m, "_radius_px", None)
-        if r_px is not None:
-            real = _corner_gap_shows_backdrop(m, pts[idx], name, r_px)
-            dev_mm = np.where((dev_mm > 0) & ~real, 0.0, dev_mm)
-        worst = float(np.abs(dev_mm).max())
-        if worst > CORNER_YELLOW_MM:
-            sev = "red" if worst > CORNER_RED_MM else "yellow"
-            off = idx[np.abs(dev_mm) > CORNER_YELLOW_MM]
-            kind = "corner wear (missing)" if dev_mm[np.argmax(np.abs(dev_mm))] > 0 else "corner bent / lifted"
-            findings.append(_box_finding(m, name, kind, sev, pts[off], size_mm=worst, depth_mm=worst))
+    for name, (idx, dev_mm) in _corner_devs(m, pts, labels, sd).items():
+        inward, outward = float(max(dev_mm.max(), 0.0)), float(max(-dev_mm.min(), 0.0))
+        if inward > CORNER_YELLOW_MM:
+            sev = "red" if inward > CORNER_RED_MM else "yellow"
+            findings.append(_box_finding(m, name, "corner wear (missing)", sev, pts[idx[dev_mm > CORNER_YELLOW_MM]],
+                                         size_mm=inward, depth_mm=inward))
+        elif outward > CORNER_OUT_YELLOW_MM:
+            sev = "red" if outward > CORNER_OUT_RED_MM else "yellow"
+            findings.append(_box_finding(m, name, "corner bent / lifted", sev, pts[idx[-dev_mm > CORNER_OUT_YELLOW_MM]],
+                                         size_mm=outward, depth_mm=outward))
         side = "top" if name.startswith("top") else "bottom"
         extra_mm = (rim[idx] - typical[side]) * m.mmpp
         for a, b in _runs(extra_mm > WHITE_RED[0], min_len=max(2, int(round(m.px(0.2))))):

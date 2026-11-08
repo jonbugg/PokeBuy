@@ -1,0 +1,20 @@
+{
+ "card": {
+  "perGrade": 2,
+  "year": 2000,
+  "setPath": "WOTC Pok\u00e9mon",
+  "setName": "Neo Genesis",
+  "match": "Lugia"
+ },
+ "url": "/pop-report/Pok\u00e9mon/2000/WOTC Pok\u00e9mon/Lugia/9%2F111?setName=Neo+Genesis&variation=Holo",
+ "pop": {
+  "6": 16,
+  "7": 11,
+  "8": 12,
+  "9": 1,
+  "10": 0,
+  "10P": 0,
+  "8.5": 6
+ },
+ "ppi": 1200
+}

@@ -413,7 +413,7 @@ def _border_width(lab_strip, min_px, max_px, hold):
     return None, 0.0, ref
 
 
-def _border_width_slices(lab_strip, min_px, max_px, hold, slice_px, settle_px=None):
+def _border_width_slices(lab_strip, min_px, max_px, hold, slice_px, settle_px=None, max_drift=18, depth_blur=3):
     """lab_strip: positions-along-edge x depth, depth 0 is the card's outer edge.
 
     Finds where the border ends separately in each ~1 mm slice along the edge, then keeps the slices
@@ -425,25 +425,45 @@ def _border_width_slices(lab_strip, min_px, max_px, hold, slice_px, settle_px=No
     if n < 6:
         return None, 0.0, None
     prof = lab_strip[:n * slice_px].reshape(n, slice_px, -1, 3).mean(axis=1)  # slices x depth x 3
-    prof = cv2.GaussianBlur(prof, (3, 1), 0)
+    # Smooth across the border's depth only (cv2 ksize is (along depth, along edge)); a textured border's
+    # mesh needs a wider kernel than a flat one.
+    prof = cv2.GaussianBlur(prof, (depth_blur, 1), 0)
     # The border's colour, sampled away from the cut edge (which carries shading, glare and blur).
     z0, z1 = int(min_px * 0.5), int(min_px * 0.95)
     refs = np.median(prof[:, z0:z1], axis=1)                      # each slice's border colour
     side_ref = np.median(refs, axis=0)
     # How much the border itself varies along this side (glare streaks, holo sparkle).
     side_noise = np.median(np.linalg.norm(prof[:, z0:z1] - side_ref, axis=2))
+    if max_drift > 18:
+        # Textured foil: the border's tone changes slowly along the edge, so judge each slice's noise against
+        # its own border colour rather than the side's average (which would make every edge look like noise).
+        side_noise = np.median(np.linalg.norm(prof[:, z0:z1] - refs[:, None, :], axis=2))
     widths = np.full(n, np.nan)
     for i in range(n):
-        if np.linalg.norm(refs[i] - side_ref) > 18:               # artwork where the border should be
+        if np.linalg.norm(refs[i] - side_ref) > max_drift:        # artwork where the border should be
             continue
         dist = np.linalg.norm(prof[i] - refs[i], axis=1)
         noise = np.median(np.abs(dist[z0:z1] - np.median(dist[z0:z1]))) * 1.48
         thr = max(10.0, 5 * noise, 2.5 * side_noise)
         settle = settle_px or hold
-        for x in range(min_px, min(max_px, len(dist) - settle)):
+        px_mm = min_px / 0.035 / 25.4                                # pixels per mm (min_px is 0.035 in)
+        band_max, back_len = int(1.6 * px_mm), max(3, int(0.35 * px_mm))
+        x = min_px
+        while x < min(max_px, len(dist) - settle):
             # The art boundary stays changed; a line of small print inside the border (copyright, set
             # code) is ~1 mm tall and mostly gaps between letters, so it doesn't.
             if dist[x] > thr and dist[x:x + hold].min() > 0.6 * thr and (dist[x:x + settle] > 0.6 * thr).mean() >= 0.8:
+                # A taller line of print (e.g. "©2025 Pokémon / Nintendo / ..." across a dark border) can pass
+                # that test. Tell it apart by what follows: the border's own colour comes back within ~1.6 mm.
+                # Then keep looking for the real edge beyond it.
+                back = None
+                for r in range(x + hold, min(x + band_max, len(dist) - back_len)):
+                    if (dist[r:r + back_len] < 0.4 * thr).all():
+                        back = r
+                        break
+                if back is not None:
+                    x = back + back_len
+                    continue
                 inner = float(np.median(dist[x:x + hold]))
                 target = inner / 2                                 # half-way into the change = the edge
                 x0 = x
@@ -452,6 +472,7 @@ def _border_width_slices(lab_strip, min_px, max_px, hold, slice_px, settle_px=No
                 lo, hi = dist[x0 - 1], dist[x0]
                 widths[i] = x0 - 1 + ((target - lo) / (hi - lo) if hi > lo else 1.0)
                 break
+            x += 1
     good = widths[~np.isnan(widths)]
     good = good[good > min_px + 2]                                 # "changed at once" = the colour sample was off
     if len(good) < max(4, 0.2 * n):
@@ -464,7 +485,7 @@ def _border_width_slices(lab_strip, min_px, max_px, hold, slice_px, settle_px=No
     return float(np.mean(keep)), len(keep) / n, side_ref
 
 
-def _line_depth(lab_strip, min_px, max_px, slice_px, settle_px):
+def _line_depth(lab_strip, min_px, max_px, slice_px, settle_px, depth_blur=3):
     """Where a long straight line runs parallel to the edge between min_px and max_px deep.
 
     The border's inner edge is printed as one straight line along the whole side. Even where it barely
@@ -478,7 +499,9 @@ def _line_depth(lab_strip, min_px, max_px, slice_px, settle_px):
     if n < 6:
         return None, 0.0
     prof = lab_strip[:n * slice_px].reshape(n, slice_px, -1, 3).mean(axis=1)
-    prof = cv2.GaussianBlur(prof, (3, 1), 0)
+    # Smooth across the border's depth only (cv2 ksize is (along depth, along edge)); a textured border's
+    # mesh needs a wider kernel than a flat one.
+    prof = cv2.GaussianBlur(prof, (depth_blur, 1), 0)
     g = np.linalg.norm(prof[:, 2:] - prof[:, :-2], axis=2)          # slices x (depth-2), centred at x+1
     g = np.pad(g, ((0, 0), (1, 1)))
     lo, hi = min_px, min(max_px, g.shape[1] - settle_px - 1)
@@ -547,9 +570,19 @@ def measure_centering(m: Measurement):
     widths, agreement, refs = {}, {}, {}
     slice_px = max(4, int(round(m.px(1.0))))
     settle_px = int(round(m.px(1.2)))
+    # Etched gold and other textured foil borders change tone in patches along the edge (the etching runs
+    # different ways), so a slice's border colour can sit far from the side's average without being artwork.
+    # Each slice is still compared with its own border colour, and the slices that agree decide the width.
+    m.border_texture = _border_texture(m)
+    textured = m.border_texture > TEXTURED_BORDER
+    max_drift = 60 if textured else 18
+    # ~0.2 mm across the depth evens out a heavy cross-hatched mesh (score ~40, e.g. textured full arts); on lighter
+    # etching (gold, ~22) it would smear the copyright line into an edge, so only the heavy mesh gets it.
+    depth_blur = (int(round(m.px(0.2))) | 1) if m.border_texture > 30 else 3
     for side, strip in strips.items():
-        line, strength = _line_depth(strip, min_px, max_px, slice_px, settle_px)
-        w_s, a_s, r_s = _border_width_slices(strip, min_px, max_px, hold, slice_px, settle_px=settle_px)
+        line, strength = _line_depth(strip, min_px, max_px, slice_px, settle_px, depth_blur=depth_blur)
+        w_s, a_s, r_s = _border_width_slices(strip, min_px, max_px, hold, slice_px, settle_px=settle_px,
+                                             max_drift=max_drift, depth_blur=depth_blur)
         refs[side] = r_s
         # The colour-change answer, where enough slices agree; the straight-line answer stands in where the
         # border barely differs from the art (black holo border against dark art).

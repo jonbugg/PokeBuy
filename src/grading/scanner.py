@@ -35,7 +35,8 @@ class Scanner:
         m = re.search(r"<pwg:State>(\w+)</pwg:State>", r.text)
         return m.group(1) if m else "Unknown"
 
-    def scan(self, dpi: int = 600, region=DEFAULT_REGION) -> bytes:
+    def scan(self, dpi: int = 600, region=DEFAULT_REGION, on_stage=None) -> bytes:
+        """Scan the region and return the JPEG. on_stage("receiving") is called once the image starts coming in."""
         x, y, w, h = region
         settings = f"""<?xml version="1.0" encoding="UTF-8"?>
 <scan:ScanSettings xmlns:scan="{ESCL_NS}" xmlns:pwg="{PWG_NS}">
@@ -52,27 +53,37 @@ class Scanner:
   <scan:DocumentFormatExt>image/jpeg</scan:DocumentFormatExt>
   <scan:Intent>Photo</scan:Intent>
 </scan:ScanSettings>"""
-        r = httpx.post(
-            f"{self.base_url}/eSCL/ScanJobs",
-            content=settings.encode(),
-            headers={"Content-Type": "text/xml"},
-            timeout=30,
-        )
+        # The scanner refuses new jobs (503) for a short while after the previous one, e.g. right after
+        # the locate preview. Wait it out instead of reporting "busy" to the user.
+        for attempt in range(8):
+            r = httpx.post(
+                f"{self.base_url}/eSCL/ScanJobs",
+                content=settings.encode(),
+                headers={"Content-Type": "text/xml"},
+                timeout=30,
+            )
+            if r.status_code != 503:
+                break
+            time.sleep(5)
         if r.status_code == 503:
             raise RuntimeError("Scanner is busy. Wait for it to finish and try again.")
         r.raise_for_status()
         job = r.headers["Location"]
         if job.startswith("/"):
             job = self.base_url + job
-        # 1200 dpi scans can take several minutes on this class of printer.
+        # 1200 dpi scans can take several minutes on this class of printer. The image starts arriving once the
+        # scan head is done; on Wi-Fi a 1200 dpi image then takes a while longer to come through.
         for attempt in range(3):
-            doc = httpx.get(f"{job}/NextDocument", timeout=600)
-            if doc.status_code == 200:
-                return doc.content
-            if doc.status_code == 503:
-                time.sleep(2)
-                continue
-            doc.raise_for_status()
+            with httpx.stream("GET", f"{job}/NextDocument", timeout=600) as doc:
+                if doc.status_code == 200:
+                    if on_stage:
+                        on_stage("receiving")
+                    return b"".join(doc.iter_bytes())
+                if doc.status_code == 503:
+                    time.sleep(2)
+                    continue
+                doc.read()
+                doc.raise_for_status()
         raise RuntimeError("Scanner did not return an image.")
 
 

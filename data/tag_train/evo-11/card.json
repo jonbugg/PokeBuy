@@ -5,17 +5,18 @@
   "setPath": "Pok\u00e9mon XY",
   "setName": "Evolutions",
   "match": "Charizard",
-  "number": "11/108"
+  "number": "11/108",
+  "grades": [
+   "8",
+   "7",
+   "6"
+  ]
  },
  "url": "/pop-report/Pok\u00e9mon/2016/Pok\u00e9mon XY/Charizard/11%2F108?setName=Evolutions&variation=Holo",
  "pop": {
   "6": 5,
   "7": 2,
-  "8": 16,
-  "9": 0,
-  "10": 3,
-  "10P": 0,
-  "8.5": 0
+  "8": 16
  },
  "ppi": 1200
 }

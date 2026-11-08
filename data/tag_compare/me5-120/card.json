@@ -1,0 +1,34 @@
+{
+ "card": {
+  "perGrade": 4,
+  "year": 2026,
+  "setPath": "Pok\u00e9mon Mega Evolution",
+  "setName": "Pitch Black",
+  "match": "Mega Darkrai ex",
+  "number": "120/084",
+  "grades": [
+   "10P",
+   "10",
+   "9.5",
+   "9",
+   "8.5",
+   "8",
+   "7",
+   "6",
+   "5"
+  ]
+ },
+ "url": "/pop-report/Pok\u00e9mon/2026/Pok\u00e9mon Mega Evolution/Mega Darkrai ex/120%2F084?setName=Pitch+Black&variation=Mega+Hyper+Rare",
+ "pop": {
+  "5": 0,
+  "6": 0,
+  "7": 0,
+  "8": 2,
+  "9": 48,
+  "10": 26,
+  "10P": 0,
+  "9.5": 86,
+  "8.5": 10
+ },
+ "ppi": 1200
+}

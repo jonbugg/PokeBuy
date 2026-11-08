@@ -1,0 +1,343 @@
+{
+ "V3053310": {
+  "grade": "10",
+  "score": 986,
+  "centF": "52L/48R 49T/51B",
+  "centB": "52L/48R 50T/50B",
+  "dims": [
+   "3.455",
+   "2.475"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/b11ea835-7656-4c40-aac3-5280c248ec03",
+  "spots": []
+ },
+ "F6052077": {
+  "grade": "10",
+  "score": 950,
+  "centF": "48.7L/51.3R 49.4T/50.6B",
+  "centB": "51.9L/48.1R 50.7T/49.3B",
+  "dims": [
+   "3.469",
+   "2.488"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   1,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/d9921492-37fe-4b68-83ed-a3d7f49da1a9",
+  "spots": [
+   [
+    "front",
+    "SURFACE / SURFACE DEFECT",
+    990,
+    5873
+   ]
+  ]
+ },
+ "N1618184": {
+  "grade": "9",
+  "score": 947,
+  "centF": "53L/47R 48T/52B",
+  "centB": "47L/53R 53T/47B",
+  "dims": [
+   "3.475",
+   "2.484"
+  ],
+  "dings": [
+   0,
+   1,
+   0,
+   0,
+   0,
+   1
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/2d956078-2fdc-426f-a722-6dbd03ed41e5",
+  "spots": [
+   [
+    "back",
+    "SURFACE / PIT",
+    4107,
+    710
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    56,
+    51
+   ]
+  ]
+ },
+ "S7592906": {
+  "grade": "9",
+  "score": 903,
+  "centF": "51.1L/48.9R 51.9T/48.1B",
+  "centB": "48.8L/51.2R 49.8T/50.2B",
+  "dims": [
+   "3.463",
+   "2.474"
+  ],
+  "dings": [
+   0,
+   1,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/ef7ba370-0b8c-4588-a860-8f092df63d46",
+  "spots": [
+   [
+    "back",
+    "CORNER WEAR",
+    54,
+    5814
+   ]
+  ]
+ },
+ "Z4050385": {
+  "grade": "8.5",
+  "score": 896,
+  "centF": "51.4L/48.6R 51.4T/48.6B",
+  "centB": "53.4L/46.6R 49.1T/50.9B",
+  "dims": [
+   "3.474",
+   "2.480"
+  ],
+  "dings": [
+   0,
+   0,
+   1,
+   1,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/06d411fc-8491-4b8a-bdd7-9201774cab95",
+  "spots": [
+   [
+    "front",
+    "EDGE WEAR",
+    4358,
+    568
+   ],
+   [
+    "back",
+    "EDGE/CORNER / BEND",
+    425,
+    6079
+   ]
+  ]
+ },
+ "N4164423": {
+  "grade": "8.5",
+  "score": 855,
+  "centF": "58L/42R 48T/52B",
+  "centB": "47L/53R 49T/51B",
+  "dims": [
+   "3.474",
+   "2.477"
+  ],
+  "dings": [
+   0,
+   1,
+   0,
+   2,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/4004a1d0-7058-427f-8332-dd6ed787c0d3",
+  "spots": [
+   [
+    "back",
+    "EDGE WEAR",
+    1385,
+    47
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    49,
+    51
+   ],
+   [
+    "back",
+    "EDGE WEAR",
+    50,
+    3141
+   ]
+  ]
+ },
+ "F8640931": {
+  "grade": "8",
+  "score": 848,
+  "centF": "55L/45R 54T/46B",
+  "centB": "54L/46R 55T/45B",
+  "dims": [
+   "3.468",
+   "2.474"
+  ],
+  "dings": [
+   1,
+   1,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/7d1deec2-2107-4800-9834-e89509989e3f",
+  "spots": [
+   [
+    "front",
+    "CORNER WEAR",
+    50,
+    50
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    4176,
+    50
+   ]
+  ]
+ },
+ "U1049780": {
+  "grade": "8",
+  "score": 807,
+  "centF": "50.1L/49.9R 53.2T/46.8B",
+  "centB": "49.1L/50.9R 52.1T/47.9B",
+  "dims": [
+   "3.473",
+   "2.487"
+  ],
+  "dings": [
+   0,
+   2,
+   0,
+   1,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/a0b6f8c2-0995-4597-a587-5d0a729f3e61",
+  "spots": [
+   [
+    "back",
+    "EDGE WEAR",
+    2820,
+    5967
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    4073,
+    5754
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    50,
+    5754
+   ]
+  ]
+ },
+ "J3764165": {
+  "grade": "7",
+  "score": 726,
+  "centF": "51L/49R 53T/47B",
+  "centB": "46L/54R 52T/48B",
+  "dims": [
+   "3.470",
+   "2.476"
+  ],
+  "dings": [
+   0,
+   0,
+   1,
+   0,
+   1,
+   2
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/b512e9b9-2e88-4f4a-8ad0-a73cda1affac",
+  "spots": [
+   [
+    "front",
+    "SURFACE / WRINKLE/CREASE",
+    1958,
+    52
+   ],
+   [
+    "front",
+    "EDGE WEAR",
+    4261,
+    1461
+   ],
+   [
+    "back",
+    "SURFACE / SCRATCH(ES)",
+    4148,
+    5825
+   ],
+   [
+    "back",
+    "SURFACE / SCRATCH(ES)",
+    169,
+    5859
+   ]
+  ]
+ },
+ "N9971348": {
+  "grade": "6",
+  "score": 600,
+  "centF": "55.3L/44.7R 45.3T/54.7B",
+  "centB": "47.4L/52.6R 46.1T/53.9B",
+  "dims": [
+   "3.481",
+   "2.484"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   2,
+   1,
+   1
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/22a870d0-1508-4633-982f-e70529f076fe",
+  "spots": [
+   [
+    "front",
+    "SURFACE / SURFACE DEFECT",
+    214,
+    57
+   ],
+   [
+    "back",
+    "SURFACE / DENT",
+    4210,
+    91
+   ],
+   [
+    "back",
+    "EDGE WEAR",
+    1748,
+    45
+   ],
+   [
+    "back",
+    "EDGE WEAR",
+    49,
+    2750
+   ]
+  ]
+ }
+}

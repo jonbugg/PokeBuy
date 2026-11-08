@@ -50,14 +50,49 @@ def slopes(first, turned180_upright, q90_upright, q270_upright, ppi):
     return ratio(a, b), ratio(c, e)
 
 
+def from_scans(first, ppi, turned180=None, q90=None, q270=None):
+    """Slope maps from whichever scans exist, all already turned to the first scan's way up.
+
+    Returns (along, across, directions). Opposite pairs give a slope directly (0°/180° along the card, 90°/270°
+    across it). A single quarter turn without its opposite still gives the across slope, more roughly, by
+    comparing it with the average of the 0°/180° pair (light from neither side). A missing slope is left flat,
+    so a 0°/180°-only map is lit along the card only: marks running across the card show, marks running
+    along it barely do."""
+    a = _grey(first)
+    blur = lambda x: cv2.GaussianBlur(x, (0, 0), max(0.6, ppi / 1200))
+    hp = 3.0 / 25.4 * ppi
+
+    def ratio(p, q):
+        d = (blur(p) - blur(q)) / (blur(p) + blur(q))
+        return d - cv2.GaussianBlur(d, (0, 0), hp)
+
+    b = _aligned(a, turned180) if turned180 is not None else None
+    c = _aligned(a, q90) if q90 is not None else None
+    e = _aligned(a, q270) if q270 is not None else None
+    zero = np.zeros_like(a)
+    along = ratio(a, b) if b is not None else zero
+    if c is not None and e is not None:
+        across = ratio(c, e)
+    elif (c is not None or e is not None) and b is not None:
+        mid = (a + b) / 2
+        across = 2 * ratio(c, mid) if c is not None else -2 * ratio(e, mid)
+    else:
+        across = zero
+    directions = 1 + sum(x is not None for x in (b, c, e))
+    return along, across, directions
+
+
 def render(along, across, ppi, gain=10.0):
     """(relief image, slope-strength image) as 8-bit grey/heat images the size of the card."""
     gy, gx = along * gain, across * gain
     # one virtual light from the upper left, fairly low, like a raking lamp
     lx, ly, lz = -0.55, -0.55, 0.63
     shade = (-gx * lx - gy * ly + lz) / np.sqrt(gx * gx + gy * gy + 1.0)
-    lo, hi = np.percentile(shade, [1, 99])
-    relief = np.clip((shade - lo) / (hi - lo + 1e-6) * 255, 0, 255).astype(np.uint8)
+    # Like TAG's surface map: flat card sits at mid grey, ridges and dips go evenly lighter and darker. (A plain
+    # min-max stretch put flat card near white, which washed the relief out.)
+    dev = shade - np.median(shade)
+    spread = np.percentile(np.abs(dev), 99.5) + 1e-6
+    relief = np.clip(128 + dev / spread * 110, 0, 255).astype(np.uint8)
     strength = np.hypot(along, across)
     strength = cv2.GaussianBlur(strength, (0, 0), max(1.0, ppi / 600))
     s_hi = np.percentile(strength, 99.5)

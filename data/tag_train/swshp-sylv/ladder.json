@@ -1,0 +1,200 @@
+{
+ "M2173005": {
+  "grade": "10",
+  "score": 966,
+  "centF": "54L/46R 51T/49B",
+  "centB": "53L/47R 52T/48B",
+  "dims": [
+   "3.462",
+   "2.474"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/48b02e50-9a54-4684-a76e-0b16df98e97c",
+  "spots": []
+ },
+ "X3379535": {
+  "grade": "10",
+  "score": 962,
+  "centF": "53L/47R 47T/53B",
+  "centB": "47L/53R 48T/52B",
+  "dims": [
+   "3.475",
+   "2.482"
+  ],
+  "dings": [
+   0,
+   1,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/393cf8d7-1170-45f6-99bd-99afd519cc20",
+  "spots": [
+   [
+    "back",
+    "CORNER WEAR",
+    50,
+    50
+   ]
+  ]
+ },
+ "U6236390": {
+  "grade": "9",
+  "score": 936,
+  "centF": "54L/46R 49T/51B",
+  "centB": "49L/51R 52T/48B",
+  "dims": [
+   "3.474",
+   "2.483"
+  ],
+  "dings": [
+   1,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/e01139cc-25b5-42cd-aaa0-de20ce3296f8",
+  "spots": [
+   [
+    "front",
+    "CORNER WEAR",
+    60,
+    5827
+   ]
+  ]
+ },
+ "U2762833": {
+  "grade": "9",
+  "score": 904,
+  "centF": "60L/40R 55T/45B",
+  "centB": "45L/55R 56T/44B",
+  "dims": [
+   "3.466",
+   "2.477"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/302e85ff-5c3f-463b-aab2-14655e95fbd0",
+  "spots": []
+ },
+ "X6136398": {
+  "grade": "8.5",
+  "score": 892,
+  "centF": "56L/44R 50T/50B",
+  "centB": "47L/53R 53T/47B",
+  "dims": [
+   "3.463",
+   "2.475"
+  ],
+  "dings": [
+   0,
+   0,
+   1,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/24354956-5194-4a56-aadd-b82d0fa74839",
+  "spots": [
+   [
+    "front",
+    "EDGE WEAR",
+    62,
+    5644
+   ]
+  ]
+ },
+ "L5503025": {
+  "grade": "8",
+  "score": 801,
+  "centF": "61L/39R 65T/35B",
+  "centB": "56L/44R 61T/39B",
+  "dims": [
+   "3.473",
+   "2.484"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/dc195b42-6330-45bc-9c16-befc69881afb",
+  "spots": []
+ },
+ "V6882524": {
+  "grade": "7",
+  "score": 733,
+  "centF": "54L/46R 47T/53B",
+  "centB": "51L/49R 45T/55B",
+  "dims": [
+   "3.472",
+   "2.484"
+  ],
+  "dings": [
+   0,
+   3,
+   0,
+   3,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/aa3ac0f0-fb0c-445d-96cb-a4e42e31c516",
+  "spots": [
+   [
+    "back",
+    "EDGE WEAR",
+    51,
+    2430
+   ],
+   [
+    "back",
+    "EDGE WEAR",
+    4321,
+    543
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    49,
+    49
+   ],
+   [
+    "back",
+    "EDGE WEAR",
+    479,
+    54
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    4123,
+    5820
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    53,
+    5824
+   ]
+  ]
+ }
+}

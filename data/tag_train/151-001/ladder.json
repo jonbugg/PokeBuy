@@ -1,0 +1,35 @@
+{
+ "C3625666": {
+  "grade": "9",
+  "score": 932,
+  "centF": "52L/48R 52T/48B",
+  "centB": "51L/49R 52T/48B",
+  "dims": [
+   "3.469",
+   "2.483"
+  ],
+  "dings": [
+   0,
+   2,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/d68bd7c4-ddf2-49ce-a17c-55b35b3d686c",
+  "spots": [
+   [
+    "back",
+    "CORNER WEAR",
+    4058,
+    5731
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    62,
+    49
+   ]
+  ]
+ }
+}

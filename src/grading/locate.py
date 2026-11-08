@@ -75,13 +75,21 @@ def _paper_colour(bgr):
     vivid = chroma > 30
     if vivid.mean() < 0.15:
         return None
-    px = lab[vivid]
+    # The paper surrounds the card, so read its colour from the outer band of the scan where it shows and the
+    # card doesn't. Otherwise a gold or other boldly coloured full-art card, which covers more of a tight scan
+    # than the paper strip around it, gets taken for the paper.
+    h, w = vivid.shape
+    by, bx = max(2, int(h * 0.12)), max(2, int(w * 0.12))
+    band = np.zeros_like(vivid)
+    band[:by], band[-by:], band[:, :bx], band[:, -bx:] = True, True, True, True
+    use = vivid & band if (vivid & band).sum() > 0.25 * band.sum() else vivid
+    px = lab[use]
     # most common hue among the vivid pixels (a card's own art is varied; paper is one colour)
     hue = np.degrees(np.arctan2(px[:, 2] - 128, px[:, 1] - 128)) % 360
     hist, edges = np.histogram(hue, bins=36, range=(0, 360))
     i = int(np.argmax(hist))
     near = (hue >= edges[i] - 10) & (hue <= edges[i + 1] + 10)
-    if near.sum() < 0.1 * vivid.size:
+    if near.sum() < 0.1 * (band.sum() if use is not vivid else vivid.size):
         return None
     return np.median(px[near], axis=0)
 

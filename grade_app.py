@@ -27,6 +27,11 @@ LAST_REGION = SCANS / "last_region.json"
 app = Flask(__name__)
 _scan_lock = threading.Lock()
 _scanner = None
+# The scan in progress (or the last one), so any page can show its status and link back to it.
+SCAN_JOB = {}
+# Saved reports are reused until a scan or an ignore changes, or this number goes up. Bump it whenever a change
+# to the grading code changes what a report says, so saved reports rebuild once; other code edits leave them be.
+CODE_STAMP = 6
 
 
 def scanner():
@@ -71,8 +76,8 @@ class WrongSide(Exception):
     pass
 
 
-def _small(canon):
-    v = cv2.resize(cv2.cvtColor(canon, cv2.COLOR_BGR2GRAY), (25, 35), interpolation=cv2.INTER_AREA).astype(np.float32).ravel()
+def _small(canon, size=(25, 35)):
+    v = cv2.resize(cv2.cvtColor(canon, cv2.COLOR_BGR2GRAY), size, interpolation=cv2.INTER_AREA).astype(np.float32).ravel()
     return (v - v.mean()) / (v.std() + 1e-6)
 
 
@@ -109,10 +114,15 @@ def _upside_down(d, slot, canon):
     if not f.exists():
         return False
     ref = cv2.imread(str(f))
-    sa = _small(canon)
-    same_way = float(np.dot(sa, _small(ref))) / len(sa)
-    turned = float(np.dot(sa, _small(cv2.rotate(ref, cv2.ROTATE_180)))) / len(sa)
-    return same_way > turned + 0.2  # partners should match only once one is turned 180°
+    # A finer thumbnail than _small: the standard Pokémon back looks almost the same upside down (a logo at
+    # each end, the ball in the middle), so at 25x35 a back scanned twice the same way scored only 0.19 apart.
+    fine = lambda c: _small(c, (100, 140))
+    sa = fine(canon)
+    same_way = float(np.dot(sa, fine(ref))) / len(sa)
+    turned = float(np.dot(sa, fine(cv2.rotate(ref, cv2.ROTATE_180)))) / len(sa)
+    # Correctly turned partners: turned ~1.0, same way ~0.75-0.8 (backs) or ~0.2 (fronts). The same scan twice:
+    # same way ~1.0.
+    return same_way > 0.9 and same_way > turned + 0.08
 
 
 def _process(sid, slot, raw: bytes, src_ppi):
@@ -298,9 +308,17 @@ def library():
     cards = []
     for d in sorted(SCANS.iterdir(), reverse=True):
         snap = d / "report.json"
-        if not (d.is_dir() and snap.exists()):
+        if not d.is_dir():
             continue
-        r = json.loads(snap.read_text())
+        if snap.exists():
+            r = json.loads(snap.read_text())
+        else:
+            # A side was scanned but the page was left before it built the report: still list the card
+            # (as pending) so it can be reopened and finished.
+            sides = {s: json.loads((d / f"{s}.json").read_text()) for s in ("front", "back") if (d / f"{s}.json").exists()}
+            if not sides:
+                continue
+            r = {"front": sides.get("front"), "back": sides.get("back"), "estimates": {}}
         meta = _meta(d)
         est = r.get("estimates", {})
         front = r.get("front") or {}
@@ -381,19 +399,33 @@ def _locked_scan(**kw):
 
 @app.route("/api/locate/<sid>", methods=["POST"])
 def locate_card(sid):
-    d = _session_dir(sid)
     try:
-        raw = _locked_scan(dpi=PREVIEW_DPI, region=PLATEN_REGION)
+        info = _locate(sid)
     except Exception as e:
         return jsonify({"error": f"Scanner: {e}"}), 502
+    return jsonify(info)
+
+
+def _locate(sid):
+    """Quick preview of the whole glass to find the card; saves the scan area for this card."""
+    d = _session_dir(sid)
+    raw = _locked_scan(dpi=PREVIEW_DPI, region=PLATEN_REGION)
     (d / "preview_raw.jpg").write_bytes(raw)
     info, annotated = locate.locate(measure.load(raw), PREVIEW_DPI)
     cv2.imwrite(str(d / "preview.jpg"), annotated, [cv2.IMWRITE_JPEG_QUALITY, 85])
     info["preview"] = f"/scans/{sid}/preview.jpg?t={int(time.time())}"
     if info["region"]:
         (d / "region.json").write_text(json.dumps(info["region"]))
-        LAST_REGION.write_text(json.dumps(info["region"]))
-    return jsonify(info)
+        if _sideways(info["region"]) is False:
+            # Only an upright card's area is a sensible starting guess for the next card; a sideways one
+            # (the 90°/270° scans) would cut the next upright card off.
+            LAST_REGION.write_text(json.dumps(info["region"]))
+    return info
+
+
+def _sideways(region):
+    """True when a scan area is wider than tall (a card lying sideways), False when upright."""
+    return None if not region else region[2] > region[3]
 
 
 @app.route("/api/scan/<sid>/<slot>", methods=["POST"])
@@ -407,11 +439,118 @@ def scan(sid, slot):
     if not region_file.exists():
         region_file = LAST_REGION
     region = tuple(json.loads(region_file.read_text())) if region_file.exists() else DEFAULT_REGION
+    if _sideways(list(region)) != (slot in QUARTER_SLOTS):
+        # The saved scan area points the wrong way for this step (e.g. a sideways area left from the last
+        # card's 90° scan, about to scan an upright card): find the card again first instead of cutting it off.
+        try:
+            info = _locate(sid)
+        except Exception as e:
+            return jsonify({"error": f"Scanner: {e}"}), 502
+        if not info.get("region"):
+            return jsonify({"error": " ".join(info.get("warnings") or []) or "Couldn't find the card on the glass."}), 422
+        region = tuple(info["region"])
+    global SCAN_JOB
+    t0 = time.time()
+    job = {"sid": sid, "slot": slot, "dpi": dpi, "stage": "scanning", "started": t0, "stage_at": t0,
+           "name": _meta(_session_dir(sid)).get("name") or "", "marks": {}}
+    SCAN_JOB = job
+
+    def stage(name):
+        job["marks"][name] = round(time.time() - t0, 1)
+        job["stage"], job["stage_at"] = name, time.time()
+
+    # Watch the printer: once its scan head is done (it stops saying "Processing"), the image is on its way.
+    stop = threading.Event()
+
+    def watch():
+        # The printer can report "not busy" for a moment as a scan starts, so only believe it once it has said
+        # so twice in a row (4 s), and not in the first 20 s of a scan.
+        seen_busy, quiet = False, 0
+        while not stop.wait(2):
+            try:
+                st = scanner().status()
+            except Exception:
+                continue
+            seen_busy = seen_busy or st == "Processing"
+            quiet = quiet + 1 if (seen_busy and st != "Processing") else 0
+            if quiet >= 2 and time.time() - t0 > 20 and job["stage"] == "scanning":
+                stage("receiving")
+                return
+
+    threading.Thread(target=watch, daemon=True).start()
     try:
-        raw = _locked_scan(dpi=dpi, region=region)
+        raw = _locked_scan(dpi=dpi, region=region,
+                           on_stage=lambda s: job["marks"].setdefault("first_byte", round(time.time() - t0, 1)))
     except Exception as e:
+        stop.set()
+        job.update(stage="error", error=f"Scanner: {e}", finished=time.time())
         return jsonify({"error": f"Scanner: {e}"}), 502
-    return _measure_response(sid, slot, raw, dpi)
+    stop.set()
+    if job["stage"] == "scanning":
+        job["marks"]["receiving"] = None  # the printer never reported idle before the image was in
+    stage("measuring")
+    try:
+        resp = _measure_response(sid, slot, raw, dpi)
+    except Exception as e:
+        job.update(stage="error", error=str(e), finished=time.time())
+        raise
+    body, status = resp if isinstance(resp, tuple) else (resp, 200)
+    if status == 200:
+        job.update(stage="done", finished=time.time())
+        _record_scan_times(dpi, job["marks"], time.time() - t0)
+    else:
+        job.update(stage="error", error=(body.get_json(silent=True) or {}).get("error", "Measuring failed."), finished=time.time())
+    return resp
+
+
+SCAN_TIMES = SCANS / "scan_times.json"
+# Starting guesses (seconds) for each step, by dpi; replaced by what this printer actually takes.
+DEFAULT_STEPS = {300: [12, 3, 5], 600: [25, 6, 8], 1200: [85, 25, 25]}
+
+
+def _record_scan_times(dpi, marks, total):
+    """Remember how long each step took, so the next progress bar follows this printer and Wi-Fi."""
+    received = marks.get("measuring")
+    if received is None:
+        return
+    head = marks.get("receiving") or received
+    row = [round(head, 1), round(received - head, 1), round(total - received, 1)]
+    try:
+        hist = json.loads(SCAN_TIMES.read_text()) if SCAN_TIMES.exists() else {}
+    except ValueError:
+        hist = {}
+    hist[str(dpi)] = (hist.get(str(dpi)) or [])[-9:] + [row]
+    SCAN_TIMES.write_text(json.dumps(hist))
+
+
+def _expected_steps(dpi):
+    try:
+        rows = (json.loads(SCAN_TIMES.read_text()) if SCAN_TIMES.exists() else {}).get(str(dpi)) or []
+    except ValueError:
+        rows = []
+    if not rows:
+        return DEFAULT_STEPS.get(dpi, [40, 10, 10])
+    return [float(np.median([r[i] for r in rows])) for i in range(3)]
+
+
+@app.route("/api/scan-job")
+def scan_job():
+    """The scan running now, or the last one: lets any page show a status bar and link back to the card.
+    progress/eta follow the real steps (scanning, receiving the image, measuring), timed from past scans."""
+    job = dict(SCAN_JOB, now=time.time())
+    if job.get("stage") in ("scanning", "receiving", "measuring"):
+        steps = _expected_steps(job["dpi"])
+        order = ["scanning", "receiving", "measuring"]
+        i = order.index(job["stage"])
+        in_step = job["now"] - job["stage_at"]
+        before = sum(steps[:i])
+        cur = max(steps[i], 1.0)
+        frac = min(0.95, in_step / cur)
+        total = sum(steps)
+        job["progress"] = round(100 * (before + frac * cur) / total, 1)
+        job["eta"] = round(max(cur - in_step, 3) + sum(steps[i + 1:]))
+        job["expected"] = round(total)
+    return jsonify(job)
 
 
 @app.route("/api/upload/<sid>/<slot>", methods=["POST"])
@@ -502,6 +641,28 @@ def _upright_like(canon, ref):
     return canon if same >= flip else turned
 
 
+def _quarter_view(d, side, q):
+    """The 90°/270° scan's close-up view, turned the same way up and sized like the first scan's view, so the
+    zoom viewer can line it up pixel for pixel. Made once per scan and kept as {side}_view_{q}.jpg."""
+    src, out = d / f"{side}_{q}_view.jpg", d / f"{side}_view_{q}.jpg"
+    first_view, canon, ref = d / f"{side}_view.jpg", d / f"{side}_{q}_canon.png", d / f"{side}_canon.png"
+    if not (src.exists() and first_view.exists() and canon.exists() and ref.exists()):
+        return None
+    if out.exists() and out.stat().st_mtime >= max(src.stat().st_mtime, first_view.stat().st_mtime):
+        return out
+    c, r = cv2.imread(str(canon)), cv2.imread(str(ref))
+    c = cv2.resize(c, (r.shape[1], r.shape[0]), interpolation=cv2.INTER_AREA) if c.shape != r.shape else c
+    sr = _small(r)
+    turned = float(np.dot(_small(cv2.rotate(c, cv2.ROTATE_180)), sr)) > float(np.dot(_small(c), sr))
+    v, fv = cv2.imread(str(src)), cv2.imread(str(first_view))
+    if turned:
+        v = cv2.rotate(v, cv2.ROTATE_180)
+    if v.shape[:2] != fv.shape[:2]:
+        v = cv2.resize(v, (fv.shape[1], fv.shape[0]), interpolation=cv2.INTER_AREA)
+    cv2.imwrite(str(out), v, [cv2.IMWRITE_JPEG_QUALITY, 95])
+    return out
+
+
 def _merge_marks(first, second, shape, tol_mm=1.5):
     """Combine marks from the two light pairs; a mark both pairs saw is kept once, tagged with both."""
     h, w = shape[:2]
@@ -527,48 +688,91 @@ def report(sid):
     front, back = load("front"), load("back")
     if not front and not back:
         return jsonify({"error": "Scan at least one side first."}), 400
+    _auto_identify(d)
+    # Reuse the saved report while nothing it depends on has changed: the scans, the ignored findings and
+    # the grading code. Building one from scratch re-runs the surface checks (~40 s with all eight scans).
+    def mt(name):
+        f = d / name
+        return round(f.stat().st_mtime, 3) if f.exists() else None
+    scans_stamp = {s: [mt(f"{s}.json"), mt(f"{s}_canon.png")] for s in SLOTS}
+    stamp = json.dumps({"code": CODE_STAMP, "scans": scans_stamp, "ignored": sorted(_meta(d).get("ignored") or [])})
+    snap = d / "report.json"
+    if snap.exists() and request.args.get("fresh") != "1":
+        cached = json.loads(snap.read_text())
+        if cached.get("_stamp") == stamp:
+            cached["meta"] = _meta(d)  # names, values and results can change without touching the grade
+            cached.pop("_stamp", None)
+            return jsonify(cached)
     surf = {}
     surface_by_side = {}
     for side, data in (("front", front), ("back", back)):
         a, b = d / f"{side}_canon.png", d / f"{side}_rot_canon.png"
-        if not (data and a.exists() and b.exists()):
+        q90, q270 = d / f"{side}_r90_canon.png", d / f"{side}_r270_canon.png"
+        # The surface checks need at least one opposite pair of scans: 0°/180°, or 90°/270°.
+        if not (data and a.exists() and (b.exists() or (q90.exists() and q270.exists()))):
             continue
+        # The surface checks only depend on this side's scans: an ignore or a rescan of the other side reuses them.
+        side_stamp = json.dumps({"code": CODE_STAMP, "scans": {s: v for s, v in scans_stamp.items() if s.startswith(side)}})
+        side_cache = d / f"{side}_surface_cache.json"
+        if side_cache.exists():
+            sc = json.loads(side_cache.read_text())
+            if sc.get("stamp") == side_stamp:
+                surf[side] = sc["res"]
+                surface_by_side[side] = closeups.surface_findings(sc["res"]["marks"], tuple(sc["shape"]))
+                continue
         canon = cv2.imread(str(a))
-        res, heat = surface.compare(canon, cv2.imread(str(b)))
-        cv2.imwrite(str(d / f"{side}_surface.jpg"), heat, [cv2.IMWRITE_JPEG_QUALITY, 85])
-        res["heatmap"] = f"/scans/{sid}/{side}_surface.jpg?t={int(time.time())}"
-        for i, (entry, img) in enumerate(res.pop("_pairs")):
-            cv2.imwrite(str(d / f"{side}_spot_{i}.jpg"), img, [cv2.IMWRITE_JPEG_QUALITY, 92])
-            entry["pair"] = f"/scans/{sid}/{side}_spot_{i}.jpg?t={int(time.time())}"
-        for m in res["marks"] + res["debris"]:
-            m["light"] = ["0/180"]
+        res = None
+        if b.exists():
+            res, heat = surface.compare(canon, cv2.imread(str(b)))
+            cv2.imwrite(str(d / f"{side}_surface.jpg"), heat, [cv2.IMWRITE_JPEG_QUALITY, 85])
+            res["heatmap"] = f"/scans/{sid}/{side}_surface.jpg?t={int(time.time())}"
+            for i, (entry, img) in enumerate(res.pop("_pairs")):
+                cv2.imwrite(str(d / f"{side}_spot_{i}.jpg"), img, [cv2.IMWRITE_JPEG_QUALITY, 92])
+                entry["pair"] = f"/scans/{sid}/{side}_spot_{i}.jpg?t={int(time.time())}"
+            for m in res["marks"] + res["debris"]:
+                m["light"] = ["0/180"]
         # Second light pair: the card turned 90° and 270°, lit across it instead of along it. Marks that run
         # along one light direction barely shade in that pair, but stand out in the other.
-        q90, q270 = d / f"{side}_r90_canon.png", d / f"{side}_r270_canon.png"
-        res["light_pairs"] = 1
-        if q90.exists() and q270.exists():
-            a90, a270 = _upright_like(cv2.imread(str(q90)), canon), _upright_like(cv2.imread(str(q270)), canon)
-            res2, heat2 = surface.compare(a90, cv2.rotate(a270, cv2.ROTATE_180))
+        a90 = _upright_like(cv2.imread(str(q90)), canon) if q90.exists() else None
+        a270 = _upright_like(cv2.imread(str(q270)), canon) if q270.exists() else None
+        if a90 is not None and a270 is not None:
+            res2, heat2 = surface.compare(a90, cv2.rotate(a270, cv2.ROTATE_180), pair_labels=("90 deg scan", "270 deg scan, turned back"))
             cv2.imwrite(str(d / f"{side}_surface_q.jpg"), heat2, [cv2.IMWRITE_JPEG_QUALITY, 85])
-            res["heatmap_q"] = f"/scans/{sid}/{side}_surface_q.jpg?t={int(time.time())}"
             for i, (entry, img) in enumerate(res2.pop("_pairs")):
                 cv2.imwrite(str(d / f"{side}_qspot_{i}.jpg"), img, [cv2.IMWRITE_JPEG_QUALITY, 92])
                 entry["pair"] = f"/scans/{sid}/{side}_qspot_{i}.jpg?t={int(time.time())}"
-            res["light_pairs"] = 2
-            # TAG-style relief map: slopes from both light pairs, shaded with one virtual light.
-            along, across = relief.slopes(canon, cv2.rotate(cv2.imread(str(b)), cv2.ROTATE_180), a90, a270,
-                                          data.get("ppi", 1200))
-            relief_img, slope_heat = relief.render(along, across, data.get("ppi", 1200))
-            cv2.imwrite(str(d / f"{side}_relief.jpg"), relief_img, [cv2.IMWRITE_JPEG_QUALITY, 90])
-            cv2.imwrite(str(d / f"{side}_slope.jpg"), slope_heat, [cv2.IMWRITE_JPEG_QUALITY, 85])
-            res["relief"] = f"/scans/{sid}/{side}_relief.jpg?t={int(time.time())}"
-            res["slope"] = f"/scans/{sid}/{side}_slope.jpg?t={int(time.time())}"
-            res["marks"] = _merge_marks(res["marks"], res2["marks"], canon.shape)
-            res["debris"] = _merge_marks(res["debris"], res2["debris"], canon.shape)
+            for m in res2["marks"] + res2["debris"]:
+                m["light"] = ["90/270"]
+            if res is None:
+                res = dict(res2, heatmap=None)  # only the quarter-turn pair was scanned
+            else:
+                res["marks"] = _merge_marks(res["marks"], res2["marks"], canon.shape)
+                res["debris"] = _merge_marks(res["debris"], res2["debris"], canon.shape)
+            res["heatmap_q"] = f"/scans/{sid}/{side}_surface_q.jpg?t={int(time.time())}"
+        res["light_pairs"] = int(b.exists()) + int(a90 is not None and a270 is not None)
+        # TAG-style relief map from however many light directions were scanned (2, 3 or 4), shaded with one
+        # virtual light. Fewer directions miss marks that run parallel to the light; the report says how many.
+        ppi = data.get("ppi", 1200)
+        along, across, dirs = relief.from_scans(
+            canon, ppi, turned180=cv2.rotate(cv2.imread(str(b)), cv2.ROTATE_180) if b.exists() else None, q90=a90, q270=a270)
+        relief_img, slope_heat = relief.render(along, across, ppi)
+        cv2.imwrite(str(d / f"{side}_relief.jpg"), relief_img, [cv2.IMWRITE_JPEG_QUALITY, 90])
+        cv2.imwrite(str(d / f"{side}_slope.jpg"), slope_heat, [cv2.IMWRITE_JPEG_QUALITY, 85])
+        res["relief"] = f"/scans/{sid}/{side}_relief.jpg?t={int(time.time())}"
+        # Lighter copies of the relief map and the matching photo (same framing) for the report's overlay slider.
+        web_w = 1000
+        size = (web_w, int(round(relief_img.shape[0] * web_w / relief_img.shape[1])))
+        cv2.imwrite(str(d / f"{side}_relief_web.jpg"), cv2.resize(relief_img, size, interpolation=cv2.INTER_AREA), [cv2.IMWRITE_JPEG_QUALITY, 88])
+        cv2.imwrite(str(d / f"{side}_photo_web.jpg"), cv2.resize(canon, size, interpolation=cv2.INTER_AREA), [cv2.IMWRITE_JPEG_QUALITY, 88])
+        res["relief_web"] = f"/scans/{sid}/{side}_relief_web.jpg?t={int(time.time())}"
+        res["photo_web"] = f"/scans/{sid}/{side}_photo_web.jpg?t={int(time.time())}"
+        res["slope"] = f"/scans/{sid}/{side}_slope.jpg?t={int(time.time())}"
+        res["relief_dirs"] = dirs
+        res["relief_scans"] = ["0°"] + (["180°"] if b.exists() else []) + (["90°"] if a90 is not None else []) + (["270°"] if a270 is not None else [])
         surf[side] = res
         surface_by_side[side] = closeups.surface_findings(res["marks"], canon.shape)
+        side_cache.write_text(json.dumps({"stamp": side_stamp, "res": res, "shape": list(canon.shape)}))
 
-    _auto_identify(d)
     ignored = set(_meta(d).get("ignored") or [])
 
     def parse_key(k):
@@ -602,6 +806,15 @@ def report(sid):
         r180 = d / f"{side}_view_r180.jpg"
         data["zoom"] = {"view": f"/scans/{sid}/{side}_view.jpg?t={t}",
                         "view_r180": f"/scans/{sid}/{side}_view_r180.jpg?t={t}" if r180.exists() else None}
+        # Every scan of this side, turned to the first scan's way up, for the side-by-side close-up viewer.
+        views = [{"src": data["zoom"]["view"], "label": "First scan"}]
+        if r180.exists():
+            views.append({"src": data["zoom"]["view_r180"], "label": "180° scan, turned back"})
+        for q in ("r90", "r270"):
+            qv = _quarter_view(d, side, q)
+            if qv:
+                views.append({"src": f"/scans/{sid}/{qv.name}?t={t}", "label": f"{q[1:]}° scan, turned back"})
+        data["zoom"]["views"] = views
         # Check each corner/edge finding against the 180° scan. A yellow it didn't see is "cleared".
         rot = load(f"{side}_rot")
         findings = data.get("findings", [])
@@ -645,7 +858,11 @@ def report(sid):
             # (a real bent corner or chip shows whichever way the light falls): count it as borderline.
             if f["severity"] == "red" and not confirmed:
                 f["severity"], f["was_red"] = "yellow", True
-            f["cleared"] = f["severity"] == "yellow" and hits == 0 and not f.get("was_red")
+            # Cleared: a borderline call none of the other scans saw. A red call is cleared too when two or more
+            # other scans (lit from other sides) all missed it; with only the 180° scan to go on it stays
+            # borderline. (On a gold card the etching's bright lines reach the cut edge and read as whitening
+            # under one light only.)
+            f["cleared"] = f["severity"] == "yellow" and hits == 0 and (not f.get("was_red") or n >= 2)
         # Redraw this side's close-ups so boxes and tile outlines reflect cleared findings and surface marks.
         outline_file = d / f"{side}_outline.npy"
         rendered = closeups.render(cv2.imread(str(d / f"{side}_view.jpg")), data.get("view_pad", 0),
@@ -659,7 +876,7 @@ def report(sid):
            "surface_findings": [dict(f, side=side) for side, fs in surface_by_side.items() for f in fs]}
     if not (d / "meta.json").exists():
         (d / "meta.json").write_text(json.dumps(out["meta"]))
-    (d / "report.json").write_text(json.dumps(out))  # snapshot for the library
+    (d / "report.json").write_text(json.dumps(dict(out, _stamp=stamp)))  # snapshot for the library, and the cache
     return jsonify(out)
 
 

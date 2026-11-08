@@ -1,0 +1,369 @@
+{
+ "W6919183": {
+  "grade": "10",
+  "score": 987,
+  "centF": "50L/50R 50T/50B",
+  "centB": "51L/49R 51T/49B",
+  "dims": [
+   "3.468",
+   "2.480"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/25c28125-f9d7-45bc-9f2f-53f3b4a5a244",
+  "spots": []
+ },
+ "Z9697660": {
+  "grade": "10",
+  "score": 950,
+  "centF": "44.9L/55.1R 48.8T/51.2B",
+  "centB": "56.6L/43.4R 49.8T/50.2B",
+  "dims": [
+   "3.467",
+   "2.492"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/2b7d96f6-d6be-4d8b-a791-c2b85450496a",
+  "spots": []
+ },
+ "R3782341": {
+  "grade": "9",
+  "score": 946,
+  "centF": "47L/53R 49T/51B",
+  "centB": "54L/46R 51T/49B",
+  "dims": [
+   "3.461",
+   "2.480"
+  ],
+  "dings": [
+   0,
+   1,
+   0,
+   0,
+   0,
+   1
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/7c9926c8-580b-405d-8457-cc054be97a2b",
+  "spots": [
+   [
+    "back",
+    "Play Wear Defect",
+    140,
+    131
+   ]
+  ]
+ },
+ "X8214796": {
+  "grade": "9",
+  "score": 900,
+  "centF": "54L/46R 57T/43B",
+  "centB": "51L/49R 56T/44B",
+  "dims": [
+   "3.473",
+   "2.488"
+  ],
+  "dings": [
+   0,
+   3,
+   0,
+   0,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/bbeea362-5669-4159-913b-3b9803d88d31",
+  "spots": [
+   [
+    "back",
+    "CORNER WEAR",
+    49,
+    49
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    51,
+    5820
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    4120,
+    49
+   ]
+  ]
+ },
+ "V4258305": {
+  "grade": "8.5",
+  "score": 899,
+  "centF": "54L/46R 55T/45B",
+  "centB": "47L/53R 54T/46B",
+  "dims": [
+   "3.460",
+   "2.473"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   2
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/58ff3028-4dac-44e1-aa96-c6133817f473",
+  "spots": [
+   [
+    "back",
+    "SURFACE / SCRATCH(ES)",
+    1346,
+    475
+   ],
+   [
+    "back",
+    "SURFACE / SCRATCH(ES)",
+    827,
+    591
+   ]
+  ]
+ },
+ "G2722298": {
+  "grade": "8.5",
+  "score": 850,
+  "centF": "46L/54R 50T/50B",
+  "centB": "48L/52R 48T/52B",
+  "dims": [
+   "3.458",
+   "2.475"
+  ],
+  "dings": [
+   0,
+   1,
+   0,
+   3,
+   0,
+   0
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/00d950ac-7354-4ace-a63d-8f417f517a17",
+  "spots": [
+   [
+    "back",
+    "EDGE WEAR",
+    2797,
+    6089
+   ],
+   [
+    "back",
+    "EDGE/CORNER / BEND",
+    4150,
+    56
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    59,
+    49
+   ],
+   [
+    "back",
+    "EDGE WEAR",
+    4371,
+    1888
+   ]
+  ]
+ },
+ "Q4741714": {
+  "grade": "8",
+  "score": 840,
+  "centF": "62L/38R 48T/52B",
+  "centB": "44L/56R 53T/47B",
+  "dims": [
+   "3.469",
+   "2.485"
+  ],
+  "dings": [
+   0,
+   1,
+   0,
+   0,
+   0,
+   1
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/256b908a-c7ae-46e1-b754-037ad158a19b",
+  "spots": [
+   [
+    "back",
+    "SURFACE / SCRATCH(ES)",
+    1734,
+    792
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    50,
+    5827
+   ]
+  ]
+ },
+ "P8890767": {
+  "grade": "8",
+  "score": 801,
+  "centF": "42.9L/57.1R 54.0T/46.0B",
+  "centB": "54.5L/45.5R 54.0T/46.0B",
+  "dims": [
+   "3.464",
+   "2.482"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   1,
+   1
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/9793932a-fb15-401b-aed7-8aa512ad76d0",
+  "spots": [
+   [
+    "front",
+    "SURFACE / DENT",
+    329,
+    1575
+   ],
+   [
+    "back",
+    "SURFACE / SURFACE DEFECT",
+    3996,
+    1562
+   ]
+  ]
+ },
+ "Q9596989": {
+  "grade": "7",
+  "score": 714,
+  "centF": "48L/52R 39T/61B",
+  "centB": "51L/49R 41T/59B",
+  "dims": [
+   "3.463",
+   "2.479"
+  ],
+  "dings": [
+   0,
+   2,
+   0,
+   0,
+   0,
+   1
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/2fc5d9c5-dcd8-421f-b104-7b9fc89a1c9e",
+  "spots": [
+   [
+    "back",
+    "SURFACE / PLAY WEAR",
+    150,
+    129
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    4149,
+    5808
+   ],
+   [
+    "back",
+    "CORNER WEAR",
+    90,
+    5808
+   ]
+  ]
+ },
+ "S1034313": {
+  "grade": "6",
+  "score": 643,
+  "centF": "61.2L/38.8R 47.1T/52.9B",
+  "centB": "38.9L/61.1R 45.2T/54.8B",
+  "dims": [
+   "3.469",
+   "2.483"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   1,
+   1
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/c4bc9795-e203-47a3-bbca-1800c0f468fb",
+  "spots": [
+   [
+    "front",
+    "SURFACE / SURFACE DEFECT",
+    1088,
+    1179
+   ],
+   [
+    "back",
+    "SURFACE / DENTS",
+    2761,
+    1174
+   ]
+  ]
+ },
+ "Z2405433": {
+  "grade": "6",
+  "score": 634,
+  "centF": "47L/53R 43T/57B",
+  "centB": "52L/48R 48T/52B",
+  "dims": [
+   "3.466",
+   "2.482"
+  ],
+  "dings": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   4
+  ],
+  "img": "https://d39lwrz0lm7c9r.cloudfront.net/card-images/3b01c86f-7626-47a1-afd5-5e42535a0d7a",
+  "spots": [
+   [
+    "back",
+    "Ink/Surface Defect",
+    420,
+    5865
+   ],
+   [
+    "back",
+    "Play Wear Defect",
+    126,
+    144
+   ],
+   [
+    "back",
+    "Scratch(es)",
+    3259,
+    4617
+   ],
+   [
+    "back",
+    "Ink/Surface Defect",
+    93,
+    156
+   ]
+  ]
+ }
+}

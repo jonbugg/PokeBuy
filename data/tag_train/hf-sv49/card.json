@@ -5,7 +5,12 @@
   "setPath": "Pok\u00e9mon Sun & Moon",
   "setName": "Hidden Fates Shiny Vault",
   "match": "Charizard",
-  "number": "SV49"
+  "number": "SV49",
+  "grades": [
+   "9",
+   "8",
+   "7"
+  ]
  },
  "url": "/pop-report/Pok\u00e9mon/2019/Pok\u00e9mon Sun & Moon/Charizard GX/SV49?setName=Hidden+Fates+Shiny+Vault&variation=Full+Art+-+Shiny+Rare",
  "pop": {

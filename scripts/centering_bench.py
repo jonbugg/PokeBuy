@@ -73,8 +73,12 @@ def main(verbose=True):
         for cert, v in json.loads(ladder.read_text()).items():
             for side, key in (("FRONT", "centF"), ("BACK", "centB")):
                 t = tag_cent(v.get(key))
-                view, pad = canon_for(ladder.parent / cert / f"{side}_MAIN.jpg", src_ppi)
-                c = centering(view, src_ppi, pad)
+                try:
+                    view, pad = canon_for(ladder.parent / cert / f"{side}_MAIN.jpg", src_ppi)
+                    c = centering(view, src_ppi, pad)
+                except (measure.CardNotFound, FileNotFoundError, cv2.error):
+                    c = {}  # photo missing or the card couldn't be found in it: counts as a failure
+
                 if c.get("lr") is None or not t:
                     fails += 1
                     per.append((card, cert, side, None, t))

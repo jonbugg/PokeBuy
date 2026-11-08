@@ -1,0 +1,22 @@
+{
+ "card": {
+  "perGrade": 2,
+  "year": 1999,
+  "setPath": "WOTC Pok\u00e9mon",
+  "setName": "Base Set",
+  "match": "Pikachu",
+  "number": "58/102",
+  "variation": "Yellow"
+ },
+ "url": "/pop-report/Pok\u00e9mon/1999/WOTC Pok\u00e9mon/Pikachu/58%2F102?setName=Base+Set&variation=Yellow+Cheeks",
+ "pop": {
+  "6": 2,
+  "7": 0,
+  "8": 1,
+  "9": 6,
+  "10": 2,
+  "10P": 0,
+  "8.5": 1
+ },
+ "ppi": 1200
+}

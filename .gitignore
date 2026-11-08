@@ -65,3 +65,6 @@ data/tag_compare/_canon_cache/
 data/tag_train/*/*/
 data/tag_train/harvest_*.json
 data/backdrop_test/
+data/tag_compare/_sfx/
+data/qc/
+*.json.prev
